@@ -1,0 +1,548 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+import threading
+import os
+import sys
+import logging
+import datetime
+from pathlib import Path
+
+# Import our pipeline modules
+from emg_pipeline import EMGPipeline
+from db_connector import DBConnector
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('emg_pipeline.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+class EMGPipelineGUI:
+    """GUI for the EMG Data Processing Pipeline."""
+    
+    def __init__(self, root):
+        self.root = root
+        self.root.title("EMG Data Processing Pipeline")
+        self.root.geometry("700x550")
+        self.root.minsize(600, 450)
+        
+        # Database configuration
+        self.db_config = {
+            'host': '10.200.200.107',
+            'user': 'scriptuser1',
+            'password': 'YabinMarshed2023@#$',
+            'database': 'theia_pitching_db'
+        }
+        
+        # Initialize pipeline
+        self.pipeline = EMGPipeline(
+            db_config=self.db_config,
+            batch_size=1000
+        )
+        
+        # Create the GUI elements
+        self.create_widgets()
+        
+        # Update status
+        self.update_status("Ready")
+    
+    def create_widgets(self):
+        """Create all the GUI widgets."""
+        # Create main frame
+        main_frame = ttk.Frame(self.root, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Create title
+        title_label = ttk.Label(
+            main_frame, 
+            text="EMG Data Processing Pipeline", 
+            font=("Helvetica", 16, "bold")
+        )
+        title_label.pack(pady=(0, 10))
+        
+        # Create tabbed interface
+        tab_control = ttk.Notebook(main_frame)
+        
+        # File Processing Tab
+        process_tab = ttk.Frame(tab_control)
+        tab_control.add(process_tab, text="Process Files")
+        self.setup_process_tab(process_tab)
+        
+        # Database Tab
+        db_tab = ttk.Frame(tab_control)
+        tab_control.add(db_tab, text="Database")
+        self.setup_db_tab(db_tab)
+        
+        # Help Tab
+        help_tab = ttk.Frame(tab_control)
+        tab_control.add(help_tab, text="Help")
+        self.setup_help_tab(help_tab)
+        
+        tab_control.pack(expand=1, fill=tk.BOTH)
+        
+        # Status bar
+        status_frame = ttk.Frame(main_frame)
+        status_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        ttk.Label(status_frame, text="Status:").pack(side=tk.LEFT)
+        self.status_var = tk.StringVar(value="Ready")
+        status_label = ttk.Label(status_frame, textvariable=self.status_var)
+        status_label.pack(side=tk.LEFT, padx=(5, 0))
+    
+    def setup_process_tab(self, tab):
+        """Set up the file processing tab."""
+        # File selection frame
+        file_frame = ttk.LabelFrame(tab, text="Select EMG Data", padding="10")
+        file_frame.pack(fill=tk.X, pady=10)
+        
+        # Radio buttons for file or directory
+        self.process_type = tk.StringVar(value="file")
+        ttk.Radiobutton(
+            file_frame, 
+            text="Process Single File", 
+            variable=self.process_type, 
+            value="file",
+            command=self.update_file_selection
+        ).grid(row=0, column=0, sticky=tk.W)
+        
+        ttk.Radiobutton(
+            file_frame, 
+            text="Process Directory", 
+            variable=self.process_type, 
+            value="directory",
+            command=self.update_file_selection
+        ).grid(row=0, column=1, sticky=tk.W)
+        
+        # File/directory path
+        ttk.Label(file_frame, text="Path:").grid(row=1, column=0, sticky=tk.W, pady=(10, 0))
+        self.path_var = tk.StringVar()
+        path_entry = ttk.Entry(file_frame, textvariable=self.path_var, width=50)
+        path_entry.grid(row=1, column=1, sticky=tk.EW, padx=(5, 5), pady=(10, 0))
+        
+        self.browse_button = ttk.Button(
+            file_frame, 
+            text="Browse...", 
+            command=self.browse_path
+        )
+        self.browse_button.grid(row=1, column=2, padx=(0, 5), pady=(10, 0))
+        
+        # Recursive option
+        self.recursive_var = tk.BooleanVar(value=False)
+        self.recursive_check = ttk.Checkbutton(
+            file_frame, 
+            text="Process Recursively (for directories)", 
+            variable=self.recursive_var
+        )
+        self.recursive_check.grid(row=2, column=0, columnspan=3, sticky=tk.W, pady=(5, 0))
+        
+        # Dry run option
+        self.dry_run_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            file_frame, 
+            text="Dry Run (don't save to database)", 
+            variable=self.dry_run_var
+        ).grid(row=3, column=0, columnspan=3, sticky=tk.W, pady=(5, 0))
+        
+        # Process button
+        process_button = ttk.Button(
+            file_frame, 
+            text="Start Processing", 
+            command=self.start_processing
+        )
+        process_button.grid(row=4, column=0, columnspan=3, pady=(10, 5))
+        
+        # Output frame
+        output_frame = ttk.LabelFrame(tab, text="Processing Log", padding="10")
+        output_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Log text widget
+        self.log_text = tk.Text(output_frame, wrap=tk.WORD, height=10)
+        self.log_text.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(output_frame, command=self.log_text.yview)
+        scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
+        self.log_text.config(yscrollcommand=scrollbar.set)
+        
+        # Configure grid
+        file_frame.columnconfigure(1, weight=1)
+        
+        # Update initial state
+        self.update_file_selection()
+    
+    def setup_db_tab(self, tab):
+        """Set up the database tab."""
+        # Database connection frame
+        db_frame = ttk.LabelFrame(tab, text="Database Connection", padding="10")
+        db_frame.pack(fill=tk.X, pady=10)
+        
+        # Host
+        ttk.Label(db_frame, text="Host:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.host_var = tk.StringVar(value=self.db_config['host'])
+        ttk.Entry(db_frame, textvariable=self.host_var, width=30).grid(row=0, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # User
+        ttk.Label(db_frame, text="User:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.user_var = tk.StringVar(value=self.db_config['user'])
+        ttk.Entry(db_frame, textvariable=self.user_var, width=30).grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # Password
+        ttk.Label(db_frame, text="Password:").grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.password_var = tk.StringVar(value=self.db_config['password'])
+        ttk.Entry(db_frame, textvariable=self.password_var, width=30, show="*").grid(row=2, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # Database
+        ttk.Label(db_frame, text="Database:").grid(row=3, column=0, sticky=tk.W, pady=5)
+        self.database_var = tk.StringVar(value=self.db_config['database'])
+        ttk.Entry(db_frame, textvariable=self.database_var, width=30).grid(row=3, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # Test connection button
+        ttk.Button(
+            db_frame, 
+            text="Test Connection", 
+            command=self.test_db_connection
+        ).grid(row=4, column=0, pady=(10, 5))
+        
+        # Save config button
+        ttk.Button(
+            db_frame, 
+            text="Update Connection", 
+            command=self.update_db_config
+        ).grid(row=4, column=1, pady=(10, 5))
+        
+        # Database status
+        ttk.Label(db_frame, text="Status:").grid(row=5, column=0, sticky=tk.W, pady=5)
+        self.db_status_var = tk.StringVar(value="Not tested")
+        ttk.Label(db_frame, textvariable=self.db_status_var).grid(row=5, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # Database operations frame
+        ops_frame = ttk.LabelFrame(tab, text="Database Operations", padding="10")
+        ops_frame.pack(fill=tk.X, pady=10)
+        
+        # Get table counts button
+        ttk.Button(
+            ops_frame, 
+            text="Get Record Counts", 
+            command=self.get_record_counts
+        ).pack(pady=5)
+        
+        # Results text
+        self.db_results_text = tk.Text(ops_frame, wrap=tk.WORD, height=10)
+        self.db_results_text.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+        
+        # Scrollbar
+        db_scrollbar = ttk.Scrollbar(ops_frame, command=self.db_results_text.yview)
+        db_scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
+        self.db_results_text.config(yscrollcommand=db_scrollbar.set)
+    
+    def setup_help_tab(self, tab):
+        """Set up the help tab."""
+        # Help text
+        help_text = """
+EMG Data Processing Pipeline Help
+
+This application processes EMG data files and stores the results in a database.
+
+File Processing:
+- Process a single EMG file or a directory of files
+- Check "Process Recursively" to include subdirectories
+- Use "Dry Run" to process files without saving to the database
+
+Database:
+- Configure your database connection
+- Test the connection before processing
+- View record counts in the database
+
+File Format:
+- The application expects files in Delsys Trigno format
+- Filename format should be: MMDDYYYY_TraqID_Name_sessiontype.csv
+- The file should contain FCU and FCR channel data
+
+Processing:
+- The pipeline detects throws based on EMG signal patterns
+- Calculates metrics for each throw (frequency, amplitude, etc.)
+- Stores both raw time series data and throw-level metrics
+- Each file is processed independently
+
+For more details, see the README file or check the log file (emg_pipeline.log).
+        """
+        
+        # Text widget for help
+        help_text_widget = tk.Text(tab, wrap=tk.WORD, padx=10, pady=10)
+        help_text_widget.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+        help_text_widget.insert(tk.END, help_text)
+        help_text_widget.config(state=tk.DISABLED)
+        
+        # Scrollbar
+        help_scrollbar = ttk.Scrollbar(tab, command=help_text_widget.yview)
+        help_scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
+        help_text_widget.config(yscrollcommand=help_scrollbar.set)
+    
+    def update_file_selection(self):
+        """Update UI based on file selection type."""
+        if self.process_type.get() == "file":
+            self.recursive_check.config(state=tk.DISABLED)
+            self.browse_button.config(command=self.browse_file)
+        else:
+            self.recursive_check.config(state=tk.NORMAL)
+            self.browse_button.config(command=self.browse_directory)
+    
+    def browse_file(self):
+        """Open file browser dialog."""
+        file_path = filedialog.askopenfilename(
+            title="Select EMG Data File",
+            filetypes=[
+                ("CSV files", "*.csv"),
+                ("Text files", "*.txt"),
+                ("All files", "*.*")
+            ]
+        )
+        if file_path:
+            self.path_var.set(file_path)
+    
+    def browse_directory(self):
+        """Open directory browser dialog."""
+        dir_path = filedialog.askdirectory(title="Select Directory")
+        if dir_path:
+            self.path_var.set(dir_path)
+    
+    def browse_path(self):
+        """Browse for file or directory based on selection."""
+        if self.process_type.get() == "file":
+            self.browse_file()
+        else:
+            self.browse_directory()
+    
+    def update_status(self, message):
+        """Update status bar."""
+        self.status_var.set(message)
+        self.root.update_idletasks()
+    
+    def append_log(self, message):
+        """Append message to log text widget."""
+        self.log_text.insert(tk.END, message + "\n")
+        self.log_text.see(tk.END)
+        self.root.update_idletasks()
+    
+    def clear_log(self):
+        """Clear log text widget."""
+        self.log_text.delete(1.0, tk.END)
+    
+    def start_processing(self):
+        """Start processing EMG data files."""
+        path = self.path_var.get()
+        if not path:
+            messagebox.showerror("Error", "Please select a file or directory.")
+            return
+        
+        if not os.path.exists(path):
+            messagebox.showerror("Error", "The selected path does not exist.")
+            return
+        
+        # Update UI
+        self.clear_log()
+        self.append_log(f"Starting processing of: {path}")
+        self.update_status("Processing...")
+        
+        # Create updated pipeline with current settings
+        self.update_db_config()
+        
+        # Process in a separate thread to keep UI responsive
+        processing_thread = threading.Thread(
+            target=self.run_processing,
+            args=(path,)
+        )
+        processing_thread.daemon = True
+        processing_thread.start()
+    
+    def run_processing(self, path):
+        """Run the processing in a separate thread."""
+        try:
+            is_file = self.process_type.get() == "file"
+            recursive = self.recursive_var.get()
+            dry_run = self.dry_run_var.get()
+            
+            self.append_log(f"{'Dry run' if dry_run else 'Processing'} started at {datetime.datetime.now().strftime('%H:%M:%S')}")
+            
+            if is_file:
+                # Process single file
+                self.append_log(f"Processing file: {os.path.basename(path)}")
+                
+                if dry_run:
+                    # Just process without saving to database
+                    processed_data = self.pipeline.process_file(path)
+                    if processed_data:
+                        session_id = processed_data['session_data']['session_id']
+                        throws_count = len(processed_data['throw_data'])
+                        timeseries_rows = len(processed_data['timeseries_data'])
+                        self.append_log(f"File processed successfully: {session_id}")
+                        self.append_log(f"Detected {throws_count} throws")
+                        self.append_log(f"Processed {timeseries_rows} time points")
+                        self.update_status("Processing complete (dry run)")
+                    else:
+                        self.append_log(f"Failed to process file: {path}")
+                        self.update_status("Processing failed")
+                else:
+                    # Process and save to database
+                    success = self.pipeline.run_single_file(path)
+                    if success:
+                        self.append_log(f"File processed and saved successfully")
+                        self.update_status("Processing complete")
+                    else:
+                        self.append_log(f"Failed to process or save file")
+                        self.update_status("Processing failed")
+            else:
+                # Process directory
+                self.append_log(f"Processing directory: {path}")
+                self.append_log(f"Recursive: {recursive}")
+                
+                # Count files before processing
+                file_count = 0
+                if recursive:
+                    for root, _, files in os.walk(path):
+                        file_count += sum(1 for f in files if f.endswith(('.csv', '.txt')))
+                else:
+                    file_count = sum(1 for f in os.listdir(path) 
+                                  if os.path.isfile(os.path.join(path, f)) and 
+                                  f.endswith(('.csv', '.txt')))
+                
+                self.append_log(f"Found {file_count} files to process")
+                
+                if file_count == 0:
+                    self.append_log("No EMG data files found")
+                    self.update_status("No files found")
+                    return
+                
+                # Process directory
+                summary = self.pipeline.process_directory(path, recursive)
+                
+                self.append_log(f"Directory processing complete")
+                self.append_log(f"Successfully processed {summary['processed']} of {summary['total']} files")
+                if summary['failed'] > 0:
+                    self.append_log(f"Failed to process {summary['failed']} files")
+                
+                if summary['success']:
+                    self.update_status(f"Processed {summary['processed']}/{summary['total']} files")
+                else:
+                    self.update_status("Processing completed with errors")
+            
+            self.append_log(f"Processing finished at {datetime.datetime.now().strftime('%H:%M:%S')}")
+            
+        except Exception as e:
+            self.append_log(f"Error during processing: {str(e)}")
+            self.update_status("Error during processing")
+            logger.exception("Error in processing thread")
+    
+    def test_db_connection(self):
+        """Test the database connection."""
+        self.update_db_config()
+        
+        db = DBConnector(self.db_config)
+        if db.test_connection():
+            self.db_status_var.set("Connected")
+            messagebox.showinfo("Success", "Database connection successful!")
+        else:
+            self.db_status_var.set("Failed")
+            messagebox.showerror("Error", "Database connection failed. Check logs for details.")
+    
+    def update_db_config(self):
+        """Update database configuration from UI inputs."""
+        self.db_config = {
+            'host': self.host_var.get(),
+            'user': self.user_var.get(),
+            'password': self.password_var.get(),
+            'database': self.database_var.get()
+        }
+        
+        # Update pipeline with new config
+        self.pipeline = EMGPipeline(
+            db_config=self.db_config,
+            batch_size=1000
+        )
+        
+        self.db_status_var.set("Updated")
+    
+    def get_record_counts(self):
+        """Get record counts from the database tables."""
+        self.update_db_config()
+        db = DBConnector(self.db_config)
+        conn = db.connect()
+        
+        if not conn:
+            self.db_results_text.delete(1.0, tk.END)
+            self.db_results_text.insert(tk.END, "Failed to connect to database.")
+            return
+        
+        try:
+            cursor = conn.cursor()
+            
+            # Clear results
+            self.db_results_text.delete(1.0, tk.END)
+            
+            # Check if tables exist
+            cursor.execute("SHOW TABLES LIKE 'emg_%'")
+            tables = cursor.fetchall()
+            
+            if not tables:
+                self.db_results_text.insert(tk.END, "No EMG tables found in the database.")
+                db.disconnect()
+                return
+            
+            # Get counts for each table
+            self.db_results_text.insert(tk.END, "Database Record Counts:\n\n")
+            
+            # Sessions count
+            cursor.execute("SELECT COUNT(*) FROM emg_sessions")
+            sessions_count = cursor.fetchone()[0]
+            self.db_results_text.insert(tk.END, f"EMG Sessions: {sessions_count}\n")
+            
+            # Throws count
+            cursor.execute("SELECT COUNT(*) FROM emg_throws")
+            throws_count = cursor.fetchone()[0]
+            self.db_results_text.insert(tk.END, f"EMG Throws: {throws_count}\n")
+            
+            # Time series count
+            cursor.execute("SELECT COUNT(*) FROM emg_timeseries")
+            timeseries_count = cursor.fetchone()[0]
+            self.db_results_text.insert(tk.END, f"EMG Time Series Points: {timeseries_count}\n\n")
+            
+            # Get recent sessions
+            self.db_results_text.insert(tk.END, "Recent Sessions:\n")
+            cursor.execute("""
+            SELECT session_id, date_recorded, athlete_name, session_type, processed_date 
+            FROM emg_sessions 
+            ORDER BY processed_date DESC 
+            LIMIT 5
+            """)
+            
+            recent_sessions = cursor.fetchall()
+            if recent_sessions:
+                for session in recent_sessions:
+                    session_id, date_recorded, athlete_name, session_type, processed_date = session
+                    self.db_results_text.insert(tk.END, f"- {session_id}\n")
+                    self.db_results_text.insert(tk.END, f"  Date: {date_recorded}, Athlete: {athlete_name}\n")
+                    self.db_results_text.insert(tk.END, f"  Type: {session_type}, Processed: {processed_date}\n\n")
+            else:
+                self.db_results_text.insert(tk.END, "No sessions found.\n")
+            
+        except Exception as e:
+            self.db_results_text.delete(1.0, tk.END)
+            self.db_results_text.insert(tk.END, f"Error getting record counts: {str(e)}")
+            logger.exception("Error getting record counts")
+        finally:
+            db.disconnect()
+
+def main():
+    """Main entry point for the GUI application."""
+    root = tk.Tk()
+    app = EMGPipelineGUI(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,87 @@
+2025-03-04 16:04:14,959 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:04:14,959 - db_connector - INFO - Database connector initialized
+2025-03-04 16:04:14,960 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:04:14,960 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:04:44,111 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:04:44,111 - db_connector - INFO - Database connector initialized
+2025-03-04 16:04:44,112 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:04:44,112 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:04:44,115 - __main__ - ERROR - Error in processing thread
+Traceback (most recent call last):
+  File "C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\gui_app.py", line 370, in run_processing
+    self.append_log(f"{'Dry run' if dry_run else 'Processing'} started at {datetime.datetime.now().strftime('%H:%M:%S')}")
+                                                                           ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
+2025-03-04 16:05:53,893 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:05:53,893 - db_connector - INFO - Database connector initialized
+2025-03-04 16:05:53,893 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:05:53,893 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:06:11,032 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:06:11,032 - db_connector - INFO - Database connector initialized
+2025-03-04 16:06:11,032 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:06:11,032 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:06:11,037 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/DataSet (recursive=False)
+2025-03-04 16:06:11,369 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:06:11,993 - db_connector - INFO - Database tables created/verified successfully
+2025-03-04 16:06:11,993 - emg_pipeline - INFO - Found 5 files to process
+2025-03-04 16:06:12,006 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-04 16:06:12,006 - emg_processor - WARNING - Invalid date format in filename: 021925
+2025-03-04 16:06:12,006 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-04 16:06:15,743 - emg_processor - INFO - Data loaded: FCU: 1486360 samples, FCR: 2535556 samples
+2025-03-04 16:06:17,741 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:10:48,864 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:10:48,864 - db_connector - INFO - Database connector initialized
+2025-03-04 16:10:48,865 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:10:48,865 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:10:57,785 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:10:57,785 - db_connector - INFO - Database connector initialized
+2025-03-04 16:10:57,785 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:10:57,786 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:10:57,786 - db_connector - INFO - Database connector initialized
+2025-03-04 16:10:58,119 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:10:58,292 - db_connector - INFO - Database connection test successful. Found 3 EMG tables.
+2025-03-04 16:10:58,293 - db_connector - INFO - Database connection closed
+2025-03-04 16:11:16,546 - emg_processor - INFO - EMG Processor initialized
+2025-03-04 16:11:16,547 - db_connector - INFO - Database connector initialized
+2025-03-04 16:11:16,547 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-04 16:11:16,547 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-04 16:11:16,554 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/DataSet (recursive=True)
+2025-03-04 16:11:16,885 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:11:17,385 - db_connector - INFO - Database tables created/verified successfully
+2025-03-04 16:11:17,386 - emg_pipeline - INFO - Found 5 files to process
+2025-03-04 16:11:17,396 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-04 16:11:17,396 - emg_processor - WARNING - Invalid date format in filename: 021925
+2025-03-04 16:11:17,397 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-04 16:11:21,339 - emg_processor - INFO - Data loaded: FCU: 1486360 samples, FCR: 2535556 samples
+2025-03-04 16:11:23,087 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:16:49,935 - emg_pipeline - INFO - Successfully saved data for session 021925_117946_AlexBritton_longform to database
+2025-03-04 16:16:49,936 - db_connector - INFO - Database connection closed
+2025-03-04 16:16:49,938 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-04 16:16:49,939 - emg_processor - WARNING - Invalid date format in filename: 022725
+2025-03-04 16:16:49,939 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-04 16:16:50,620 - emg_processor - INFO - Data loaded: FCU: 459968 samples, FCR: 459968 samples
+2025-03-04 16:16:51,215 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:17:50,524 - emg_pipeline - INFO - Successfully saved data for session 022725_117958_CarterWallace_mocap to database
+2025-03-04 16:17:50,525 - db_connector - INFO - Database connection closed
+2025-03-04 16:17:50,525 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-04 16:17:50,525 - emg_processor - WARNING - Invalid date format in filename: 022725
+2025-03-04 16:17:50,526 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-04 16:17:51,524 - emg_processor - INFO - Data loaded: FCU: 662098 samples, FCR: 662098 samples
+2025-03-04 16:17:52,240 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:19:18,436 - emg_pipeline - INFO - Successfully saved data for session 022725_118107_DarielFregio_mocap to database
+2025-03-04 16:19:18,436 - db_connector - INFO - Database connection closed
+2025-03-04 16:19:18,437 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-04 16:19:18,437 - emg_processor - WARNING - Invalid date format in filename: 030425
+2025-03-04 16:19:18,437 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-04 16:19:20,415 - emg_processor - INFO - Data loaded: FCU: 1217361 samples, FCR: 1217361 samples
+2025-03-04 16:19:21,581 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:21:57,295 - emg_pipeline - INFO - Successfully saved data for session 030425_102245_MateoHamm_mocap to database
+2025-03-04 16:21:57,295 - db_connector - INFO - Database connection closed
+2025-03-04 16:21:57,296 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-04 16:21:57,296 - emg_processor - WARNING - Invalid date format in filename: 030425
+2025-03-04 16:21:57,296 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-04 16:21:58,878 - emg_processor - INFO - Data loaded: FCU: 823802 samples, FCR: 823802 samples
+2025-03-04 16:21:59,986 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-04 16:23:46,134 - emg_pipeline - INFO - Successfully saved data for session 030425_118085_JayceBlair_mocap to database
+2025-03-04 16:23:46,134 - db_connector - INFO - Database connection closed
+2025-03-04 16:23:46,135 - emg_pipeline - INFO - Directory processing complete. Successfully processed 5 of 5 files.

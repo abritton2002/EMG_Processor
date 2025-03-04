@@ -234,6 +234,12 @@ class EMGPipeline:
                 cursor.execute("DELETE FROM emg_sessions WHERE session_id = %s", (session_data['session_id'],))
             
             # Insert session data
+            # If date_recorded is None, use today's date
+            date_recorded = session_data['date_recorded']
+            if date_recorded is None:
+                logger.warning(f"No date parsed from filename. Using current date for session {session_data['session_id']}")
+                date_recorded = datetime.datetime.now().date()
+            
             cursor.execute("""
             INSERT INTO emg_sessions (
                 session_id, date_recorded, traq_id, athlete_name, session_type,
@@ -241,7 +247,7 @@ class EMGPipeline:
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 session_data['session_id'],
-                session_data['date_recorded'],
+                date_recorded,
                 session_data['traq_id'],
                 session_data['athlete_name'],
                 session_data['session_type'],

@@ -47,13 +47,36 @@ class EMGProcessor:
                     'session_type': 'unknown'
                 }
             
-            # Parse date (MMDDYYYY)
+            # Parse date - try multiple formats
             date_str = parts[0]
-            try:
-                date = datetime.datetime.strptime(date_str, '%m%d%Y').date()
-            except ValueError:
-                logger.warning(f"Invalid date format in filename: {date_str}")
-                date = None
+            date = None
+            
+            # Try different date formats
+            date_formats = ['%m%d%Y', '%m%d%y']
+            for fmt in date_formats:
+                try:
+                    date = datetime.datetime.strptime(date_str, fmt).date()
+                    logger.info(f"Successfully parsed date as {fmt}: {date}")
+                    break
+                except ValueError:
+                    continue
+            
+            # If all formats fail, try to manually parse
+            if date is None:
+                logger.warning(f"Standard date formats failed for: {date_str}")
+                try:
+                    # Assuming format is MMDDYY where YY is 2-digit year
+                    if len(date_str) == 6:
+                        month = int(date_str[0:2])
+                        day = int(date_str[2:4])
+                        year = int(date_str[4:6])
+                        # Add 2000 to get full year
+                        year += 2000
+                        date = datetime.date(year, month, day)
+                        logger.info(f"Manually parsed date as: {date}")
+                except Exception as e:
+                    logger.warning(f"Failed to manually parse date: {date_str}, error: {e}")
+                    date = None
             
             return {
                 'date': date,
