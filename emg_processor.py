@@ -95,7 +95,7 @@ class EMGProcessor:
     
     def load_delsys_emg_data(self, file_path):
         """
-        Load EMG data from Delsys Trigno format with FCU and FCR channels.
+        Load EMG data from Delsys Trigno format with dynamic muscle channels.
         
         Parameters:
         -----------
@@ -105,65 +105,102 @@ class EMGProcessor:
         Returns:
         --------
         tuple
-            (fcu_emg, fcr_emg, fcu_time, fcr_time, metadata)
+            (muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata)
         """
         logger.info(f"Loading file: {file_path}")
         
         # Extract metadata
         metadata = {}
         with open(file_path, 'r') as f:
-            # Read metadata lines
-            app_line = f.readline().strip().split(',')
-            if len(app_line) >= 2:
-                metadata['Application'] = app_line[1].strip()
+            # Row 1: Application info
+            line = f.readline().strip().split(',')
+            if len(line) >= 2:
+                metadata['Application'] = line[1].strip()
             
-            date_line = f.readline().strip().split(',')
-            if len(date_line) >= 2:
-                metadata['Date/Time'] = date_line[1].strip()
+            # Row 2: Date/Time (MM/DD/YY HH:MM:SS)
+            line = f.readline().strip().split(',')
+            if len(line) >= 2:
+                # Parse date and time
+                date_time_str = line[1].strip()
+                metadata['Collection_DateTime'] = date_time_str
+                
+                # Try to convert to datetime object for database
+                try:
+                    collection_date = datetime.datetime.strptime(date_time_str, '%m/%d/%Y %I:%M:%S %p')
+                    metadata['Collection_Date'] = collection_date.date()
+                    metadata['Start_Time'] = collection_date.time()
+                except ValueError:
+                    try:
+                        # Try alternate format with 2-digit year
+                        collection_date = datetime.datetime.strptime(date_time_str, '%m/%d/%y %I:%M:%S %p')
+                        metadata['Collection_Date'] = collection_date.date()
+                        metadata['Start_Time'] = collection_date.time()
+                    except ValueError:
+                        logger.warning(f"Could not parse date/time: {date_time_str}")
+                        metadata['Collection_Date'] = None
+                        metadata['Start_Time'] = None
             
-            length_line = f.readline().strip().split(',')
-            if len(length_line) >= 2:
-                metadata['Collection Length'] = length_line[1].strip()
+            # Row 3: Collection length
+            line = f.readline().strip().split(',')
+            if len(line) >= 2:
+                metadata['Collection_Length'] = line[1].strip()
             
-            # Read muscle names (FCU and FCR)
-            channel_line = f.readline().strip().split(',')
-            if len(channel_line) >= 3:
-                fcu_channel = channel_line[0].strip()
-                fcr_channel = channel_line[2].strip()
-                metadata['FCU'] = fcu_channel
-                metadata['FCR'] = fcr_channel
+            # Row 4: Muscle names with IDs (extract up to 4 muscles)
+            line = f.readline().strip().split(',')
+            muscle_count = 0
             
-            # Read sensor modes
-            mode_line = f.readline().strip().split(',')
-            if len(mode_line) >= 3:
-                metadata['FCU_mode'] = mode_line[0].strip()
-                metadata['FCR_mode'] = mode_line[2].strip()
+            # Dictionary to store muscle info
+            muscles = {}
             
-            # Read column headers
-            header_line = f.readline().strip().split(',')
-            if len(header_line) >= 4:
-                metadata['FCU_time_header'] = header_line[0].strip()
-                metadata['FCU_emg_header'] = header_line[1].strip()
-                metadata['FCR_time_header'] = header_line[2].strip()
-                metadata['FCR_emg_header'] = header_line[3].strip()
+            # Process each column that might contain muscle info
+            for i in range(0, min(len(line), 8), 2):  # Check columns A, C, E, G (0, 2, 4, 6)
+                if i < len(line) and line[i].strip():
+                    muscle_info = line[i].strip()
+                    muscle_match = re.search(r'(\w+)\s*\((\d+)\)', muscle_info)
+                    
+                    if muscle_match:
+                        muscle_name = muscle_match.group(1)
+                        muscle_id = muscle_match.group(2)
+                        
+                        muscle_count += 1
+                        muscles[f'muscle{muscle_count}_name'] = muscle_name
+                        muscles[f'muscle{muscle_count}_id'] = muscle_id
             
-            # Read sampling rates
-            rate_line = f.readline().strip().split(',')
-            if len(rate_line) >= 4:
-                if 'Hz' in rate_line[1]:
-                    fcu_fs = float(rate_line[1].replace('Hz', '').strip())
-                    metadata['FCU_fs'] = fcu_fs
-                if 'Hz' in rate_line[3]:
-                    fcr_fs = float(rate_line[3].replace('Hz', '').strip())
-                    metadata['FCR_fs'] = fcr_fs
+            # Add muscle info to metadata
+            metadata.update(muscles)
+            metadata['muscle_count'] = muscle_count
+            
+            # Row 5: Sensor modes
+            line = f.readline().strip().split(',')
+            if len(line) >= 4:
+                metadata['muscle1_mode'] = line[1].strip().replace('sensor mode:', '').strip()
+                metadata['muscle2_mode'] = line[3].strip().replace('sensor mode:', '').strip()
+            
+            # Row 6: Column headers - just skip
+            f.readline()
+            
+            # Row 7: Sampling rates
+            line = f.readline().strip().split(',')
+            if len(line) >= 4:
+                muscle1_fs_str = line[1].strip()
+                muscle2_fs_str = line[3].strip()
+                
+                # Extract numeric rates
+                muscle1_fs_match = re.search(r'([\d\.]+)', muscle1_fs_str)
+                if muscle1_fs_match:
+                    metadata['muscle1_fs'] = float(muscle1_fs_match.group(1))
+                
+                muscle2_fs_match = re.search(r'([\d\.]+)', muscle2_fs_str)
+                if muscle2_fs_match:
+                    metadata['muscle2_fs'] = float(muscle2_fs_match.group(1))
         
-        # Now read the actual data - using two separate arrays for FCU and FCR
-        fcu_data = {'time': [], 'emg': []}
-        fcr_data = {'time': [], 'emg': []}
+        # Now read the actual data - using two separate arrays for muscle1 and muscle2
+        muscle1_data = {'time': [], 'emg': []}
+        muscle2_data = {'time': [], 'emg': []}
         
         with open(file_path, 'r') as f:
-            # Skip header lines (8 lines)
-            for _ in range(8):
+            # Skip header lines (7 lines)
+            for _ in range(7):
                 f.readline()
             
             # Read data lines
@@ -171,32 +208,36 @@ class EMGProcessor:
                 parts = line.strip().split(',')
                 if len(parts) >= 4:  # Ensure we have all 4 expected columns
                     try:
-                        # FCU data (first two columns)
-                        fcu_time = float(parts[0])
-                        fcu_emg = float(parts[1])
-                        fcu_data['time'].append(fcu_time)
-                        fcu_data['emg'].append(fcu_emg)
+                        # Muscle1 data (first two columns)
+                        muscle1_time = float(parts[0])
+                        muscle1_emg = float(parts[1])
+                        muscle1_data['time'].append(muscle1_time)
+                        muscle1_data['emg'].append(muscle1_emg)
                     except (ValueError, IndexError):
-                        pass  # Skip invalid FCU data
+                        pass  # Skip invalid muscle1 data
                     
                     try:
-                        # FCR data (columns 3 and 4)
-                        fcr_time = float(parts[2])
-                        fcr_emg = float(parts[3])
-                        fcr_data['time'].append(fcr_time)
-                        fcr_data['emg'].append(fcr_emg)
+                        # Muscle2 data (columns 3 and 4)
+                        muscle2_time = float(parts[2])
+                        muscle2_emg = float(parts[3])
+                        muscle2_data['time'].append(muscle2_time)
+                        muscle2_data['emg'].append(muscle2_emg)
                     except (ValueError, IndexError):
-                        pass  # Skip invalid FCR data
+                        pass  # Skip invalid muscle2 data
         
         # Convert to numpy arrays
-        fcu_time = np.array(fcu_data['time'])
-        fcu_emg = np.array(fcu_data['emg'])
-        fcr_time = np.array(fcr_data['time'])
-        fcr_emg = np.array(fcr_data['emg'])
+        muscle1_time = np.array(muscle1_data['time'])
+        muscle1_emg = np.array(muscle1_data['emg'])
+        muscle2_time = np.array(muscle2_data['time'])
+        muscle2_emg = np.array(muscle2_data['emg'])
         
-        logger.info(f"Data loaded: FCU: {len(fcu_emg)} samples, FCR: {len(fcr_emg)} samples")
+        # Log what we found
+        muscle1_name = metadata.get('muscle1_name', 'Muscle1')
+        muscle2_name = metadata.get('muscle2_name', 'Muscle2')
+        logger.info(f"Data loaded: {muscle1_name}: {len(muscle1_emg)} samples, {muscle2_name}: {len(muscle2_emg)} samples")
+        logger.info(f"Found {metadata.get('muscle_count', 0)} muscles in file")
         
-        return fcu_emg, fcr_emg, fcu_time, fcr_time, metadata
+        return muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata
     
     def preprocess_emg(self, emg_signal, fs):
         """
@@ -367,7 +408,6 @@ class EMGProcessor:
         rise_times = np.zeros(throw_count)
         contraction_times = np.zeros(throw_count)
         relaxation_times = np.zeros(throw_count)
-        contraction_relaxation_ratios = np.zeros(throw_count)
         
         # Workload metrics
         throw_integrals = np.zeros(throw_count)
@@ -411,12 +451,6 @@ class EMGProcessor:
             # Contraction and relaxation times
             contraction_times[i] = segment_time[peak_idx] if peak_idx < len(segment_time) else np.nan
             relaxation_times[i] = segment_time[-1] - segment_time[peak_idx] if peak_idx < len(segment_time) else np.nan
-            
-            # Contraction-relaxation ratio
-            if not np.isnan(contraction_times[i]) and not np.isnan(relaxation_times[i]) and relaxation_times[i] > 0:
-                contraction_relaxation_ratios[i] = contraction_times[i] / relaxation_times[i]
-            else:
-                contraction_relaxation_ratios[i] = np.nan
             
             # Frequency domain metrics
             # Apply Hanning window to reduce spectral leakage
@@ -479,7 +513,6 @@ class EMGProcessor:
             'rise_times': rise_times,
             'contraction_times': contraction_times,
             'relaxation_times': relaxation_times,
-            'contraction_relaxation_ratios': contraction_relaxation_ratios,
             
             # Workload metrics
             'throw_integrals': throw_integrals,

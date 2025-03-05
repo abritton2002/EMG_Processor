@@ -80,92 +80,100 @@ class EMGPipeline:
             file_metadata = self.processor.parse_filename(file_path)
             session_id = os.path.splitext(os.path.basename(file_path))[0]
             
-            # Load EMG data
-            fcu_emg, fcr_emg, fcu_time, fcr_time, metadata = self.processor.load_delsys_emg_data(file_path)
+            # Load EMG data with dynamic muscle names
+            muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata = self.processor.load_delsys_emg_data(file_path)
+            
+            # Extract muscle names for easier reference
+            muscle1_name = metadata.get('muscle1_name', 'muscle1')
+            muscle2_name = metadata.get('muscle2_name', 'muscle2')
             
             # Extract sampling rates
-            fcu_fs = metadata.get('FCU_fs', 2000)
-            fcr_fs = metadata.get('FCR_fs', 2000)
+            muscle1_fs = metadata.get('muscle1_fs', 2000)
+            muscle2_fs = metadata.get('muscle2_fs', 2000)
             
             # Preprocess EMG data
-            fcu_filtered, fcu_rectified, fcu_rms, fcu_envelope = self.processor.preprocess_emg(fcu_emg, fcu_fs)
-            fcr_filtered, fcr_rectified, fcr_rms, fcr_envelope = self.processor.preprocess_emg(fcr_emg, fcr_fs)
+            muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope = self.processor.preprocess_emg(muscle1_emg, muscle1_fs)
+            muscle2_filtered, muscle2_rectified, muscle2_rms, muscle2_envelope = self.processor.preprocess_emg(muscle2_emg, muscle2_fs)
             
-            # Detect throws using FCR data
-            throws_fcr = self.processor.detect_throws_fcr(fcr_rms, fcr_time, fcr_fs)
+            # Use muscle2 (formerly FCR) as primary for throw detection
+            throws_muscle2 = self.processor.detect_throws_fcr(muscle2_rms, muscle2_time, muscle2_fs)
             
-            # Map FCR throw indices to FCU indices
-            throws_fcu = self.processor.map_throws_to_fcu(throws_fcr, fcr_time, fcu_time)
+            # Map muscle2 throw indices to muscle1 indices
+            throws_muscle1 = self.processor.map_throws_to_fcu(throws_muscle2, muscle2_time, muscle1_time)
             
             # Calculate metrics
-            fcr_metrics = self.processor.calculate_comprehensive_metrics(
-                fcr_filtered, fcr_rectified, fcr_rms, fcr_envelope, 
-                throws_fcr, fcr_time, fcr_fs
+            muscle2_metrics = self.processor.calculate_comprehensive_metrics(
+                muscle2_filtered, muscle2_rectified, muscle2_rms, muscle2_envelope, 
+                throws_muscle2, muscle2_time, muscle2_fs
             )
             
-            fcu_metrics = self.processor.calculate_comprehensive_metrics(
-                fcu_filtered, fcu_rectified, fcu_rms, fcu_envelope,
-                throws_fcu, fcu_time, fcu_fs
+            muscle1_metrics = self.processor.calculate_comprehensive_metrics(
+                muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope,
+                throws_muscle1, muscle1_time, muscle1_fs
             )
             
-            # Prepare session data
+            # Prepare session data with additional metadata
             session_data = {
                 'session_id': session_id,
                 'date_recorded': file_metadata['date'],
+                'collection_date': metadata.get('Collection_Date'),
+                'start_time': metadata.get('Start_Time'),
                 'traq_id': file_metadata['traq_id'],
                 'athlete_name': file_metadata['athlete_name'],
                 'session_type': file_metadata['session_type'],
-                'fcu_fs': fcu_fs,
-                'fcr_fs': fcr_fs,
+                'muscle_count': metadata.get('muscle_count', 2),
+                'muscle1_name': metadata.get('muscle1_name'),
+                'muscle2_name': metadata.get('muscle2_name'),
+                'muscle3_name': metadata.get('muscle3_name'),
+                'muscle4_name': metadata.get('muscle4_name'),
+                'muscle1_id': metadata.get('muscle1_id'),
+                'muscle2_id': metadata.get('muscle2_id'),
+                'muscle3_id': metadata.get('muscle3_id'),
+                'muscle4_id': metadata.get('muscle4_id'),
+                'muscle1_fs': muscle1_fs,
+                'muscle2_fs': muscle2_fs,
                 'file_path': file_path,
                 'processed_date': datetime.datetime.now()
             }
             
-            # Prepare time series data
-            # We'll use pandas for faster processing of large time series
+            # Prepare time series data with dynamic muscle names
             timeseries_data = pd.DataFrame({
-                'session_id': [session_id] * len(fcr_time),
-                'time_point': fcr_time,
-                'fcu_emg': np.interp(fcr_time, fcu_time, fcu_emg),  # Align FCU data to FCR time points
-                'fcr_emg': fcr_emg
+                'session_id': [session_id] * len(muscle2_time),
+                'time_point': muscle2_time,
+                'muscle1_emg': np.interp(muscle2_time, muscle1_time, muscle1_emg),  # Align muscle1 data to muscle2 time points
+                'muscle2_emg': muscle2_emg
             })
             
-            # Prepare throw data
+            # Prepare throw data with dynamic muscle names
             throw_data = []
-            for i in range(len(throws_fcr)):
-                start_idx, end_idx = throws_fcr[i]
+            for i in range(len(throws_muscle2)):
+                start_idx, end_idx = throws_muscle2[i]
                 throw_row = {
                     'session_id': session_id,
                     'throw_number': i + 1,
-                    'start_time': fcr_time[start_idx],
-                    'end_time': fcr_time[end_idx],
-                    'duration': fcr_metrics['throw_durations'][i],
+                    'start_time': muscle2_time[start_idx],
+                    'end_time': muscle2_time[end_idx],
+                    'duration': muscle2_metrics['throw_durations'][i],
                     
-                    # FCR metrics
-                    'fcr_median_freq': fcr_metrics['median_freqs'][i],
-                    'fcr_mean_freq': fcr_metrics['mean_freqs'][i],
-                    'fcr_bandwidth': fcr_metrics['bandwidth'][i],
-                    'fcr_peak_amplitude': fcr_metrics['peak_amplitudes'][i],
-                    'fcr_rms_value': fcr_metrics['rms_values'][i],
-                    'fcr_rise_time': fcr_metrics['rise_times'][i],
-                    'fcr_contraction_time': fcr_metrics['contraction_times'][i],
-                    'fcr_relaxation_time': fcr_metrics['relaxation_times'][i],
-                    'fcr_contraction_relaxation_ratio': fcr_metrics['contraction_relaxation_ratios'][i],
-                    'fcr_throw_integral': fcr_metrics['throw_integrals'][i],
-                    'fcr_work_rate': fcr_metrics['work_rates'][i],
+                    # Muscle2 metrics
+                    'muscle2_median_freq': muscle2_metrics['median_freqs'][i],
+                    'muscle2_mean_freq': muscle2_metrics['mean_freqs'][i],
+                    'muscle2_bandwidth': muscle2_metrics['bandwidth'][i],
+                    'muscle2_peak_amplitude': muscle2_metrics['peak_amplitudes'][i],
+                    'muscle2_rms_value': muscle2_metrics['rms_values'][i],
+                    'muscle2_rise_time': muscle2_metrics['rise_times'][i],
+                    'muscle2_throw_integral': muscle2_metrics['throw_integrals'][i],
+                    'muscle2_work_rate': muscle2_metrics['work_rates'][i],
                     
-                    # FCU metrics
-                    'fcu_median_freq': fcu_metrics['median_freqs'][i],
-                    'fcu_mean_freq': fcu_metrics['mean_freqs'][i],
-                    'fcu_bandwidth': fcu_metrics['bandwidth'][i],
-                    'fcu_peak_amplitude': fcu_metrics['peak_amplitudes'][i],
-                    'fcu_rms_value': fcu_metrics['rms_values'][i],
-                    'fcu_rise_time': fcu_metrics['rise_times'][i],
-                    'fcu_contraction_time': fcu_metrics['contraction_times'][i],
-                    'fcu_relaxation_time': fcu_metrics['relaxation_times'][i],
-                    'fcu_contraction_relaxation_ratio': fcu_metrics['contraction_relaxation_ratios'][i],
-                    'fcu_throw_integral': fcu_metrics['throw_integrals'][i],
-                    'fcu_work_rate': fcu_metrics['work_rates'][i]
+                    # Muscle1 metrics
+                    'muscle1_median_freq': muscle1_metrics['median_freqs'][i],
+                    'muscle1_mean_freq': muscle1_metrics['mean_freqs'][i],
+                    'muscle1_bandwidth': muscle1_metrics['bandwidth'][i],
+                    'muscle1_peak_amplitude': muscle1_metrics['peak_amplitudes'][i],
+                    'muscle1_rms_value': muscle1_metrics['rms_values'][i],
+                    'muscle1_rise_time': muscle1_metrics['rise_times'][i],
+                    'muscle1_throw_integral': muscle1_metrics['throw_integrals'][i],
+                    'muscle1_work_rate': muscle1_metrics['work_rates'][i]
                 }
                 
                 # Replace NaN values with None for database insertion
@@ -233,7 +241,7 @@ class EMGPipeline:
                 cursor.execute("DELETE FROM emg_timeseries WHERE session_id = %s", (session_data['session_id'],))
                 cursor.execute("DELETE FROM emg_sessions WHERE session_id = %s", (session_data['session_id'],))
             
-            # Insert session data
+            # Insert session data with new fields
             # If date_recorded is None, use today's date
             date_recorded = session_data['date_recorded']
             if date_recorded is None:
@@ -242,22 +250,36 @@ class EMGPipeline:
             
             cursor.execute("""
             INSERT INTO emg_sessions (
-                session_id, date_recorded, traq_id, athlete_name, session_type,
-                fcu_fs, fcr_fs, file_path, processed_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                session_id, date_recorded, collection_date, start_time,
+                traq_id, athlete_name, session_type,
+                muscle_count, muscle1_name, muscle2_name, muscle3_name, muscle4_name,
+                muscle1_id, muscle2_id, muscle3_id, muscle4_id,
+                muscle1_fs, muscle2_fs, file_path, processed_date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 session_data['session_id'],
                 date_recorded,
+                session_data.get('collection_date'),
+                session_data.get('start_time'),
                 session_data['traq_id'],
                 session_data['athlete_name'],
                 session_data['session_type'],
-                session_data['fcu_fs'],
-                session_data['fcr_fs'],
+                session_data.get('muscle_count', 2),
+                session_data.get('muscle1_name'),
+                session_data.get('muscle2_name'),
+                session_data.get('muscle3_name'),
+                session_data.get('muscle4_name'),
+                session_data.get('muscle1_id'),
+                session_data.get('muscle2_id'),
+                session_data.get('muscle3_id'),
+                session_data.get('muscle4_id'),
+                session_data.get('muscle1_fs'),
+                session_data.get('muscle2_fs'),
                 session_data['file_path'],
                 session_data['processed_date']
             ))
             
-            # Insert throw data
+            # Insert throw data with dynamic muscle names
             if throw_data:
                 throw_values = []
                 for throw in throw_data:
@@ -268,47 +290,39 @@ class EMGPipeline:
                         throw['end_time'],
                         throw['duration'],
                         
-                        # FCR metrics
-                        throw['fcr_median_freq'],
-                        throw['fcr_mean_freq'],
-                        throw['fcr_bandwidth'],
-                        throw['fcr_peak_amplitude'],
-                        throw['fcr_rms_value'],
-                        throw['fcr_rise_time'],
-                        throw['fcr_contraction_time'],
-                        throw['fcr_relaxation_time'],
-                        throw['fcr_contraction_relaxation_ratio'],
-                        throw['fcr_throw_integral'],
-                        throw['fcr_work_rate'],
+                        # Muscle1 metrics
+                        throw['muscle1_median_freq'],
+                        throw['muscle1_mean_freq'],
+                        throw['muscle1_bandwidth'],
+                        throw['muscle1_peak_amplitude'],
+                        throw['muscle1_rms_value'],
+                        throw['muscle1_rise_time'],
+                        throw['muscle1_throw_integral'],
+                        throw['muscle1_work_rate'],
                         
-                        # FCU metrics
-                        throw['fcu_median_freq'],
-                        throw['fcu_mean_freq'],
-                        throw['fcu_bandwidth'],
-                        throw['fcu_peak_amplitude'],
-                        throw['fcu_rms_value'],
-                        throw['fcu_rise_time'],
-                        throw['fcu_contraction_time'],
-                        throw['fcu_relaxation_time'],
-                        throw['fcu_contraction_relaxation_ratio'],
-                        throw['fcu_throw_integral'],
-                        throw['fcu_work_rate']
+                        # Muscle2 metrics
+                        throw['muscle2_median_freq'],
+                        throw['muscle2_mean_freq'],
+                        throw['muscle2_bandwidth'],
+                        throw['muscle2_peak_amplitude'],
+                        throw['muscle2_rms_value'],
+                        throw['muscle2_rise_time'],
+                        throw['muscle2_throw_integral'],
+                        throw['muscle2_work_rate']
                     ))
                 
                 # Use executemany for better performance
                 cursor.executemany("""
                 INSERT INTO emg_throws (
                     session_id, throw_number, start_time, end_time, duration,
-                    fcr_median_freq, fcr_mean_freq, fcr_bandwidth, fcr_peak_amplitude, fcr_rms_value,
-                    fcr_rise_time, fcr_contraction_time, fcr_relaxation_time, fcr_contraction_relaxation_ratio,
-                    fcr_throw_integral, fcr_work_rate,
-                    fcu_median_freq, fcu_mean_freq, fcu_bandwidth, fcu_peak_amplitude, fcu_rms_value,
-                    fcu_rise_time, fcu_contraction_time, fcu_relaxation_time, fcu_contraction_relaxation_ratio,
-                    fcu_throw_integral, fcu_work_rate
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    muscle1_median_freq, muscle1_mean_freq, muscle1_bandwidth, muscle1_peak_amplitude, muscle1_rms_value,
+                    muscle1_rise_time, muscle1_throw_integral, muscle1_work_rate,
+                    muscle2_median_freq, muscle2_mean_freq, muscle2_bandwidth, muscle2_peak_amplitude, muscle2_rms_value,
+                    muscle2_rise_time, muscle2_throw_integral, muscle2_work_rate
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, throw_values)
             
-            # Insert time series data in batches
+            # Insert time series data in batches with dynamic muscle names
             if not timeseries_data.empty:
                 # Convert DataFrame to list of tuples for executemany
                 total_rows = len(timeseries_data)
@@ -320,13 +334,13 @@ class EMGPipeline:
                     timeseries_values = list(zip(
                         batch['session_id'],
                         batch['time_point'],
-                        batch['fcu_emg'],
-                        batch['fcr_emg']
+                        batch['muscle1_emg'],
+                        batch['muscle2_emg']
                     ))
                     
                     # Insert batch
                     cursor.executemany("""
-                    INSERT INTO emg_timeseries (session_id, time_point, fcu_emg, fcr_emg)
+                    INSERT INTO emg_timeseries (session_id, time_point, muscle1_emg, muscle2_emg)
                     VALUES (%s, %s, %s, %s)
                     """, timeseries_values)
                     

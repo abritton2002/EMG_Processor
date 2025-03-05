@@ -109,35 +109,46 @@ class DBConnector:
             True if successful, False otherwise
         """
         try:
-            # Create EMG Sessions table
+            # Create EMG Sessions table with dynamic muscle support
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_sessions (
                 session_id VARCHAR(100) PRIMARY KEY,
                 date_recorded DATE,
+                collection_date DATE,
+                start_time TIME,
                 traq_id VARCHAR(50),
                 athlete_name VARCHAR(100),
                 session_type VARCHAR(50),
-                fcu_fs FLOAT,
-                fcr_fs FLOAT,
+                muscle_count INT,
+                muscle1_name VARCHAR(50),
+                muscle2_name VARCHAR(50),
+                muscle3_name VARCHAR(50),
+                muscle4_name VARCHAR(50),
+                muscle1_id VARCHAR(20),
+                muscle2_id VARCHAR(20),
+                muscle3_id VARCHAR(20),
+                muscle4_id VARCHAR(20),
+                muscle1_fs FLOAT,
+                muscle2_fs FLOAT,
                 file_path VARCHAR(255),
                 processed_date DATETIME
             )
             """)
             
-            # Create raw time series data table
+            # Create raw time series data table with generic muscle names
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_timeseries (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 session_id VARCHAR(100),
                 time_point FLOAT,
-                fcu_emg FLOAT,
-                fcr_emg FLOAT,
+                muscle1_emg FLOAT,
+                muscle2_emg FLOAT,
                 INDEX idx_session_id (session_id),
                 FOREIGN KEY (session_id) REFERENCES emg_sessions(session_id) ON DELETE CASCADE
             )
             """)
             
-            # Create throw details table
+            # Create throw details table with generic muscle names
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_throws (
                 throw_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -147,31 +158,25 @@ class DBConnector:
                 end_time FLOAT,
                 duration FLOAT,
                 
-                /* FCR metrics */
-                fcr_median_freq FLOAT,
-                fcr_mean_freq FLOAT,
-                fcr_bandwidth FLOAT,
-                fcr_peak_amplitude FLOAT,
-                fcr_rms_value FLOAT,
-                fcr_rise_time FLOAT,
-                fcr_contraction_time FLOAT,
-                fcr_relaxation_time FLOAT,
-                fcr_contraction_relaxation_ratio FLOAT,
-                fcr_throw_integral FLOAT,
-                fcr_work_rate FLOAT,
+                /* Muscle1 metrics */
+                muscle1_median_freq FLOAT,
+                muscle1_mean_freq FLOAT,
+                muscle1_bandwidth FLOAT,
+                muscle1_peak_amplitude FLOAT,
+                muscle1_rms_value FLOAT,
+                muscle1_rise_time FLOAT,
+                muscle1_throw_integral FLOAT,
+                muscle1_work_rate FLOAT,
                 
-                /* FCU metrics */
-                fcu_median_freq FLOAT,
-                fcu_mean_freq FLOAT,
-                fcu_bandwidth FLOAT,
-                fcu_peak_amplitude FLOAT,
-                fcu_rms_value FLOAT,
-                fcu_rise_time FLOAT,
-                fcu_contraction_time FLOAT,
-                fcu_relaxation_time FLOAT,
-                fcu_contraction_relaxation_ratio FLOAT,
-                fcu_throw_integral FLOAT,
-                fcu_work_rate FLOAT,
+                /* Muscle2 metrics */
+                muscle2_median_freq FLOAT,
+                muscle2_mean_freq FLOAT,
+                muscle2_bandwidth FLOAT,
+                muscle2_peak_amplitude FLOAT,
+                muscle2_rms_value FLOAT,
+                muscle2_rise_time FLOAT,
+                muscle2_throw_integral FLOAT,
+                muscle2_work_rate FLOAT,
                 
                 INDEX idx_session_id (session_id),
                 FOREIGN KEY (session_id) REFERENCES emg_sessions(session_id) ON DELETE CASCADE
