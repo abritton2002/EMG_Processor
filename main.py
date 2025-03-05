@@ -9,8 +9,13 @@ import sys
 import logging
 import argparse
 from pathlib import Path
+from dotenv import load_dotenv
 
 from emg_pipeline import EMGPipeline
+from db_connector import DBConnector
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -36,33 +41,42 @@ def parse_args():
     
     # Optional arguments
     parser.add_argument('-r', '--recursive', action='store_true', help='Process directories recursively')
-    parser.add_argument('-b', '--batch-size', type=int, default=1000, help='Batch size for database operations')
+    parser.add_argument('-b', '--batch-size', type=int, default=int(os.getenv('BATCH_SIZE', '1000')), 
+                        help='Batch size for database operations')
     parser.add_argument('--dry-run', action='store_true', help='Process files but don\'t save to database')
     
     return parser.parse_args()
+
+def get_db_config():
+    """Get database configuration from environment variables."""
+    return {
+        'host': os.getenv('DB_HOST'),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'database': os.getenv('DB_NAME')
+    }
 
 def main():
     """Main entry point for the EMG data processing pipeline."""
     args = parse_args()
     
-    # Database configuration
-    db_config = {
-        'host': '10.200.200.107',
-        'user': 'scriptuser1',
-        'password': 'YabinMarshed2023@#$',
-        'database': 'theia_pitching_db'
-    }
+    # Check if environment variables are loaded
+    if not all([os.getenv('DB_HOST'), os.getenv('DB_USER'), os.getenv('DB_PASSWORD'), os.getenv('DB_NAME')]):
+        logger.warning("Some database environment variables are missing.")
+        logger.warning("Please make sure you have a .env file with the required configuration.")
+    
+    # Database configuration from environment
+    db_config = get_db_config()
     
     # Initialize pipeline
     pipeline = EMGPipeline(
-        data_dir=args.directory if args.directory else os.getcwd(),
+        data_dir=args.directory if args.directory else os.getenv('DEFAULT_DATA_DIR', os.getcwd()),
         db_config=db_config,
         batch_size=args.batch_size
     )
     
     # Test database connection
     if args.test_db:
-        from db_connector import DBConnector
         db = DBConnector(db_config)
         if db.test_connection():
             logger.info("Database connection test successful!")

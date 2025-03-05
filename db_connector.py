@@ -1,5 +1,10 @@
 import pymysql
 import logging
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -16,15 +21,28 @@ class DBConnector:
         Parameters:
         -----------
         config : dict, optional
-            Database configuration dictionary
+            Database configuration dictionary. If None, uses environment variables.
         """
-        # Default database configuration
-        self.db_config = config or {
-            'host': '10.200.200.107',
-            'user': 'scriptuser1',
-            'password': 'YabinMarshed2023@#$',
-            'database': 'theia_pitching_db'
-        }
+        # Use provided config or read from environment variables
+        if config is None:
+            self.db_config = {
+                'host': os.getenv('DB_HOST'),
+                'user': os.getenv('DB_USER'),
+                'password': os.getenv('DB_PASSWORD'),
+                'database': os.getenv('DB_NAME')
+            }
+            
+            # Check if environment variables are set
+            missing_vars = []
+            for key, value in self.db_config.items():
+                if value is None:
+                    missing_vars.append(key.upper())
+            
+            if missing_vars:
+                logger.warning(f"Missing environment variables: {', '.join(missing_vars)}")
+                logger.warning("Please create a .env file with the required database configuration")
+        else:
+            self.db_config = config
         
         self.conn = None
         logger.info("Database connector initialized")
@@ -39,6 +57,12 @@ class DBConnector:
             Database connection if successful, None otherwise
         """
         try:
+            # Check if all required configuration is present
+            if None in self.db_config.values():
+                missing_keys = [k for k, v in self.db_config.items() if v is None]
+                logger.error(f"Missing database configuration: {', '.join(missing_keys)}")
+                return None
+                
             self.conn = pymysql.connect(
                 host=self.db_config['host'],
                 user=self.db_config['user'],

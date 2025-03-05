@@ -167,3 +167,44 @@ NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
 2025-03-05 10:20:56,023 - emg_pipeline - INFO - Successfully saved data for session 030425_118085_JayceBlair_mocap to database
 2025-03-05 10:20:56,023 - db_connector - INFO - Database connection closed
 2025-03-05 10:20:56,024 - emg_pipeline - INFO - Directory processing complete. Successfully processed 5 of 5 files.
+2025-03-05 12:33:27,639 - emg_processor - INFO - EMG Processor initialized
+2025-03-05 12:33:27,640 - db_connector - INFO - Database connector initialized
+2025-03-05 12:33:27,640 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-05 12:33:27,640 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-05 12:33:47,372 - emg_processor - INFO - EMG Processor initialized
+2025-03-05 12:33:47,372 - db_connector - INFO - Database connector initialized
+2025-03-05 12:33:47,372 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-05 12:33:47,373 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-05 12:33:47,377 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/030525_021140_ZaneRose_veloday.csv
+2025-03-05 12:33:47,713 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-05 12:33:48,199 - db_connector - INFO - Database tables created/verified successfully
+2025-03-05 12:33:48,199 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/030525_021140_ZaneRose_veloday.csv
+2025-03-05 12:33:48,200 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-05
+2025-03-05 12:33:48,200 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/030525_021140_ZaneRose_veloday.csv
+2025-03-05 12:33:52,027 - emg_processor - INFO - Data loaded: FCU: 2556901 samples, FCR: 2556901 samples
+2025-03-05 12:33:52,027 - emg_processor - INFO - Found 2 muscles in file
+2025-03-05 12:33:54,458 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-05 12:39:20,547 - emg_pipeline - INFO - Successfully saved data for session 030525_021140_ZaneRose_veloday to database
+2025-03-05 12:39:20,548 - db_connector - INFO - Database connection closed
+2025-03-05 12:39:20,548 - emg_pipeline - INFO - Successfully processed and saved C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/030525_021140_ZaneRose_veloday.csv
+2025-03-05 15:25:30,215 - emg_processor - INFO - EMG Processor initialized
+2025-03-05 15:25:30,216 - db_connector - INFO - Database connector initialized
+2025-03-05 15:25:30,216 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-05 15:25:30,216 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-05 15:25:54,449 - emg_processor - INFO - EMG Processor initialized
+2025-03-05 15:25:54,450 - db_connector - INFO - Database connector initialized
+2025-03-05 15:25:54,450 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-05 15:25:54,450 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-05 15:25:54,454 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/022725_117958_CarterWallace_mocap.csv
+2025-03-05 15:25:54,781 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-05 15:25:55,266 - db_connector - INFO - Database tables created/verified successfully
+2025-03-05 15:25:55,268 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/022725_117958_CarterWallace_mocap.csv
+2025-03-05 15:25:55,270 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-05 15:25:55,270 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/022725_117958_CarterWallace_mocap.csv
+2025-03-05 15:25:55,965 - emg_processor - INFO - Data loaded: FCU: 459969 samples, FCR: 459969 samples
+2025-03-05 15:25:55,965 - emg_processor - INFO - Found 2 muscles in file
+2025-03-05 15:25:56,574 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-05 15:25:56,737 - emg_pipeline - INFO - Session 022725_117958_CarterWallace_mocap already exists. Removing old data...
+2025-03-05 15:27:09,502 - emg_pipeline - INFO - Successfully saved data for session 022725_117958_CarterWallace_mocap to database
+2025-03-05 15:27:09,502 - db_connector - INFO - Database connection closed
+2025-03-05 15:27:09,502 - emg_pipeline - INFO - Successfully processed and saved C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/022725_117958_CarterWallace_mocap.csv

@@ -6,6 +6,10 @@ import sys
 import logging
 import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Import our pipeline modules
 from emg_pipeline import EMGPipeline
@@ -29,28 +33,45 @@ class EMGPipelineGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("EMG Data Processing Pipeline")
-        self.root.geometry("700x550")
-        self.root.minsize(600, 450)
+        self.root.geometry("800x600")
+        self.root.minsize(700, 500)
         
-        # Database configuration
+        # Database configuration from environment variables
         self.db_config = {
-            'host': '10.200.200.107',
-            'user': 'scriptuser1',
-            'password': 'YabinMarshed2023@#$',
-            'database': 'theia_pitching_db'
+            'host': os.getenv('DB_HOST', ''),
+            'user': os.getenv('DB_USER', ''),
+            'password': os.getenv('DB_PASSWORD', ''),
+            'database': os.getenv('DB_NAME', '')
         }
         
         # Initialize pipeline
         self.pipeline = EMGPipeline(
             db_config=self.db_config,
-            batch_size=1000
+            batch_size=int(os.getenv('BATCH_SIZE', '1000'))
         )
         
         # Create the GUI elements
         self.create_widgets()
         
+        # Check environment setup
+        self.check_env_setup()
+        
         # Update status
         self.update_status("Ready")
+    
+    def check_env_setup(self):
+        """Check if environment variables are set and warn if not."""
+        missing_vars = []
+        for key, value in self.db_config.items():
+            if not value:
+                missing_vars.append(f"DB_{key.upper()}")
+        
+        if missing_vars:
+            messagebox.showwarning(
+                "Environment Setup", 
+                f"The following environment variables are not set: {', '.join(missing_vars)}\n\n"
+                "Please configure database settings in the Database tab and save to .env file."
+            )
     
     def create_widgets(self):
         """Create all the GUI widgets."""
@@ -162,7 +183,7 @@ class EMGPipelineGUI:
         output_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         
         # Log text widget
-        self.log_text = tk.Text(output_frame, wrap=tk.WORD, height=10)
+        self.log_text = tk.Text(output_frame, wrap=tk.WORD, height=15)
         self.log_text.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
         
         # Scrollbar
@@ -216,14 +237,29 @@ class EMGPipelineGUI:
             command=self.update_db_config
         ).grid(row=4, column=1, pady=(10, 5))
         
+        # Save to .env button
+        ttk.Button(
+            db_frame, 
+            text="Save to .env File", 
+            command=self.save_to_env
+        ).grid(row=5, column=0, columnspan=2, pady=(5, 5))
+        
         # Database status
-        ttk.Label(db_frame, text="Status:").grid(row=5, column=0, sticky=tk.W, pady=5)
+        ttk.Label(db_frame, text="Status:").grid(row=6, column=0, sticky=tk.W, pady=5)
         self.db_status_var = tk.StringVar(value="Not tested")
-        ttk.Label(db_frame, textvariable=self.db_status_var).grid(row=5, column=1, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(db_frame, textvariable=self.db_status_var).grid(row=6, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # Environment variables status
+        env_frame = ttk.LabelFrame(tab, text="Environment Status", padding="10")
+        env_frame.pack(fill=tk.X, pady=10)
+        
+        self.env_status_text = tk.Text(env_frame, wrap=tk.WORD, height=4)
+        self.env_status_text.pack(fill=tk.BOTH, expand=True)
+        self.update_env_status()
         
         # Database operations frame
         ops_frame = ttk.LabelFrame(tab, text="Database Operations", padding="10")
-        ops_frame.pack(fill=tk.X, pady=10)
+        ops_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         
         # Get table counts button
         ttk.Button(
@@ -240,6 +276,74 @@ class EMGPipelineGUI:
         db_scrollbar = ttk.Scrollbar(ops_frame, command=self.db_results_text.yview)
         db_scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
         self.db_results_text.config(yscrollcommand=db_scrollbar.set)
+    
+    def update_env_status(self):
+        """Update the environment variables status display."""
+        self.env_status_text.config(state=tk.NORMAL)
+        self.env_status_text.delete(1.0, tk.END)
+        
+        # Check which environment variables are set
+        status = {
+            'DB_HOST': os.getenv('DB_HOST') is not None,
+            'DB_USER': os.getenv('DB_USER') is not None,
+            'DB_PASSWORD': os.getenv('DB_PASSWORD') is not None,
+            'DB_NAME': os.getenv('DB_NAME') is not None,
+            'BATCH_SIZE': os.getenv('BATCH_SIZE') is not None
+        }
+        
+        # Display status
+        self.env_status_text.insert(tk.END, "Environment Variables Status:\n")
+        for var, is_set in status.items():
+            status_text = "✓ Set" if is_set else "✗ Not Set"
+            self.env_status_text.insert(tk.END, f"{var}: {status_text}\n")
+        
+        self.env_status_text.config(state=tk.DISABLED)
+    
+    def save_to_env(self):
+        """Save current database configuration to .env file."""
+        try:
+            # Read existing .env file if it exists to preserve other variables
+            env_vars = {}
+            if os.path.exists('.env'):
+                with open('.env', 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#') and '=' in line:
+                            key, value = line.split('=', 1)
+                            env_vars[key.strip()] = value.strip()
+            
+            # Update database variables
+            env_vars['DB_HOST'] = self.host_var.get()
+            env_vars['DB_USER'] = self.user_var.get()
+            env_vars['DB_PASSWORD'] = self.password_var.get()
+            env_vars['DB_NAME'] = self.database_var.get()
+            env_vars['BATCH_SIZE'] = env_vars.get('BATCH_SIZE', '1000')
+            
+            # Write to .env file
+            with open('.env', 'w') as f:
+                f.write("# Database Configuration\n")
+                f.write(f"DB_HOST={env_vars['DB_HOST']}\n")
+                f.write(f"DB_USER={env_vars['DB_USER']}\n")
+                f.write(f"DB_PASSWORD={env_vars['DB_PASSWORD']}\n")
+                f.write(f"DB_NAME={env_vars['DB_NAME']}\n\n")
+                f.write("# Processing Configuration\n")
+                f.write(f"BATCH_SIZE={env_vars['BATCH_SIZE']}\n\n")
+                
+                # Write other variables
+                if 'DEFAULT_DATA_DIR' in env_vars:
+                    f.write("# File paths for default locations\n")
+                    f.write(f"DEFAULT_DATA_DIR={env_vars['DEFAULT_DATA_DIR']}\n")
+            
+            messagebox.showinfo("Success", "Database configuration saved to .env file!")
+            
+            # Reload environment variables
+            load_dotenv(override=True)
+            
+            # Update the environment status display
+            self.update_env_status()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save .env file: {str(e)}")
     
     def setup_help_tab(self, tab):
         """Set up the help tab."""
@@ -258,6 +362,7 @@ Database:
 - Configure your database connection
 - Test the connection before processing
 - View record counts in the database
+- Save connection settings to .env file for future use
 
 File Format:
 - The application expects files in Delsys Trigno format
@@ -269,6 +374,17 @@ Processing:
 - Calculates metrics for each throw (frequency, amplitude, etc.)
 - Stores both raw time series data and throw-level metrics
 - Each file is processed independently
+
+Environment Variables:
+- The application uses a .env file for configuration
+- You can modify database settings in the Database tab
+- Click "Save to .env File" to update the configuration
+
+First-Time Setup:
+1. Go to the Database tab
+2. Enter your database connection details
+3. Click "Save to .env File"
+4. Test the connection
 
 For more details, see the README file or check the log file (emg_pipeline.log).
         """
@@ -336,6 +452,20 @@ For more details, see the README file or check the log file (emg_pipeline.log).
     
     def start_processing(self):
         """Start processing EMG data files."""
+        # Check if environment variables are set
+        missing_vars = []
+        for key, value in self.db_config.items():
+            if not value and not self.dry_run_var.get():
+                missing_vars.append(f"DB_{key.upper()}")
+        
+        if missing_vars and not self.dry_run_var.get():
+            messagebox.showerror(
+                "Configuration Error", 
+                f"The following environment variables are not set: {', '.join(missing_vars)}\n\n"
+                "Please configure database settings in the Database tab and save to .env file."
+            )
+            return
+        
         path = self.path_var.get()
         if not path:
             messagebox.showerror("Error", "Please select a file or directory.")
@@ -420,6 +550,9 @@ For more details, see the README file or check the log file (emg_pipeline.log).
                     return
                 
                 # Process directory
+                if dry_run:
+                    self.append_log("Dry run mode: files will be processed but not saved to database")
+                
                 summary = self.pipeline.process_directory(path, recursive)
                 
                 self.append_log(f"Directory processing complete")
@@ -443,6 +576,12 @@ For more details, see the README file or check the log file (emg_pipeline.log).
         """Test the database connection."""
         self.update_db_config()
         
+        # Check if all required fields are provided
+        if not all([self.db_config['host'], self.db_config['user'], 
+                    self.db_config['password'], self.db_config['database']]):
+            messagebox.showerror("Error", "Please fill in all database connection fields")
+            return
+        
         db = DBConnector(self.db_config)
         if db.test_connection():
             self.db_status_var.set("Connected")
@@ -463,7 +602,7 @@ For more details, see the README file or check the log file (emg_pipeline.log).
         # Update pipeline with new config
         self.pipeline = EMGPipeline(
             db_config=self.db_config,
-            batch_size=1000
+            batch_size=int(os.getenv('BATCH_SIZE', '1000'))
         )
         
         self.db_status_var.set("Updated")
@@ -471,6 +610,15 @@ For more details, see the README file or check the log file (emg_pipeline.log).
     def get_record_counts(self):
         """Get record counts from the database tables."""
         self.update_db_config()
+        
+        # Check if database configuration is complete
+        if not all([self.db_config['host'], self.db_config['user'], 
+                    self.db_config['password'], self.db_config['database']]):
+            self.db_results_text.delete(1.0, tk.END)
+            self.db_results_text.insert(tk.END, "Error: Database configuration incomplete.\n\n"
+                                      "Please fill in all database connection fields and save to .env file.")
+            return
+        
         db = DBConnector(self.db_config)
         conn = db.connect()
         
