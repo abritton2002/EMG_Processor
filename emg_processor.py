@@ -282,7 +282,7 @@ class EMGProcessor:
         
         return filtered, rectified, rms, envelope
     
-    def detect_throws_fcr(self, fcr_rms, time, fs, threshold_factor=1.2, min_duration=0.2, min_separation=1.5):
+    def detect_throws_fcr(self, fcr_rms, time, fs, threshold_factor=1.5, min_duration=0.2, min_separation=5):
         """
         Detect throwing motions using adaptive thresholding on FCR EMG data.
         
