@@ -126,17 +126,13 @@ class DBConnector:
     def create_tables(self):
         """
         Create the necessary tables for the EMG pipeline if they don't exist.
-        
-        Returns:
-        --------
-        bool
-            True if successful, False otherwise
         """
         try:
-            # Create EMG Sessions table with dynamic muscle support
+            # Create EMG Sessions table with numeric ID
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_sessions (
-                session_id VARCHAR(100) PRIMARY KEY,
+                numeric_id INT AUTO_INCREMENT PRIMARY KEY,
+                filename VARCHAR(100) UNIQUE,
                 date_recorded DATE,
                 collection_date DATE,
                 start_time TIME,
@@ -159,25 +155,25 @@ class DBConnector:
             )
             """)
             
-            # Create raw time series data table with generic muscle names
+            # Create raw time series data table with updated references
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_timeseries (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                session_id VARCHAR(100),
+                session_numeric_id INT,
                 time_point FLOAT,
                 muscle1_emg FLOAT,
                 muscle2_emg FLOAT,
-                INDEX idx_session_id (session_id),
-                FOREIGN KEY (session_id) REFERENCES emg_sessions(session_id) ON DELETE CASCADE
+                INDEX idx_session_id (session_numeric_id),
+                FOREIGN KEY (session_numeric_id) REFERENCES emg_sessions(numeric_id) ON DELETE CASCADE
             )
             """)
             
-            # Create throw details table with generic muscle names
+            # Create throw details table with 'trial' instead of 'throw'
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_throws (
                 throw_id INT AUTO_INCREMENT PRIMARY KEY,
-                session_id VARCHAR(100),
-                throw_number INT,
+                session_numeric_id INT,
+                trial_number INT,
                 start_time FLOAT,
                 end_time FLOAT,
                 duration FLOAT,
@@ -202,8 +198,8 @@ class DBConnector:
                 muscle2_throw_integral FLOAT,
                 muscle2_work_rate FLOAT,
                 
-                INDEX idx_session_id (session_id),
-                FOREIGN KEY (session_id) REFERENCES emg_sessions(session_id) ON DELETE CASCADE
+                INDEX idx_session_id (session_numeric_id),
+                FOREIGN KEY (session_numeric_id) REFERENCES emg_sessions(numeric_id) ON DELETE CASCADE
             )
             """)
             
@@ -213,7 +209,7 @@ class DBConnector:
         except Exception as e:
             logger.error(f"Error creating database tables: {e}")
             return False
-    
+        
     def test_connection(self):
         """
         Test the database connection and tables.

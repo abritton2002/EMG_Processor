@@ -56,6 +56,9 @@ The GUI provides:
 
 ### Command Line
 
+Generate Report:
+python emg_report_generator [sessionid]
+
 Process a single file:
 ```bash
 python main.py -f path/to/file.csv
@@ -85,6 +88,7 @@ The pipeline expects:
 - `emg_pipeline.py`: Core processing pipeline
 - `emg_processor.py`: Signal processing and feature extraction
 - `db_connector.py`: Database connection and operations
+- 'emg_report_generator.py' : Report Generator
 
 ## Contributing
 

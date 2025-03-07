@@ -198,16 +198,6 @@ class EMGPipeline:
     def save_to_database(self, processed_data):
         """
         Save processed data to the database.
-        
-        Parameters:
-        -----------
-        processed_data : dict
-            Processed data from process_file()
-            
-        Returns:
-        --------
-        bool
-            Success status
         """
         if not processed_data:
             logger.error("No data to save to database")
@@ -229,35 +219,39 @@ class EMGPipeline:
             # Start transaction
             conn.begin()
             
+            # Get filename from session_id
+            filename = session_data['session_id']
+            
             # Check if session already exists
             cursor.execute(
-                "SELECT session_id FROM emg_sessions WHERE session_id = %s",
-                (session_data['session_id'],)
+                "SELECT numeric_id FROM emg_sessions WHERE filename = %s",
+                (filename,)
             )
             
-            if cursor.fetchone():
-                logger.info(f"Session {session_data['session_id']} already exists. Removing old data...")
-                cursor.execute("DELETE FROM emg_throws WHERE session_id = %s", (session_data['session_id'],))
-                cursor.execute("DELETE FROM emg_timeseries WHERE session_id = %s", (session_data['session_id'],))
-                cursor.execute("DELETE FROM emg_sessions WHERE session_id = %s", (session_data['session_id'],))
+            session_result = cursor.fetchone()
+            if session_result:
+                numeric_id = session_result[0]
+                logger.info(f"Session {filename} already exists. Removing old data...")
+                cursor.execute("DELETE FROM emg_throws WHERE session_numeric_id = %s", (numeric_id,))
+                cursor.execute("DELETE FROM emg_timeseries WHERE session_numeric_id = %s", (numeric_id,))
+                cursor.execute("DELETE FROM emg_sessions WHERE numeric_id = %s", (numeric_id,))
             
             # Insert session data with new fields
-            # If date_recorded is None, use today's date
             date_recorded = session_data['date_recorded']
             if date_recorded is None:
-                logger.warning(f"No date parsed from filename. Using current date for session {session_data['session_id']}")
+                logger.warning(f"No date parsed from filename. Using current date for session {filename}")
                 date_recorded = datetime.datetime.now().date()
             
             cursor.execute("""
             INSERT INTO emg_sessions (
-                session_id, date_recorded, collection_date, start_time,
+                filename, date_recorded, collection_date, start_time,
                 traq_id, athlete_name, session_type,
                 muscle_count, muscle1_name, muscle2_name, muscle3_name, muscle4_name,
                 muscle1_id, muscle2_id, muscle3_id, muscle4_id,
                 muscle1_fs, muscle2_fs, file_path, processed_date
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                session_data['session_id'],
+                filename,
                 date_recorded,
                 session_data.get('collection_date'),
                 session_data.get('start_time'),
@@ -279,13 +273,17 @@ class EMGPipeline:
                 session_data['processed_date']
             ))
             
-            # Insert throw data with dynamic muscle names
+            # Get the auto-generated numeric_id
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            numeric_id = cursor.fetchone()[0]
+            
+            # Insert throw data with new column name
             if throw_data:
                 throw_values = []
                 for throw in throw_data:
                     throw_values.append((
-                        throw['session_id'],
-                        throw['throw_number'],
+                        numeric_id,  # Use numeric_id instead of session_id
+                        throw['throw_number'],  # This will now be trial_number in the database
                         throw['start_time'],
                         throw['end_time'],
                         throw['duration'],
@@ -314,7 +312,7 @@ class EMGPipeline:
                 # Use executemany for better performance
                 cursor.executemany("""
                 INSERT INTO emg_throws (
-                    session_id, throw_number, start_time, end_time, duration,
+                    session_numeric_id, trial_number, start_time, end_time, duration,
                     muscle1_median_freq, muscle1_mean_freq, muscle1_bandwidth, muscle1_peak_amplitude, muscle1_rms_value,
                     muscle1_rise_time, muscle1_throw_integral, muscle1_work_rate,
                     muscle2_median_freq, muscle2_mean_freq, muscle2_bandwidth, muscle2_peak_amplitude, muscle2_rms_value,
@@ -322,7 +320,7 @@ class EMGPipeline:
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, throw_values)
             
-            # Insert time series data in batches with dynamic muscle names
+            # Insert time series data in batches with numeric_id
             if not timeseries_data.empty:
                 # Convert DataFrame to list of tuples for executemany
                 total_rows = len(timeseries_data)
@@ -332,7 +330,7 @@ class EMGPipeline:
                     
                     # Create list of value tuples
                     timeseries_values = list(zip(
-                        batch['session_id'],
+                        [numeric_id] * len(batch),  # Use numeric_id instead of session_id
                         batch['time_point'],
                         batch['muscle1_emg'],
                         batch['muscle2_emg']
@@ -340,7 +338,7 @@ class EMGPipeline:
                     
                     # Insert batch
                     cursor.executemany("""
-                    INSERT INTO emg_timeseries (session_id, time_point, muscle1_emg, muscle2_emg)
+                    INSERT INTO emg_timeseries (session_numeric_id, time_point, muscle1_emg, muscle2_emg)
                     VALUES (%s, %s, %s, %s)
                     """, timeseries_values)
                     
@@ -348,7 +346,7 @@ class EMGPipeline:
             
             # Commit the transaction
             conn.commit()
-            logger.info(f"Successfully saved data for session {session_data['session_id']} to database")
+            logger.info(f"Successfully saved data for session {filename} to database")
             
             return True
             

@@ -8,6 +8,11 @@ import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Add this import at the top of gui_app.py
+from emg_report_generator import EMGReportGenerator
+import os
+import subprocess
+
 # Load environment variables
 load_dotenv()
 
