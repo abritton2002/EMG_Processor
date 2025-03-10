@@ -359,44 +359,77 @@ class SimpleEMGReportGenerator:
         return self._create_plot_buffer(fig)
 
     def create_wavelet_energy_plot(self, throws_df, session_info):
-        """Create a plot showing wavelet energy distribution across frequency bands."""
+        """Create a plot showing wavelet energy distribution across frequency bands for both muscles."""
         if (throws_df.empty or 
             'muscle1_wavelet_energy_low' not in throws_df.columns or 
             'muscle1_wavelet_energy_mid' not in throws_df.columns or 
             'muscle1_wavelet_energy_high' not in throws_df.columns):
             logger.warning("No wavelet energy data available")
             return None
-            
+                
         muscle1_name = session_info.get('muscle1_name', 'FCU')
+        muscle2_name = session_info.get('muscle2_name', 'FCR')
         
-        # Create figure
-        fig, ax = plt.subplots(figsize=(7.5, 4))
+        # Create figure with two subplots side by side
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.5, 4))
         
-        # Get data for stacked area plot
+        # Muscle 1 plot (left)
         x = throws_df['throw_number']
         y1 = throws_df['muscle1_wavelet_energy_low']
         y2 = throws_df['muscle1_wavelet_energy_mid']
         y3 = throws_df['muscle1_wavelet_energy_high']
         
-        # Create stacked area chart
-        ax.fill_between(x, 0, y1, alpha=0.8, color='#2E8B57', label='Low Frequency')
-        ax.fill_between(x, y1, y1+y2, alpha=0.8, color='#FFA500', label='Mid Frequency')
-        ax.fill_between(x, y1+y2, y1+y2+y3, alpha=0.8, color='#B22222', label='High Frequency')
+        # Create stacked area chart for muscle 1
+        ax1.fill_between(x, 0, y1, alpha=0.8, color='#2E8B57', label='Low Frequency')
+        ax1.fill_between(x, y1, y1+y2, alpha=0.8, color='#FFA500', label='Mid Frequency')
+        ax1.fill_between(x, y1+y2, y1+y2+y3, alpha=0.8, color='#B22222', label='High Frequency')
         
-        # Add labels and styling
-        ax.set_title(f'Wavelet Energy Distribution ({muscle1_name})', fontsize=14)
-        ax.set_xlabel('Throw Number', fontsize=10)
-        ax.set_ylabel('Relative Energy', fontsize=10)
-        ax.legend(fontsize=10)
-        ax.grid(True, alpha=0.3)
-        ax.set_xticks(throws_df['throw_number'])
+        # Add labels and styling for muscle 1
+        ax1.set_title(f'{muscle1_name}', fontsize=12)
+        ax1.set_xlabel('Throw Number', fontsize=9)
+        ax1.set_ylabel('Relative Energy', fontsize=9)
+        ax1.legend(fontsize=8)
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xticks(throws_df['throw_number'])
+        
+        # Muscle 2 plot (right)
+        if ('muscle2_wavelet_energy_low' in throws_df.columns and 
+            'muscle2_wavelet_energy_mid' in throws_df.columns and 
+            'muscle2_wavelet_energy_high' in throws_df.columns):
+            
+            y1 = throws_df['muscle2_wavelet_energy_low']
+            y2 = throws_df['muscle2_wavelet_energy_mid']
+            y3 = throws_df['muscle2_wavelet_energy_high']
+            
+            # Create stacked area chart for muscle 2
+            ax2.fill_between(x, 0, y1, alpha=0.8, color='#2E8B57', label='Low Frequency')
+            ax2.fill_between(x, y1, y1+y2, alpha=0.8, color='#FFA500', label='Mid Frequency')
+            ax2.fill_between(x, y1+y2, y1+y2+y3, alpha=0.8, color='#B22222', label='High Frequency')
+            
+            # Add labels and styling for muscle 2
+            ax2.set_title(f'{muscle2_name}', fontsize=12)
+            ax2.set_xlabel('Throw Number', fontsize=9)
+            ax2.legend(fontsize=8)
+            ax2.grid(True, alpha=0.3)
+            ax2.set_xticks(throws_df['throw_number'])
+        else:
+            # If muscle 2 wavelet data isn't available
+            ax2.text(0.5, 0.5, f"No wavelet data for {muscle2_name}", 
+                    ha='center', va='center', transform=ax2.transAxes)
+            ax2.set_title(f'{muscle2_name}', fontsize=12)
+        
+        # Add main title
+        fig.suptitle('Wavelet Energy Distribution', fontsize=14)
         
         # Add explanation
-        explanation = "Shift from high to low frequency bands indicates fatigue development"
-        ax.text(0.5, 0.02, explanation, transform=ax.transAxes, fontsize=10,
-            ha='center', bbox=dict(facecolor='white', alpha=0.7, boxstyle='round'))
+        fig.text(0.5, 0.01, "Shift from high to low frequency bands indicates fatigue development", 
+                ha='center', fontsize=9)
+        
+        plt.tight_layout()
+        plt.subplots_adjust(bottom=0.15, top=0.85)  # Make room for title and explanation
         
         return self._create_plot_buffer(fig)
+
 
     # Add this method to your SimpleEMGReportGenerator class
     def create_fatigue_plot(self, throws_df, session_info):
@@ -766,14 +799,19 @@ class SimpleEMGReportGenerator:
         """Generate a report for a specific session."""
         return self.create_pdf_report(session_id)
 
-# For direct usage
 if __name__ == "__main__":
     import sys
     import argparse
     
     parser = argparse.ArgumentParser(description='Generate EMG Reports')
-    parser.add_argument('session_id', help='Session ID to generate report for')
-    parser.add_argument('--output-dir', default='reports', help='Directory to save reports')
+    parser.add_argument('session_id', nargs='?', default=None, 
+                      help='Session ID to generate report for (optional if using --directory)')
+    parser.add_argument('--directory', '-d', action='store_true',
+                      help='Process all sessions in the database')
+    parser.add_argument('--output-dir', default='reports', 
+                      help='Directory to save reports')
+    parser.add_argument('--limit', type=int, default=100, 
+                      help='Maximum number of sessions to process (for directory mode)')
     
     args = parser.parse_args()
     
@@ -794,10 +832,39 @@ if __name__ == "__main__":
     # Create report generator
     generator = SimpleEMGReportGenerator(db_config=db_config, output_dir=args.output_dir)
     
-    # Generate report
-    report_path = generator.generate_report(args.session_id)
-    
-    if report_path:
-        print(f"Report generated successfully: {report_path}")
+    # Process sessions
+    if args.directory:
+        # Process all sessions
+        session_ids = generator.get_all_session_ids(limit=args.limit)
+        
+        if not session_ids:
+            print("No sessions found in the database")
+            sys.exit(1)
+            
+        print(f"Found {len(session_ids)} sessions to process")
+        success_count = 0
+        
+        for i, session_id in enumerate(session_ids):
+            print(f"Processing session {i+1}/{len(session_ids)}: {session_id}")
+            report_path = generator.generate_report(session_id)
+            
+            if report_path:
+                success_count += 1
+                print(f"  ✓ Report generated successfully: {report_path}")
+            else:
+                print(f"  ✗ Failed to generate report")
+        
+        print(f"Processed {len(session_ids)} sessions, {success_count} successful")
+    elif args.session_id:
+        # Process single session
+        report_path = generator.generate_report(args.session_id)
+        
+        if report_path:
+            print(f"Report generated successfully: {report_path}")
+        else:
+            print("Failed to generate report")
+            sys.exit(1)
     else:
-        print("Failed to generate report")
+        parser.print_help()
+        print("\nError: Either session_id or --directory must be specified")
+        sys.exit(1)

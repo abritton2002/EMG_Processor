@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, simpledialog
 import threading
 import os
 import sys
@@ -7,11 +7,11 @@ import logging
 import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-
-# Add this import at the top of gui_app.py
-from emg_report_generator import EMGReportGenerator
-import os
-import subprocess
+from tkcalendar import Calendar, DateEntry
+# Import our pipeline modules
+from emg_pipeline import EMGPipeline
+from db_connector import DBConnector
+from emg_report_generator import SimpleEMGReportGenerator
 
 # Load environment variables
 load_dotenv()
@@ -104,6 +104,11 @@ class EMGPipelineGUI:
         db_tab = ttk.Frame(tab_control)
         tab_control.add(db_tab, text="Database")
         self.setup_db_tab(db_tab)
+        
+        # Reports Tab
+        reports_tab = ttk.Frame(tab_control)
+        tab_control.add(reports_tab, text="Generate Reports")
+        self.setup_report_tab(reports_tab)
         
         # Help Tab
         help_tab = ttk.Frame(tab_control)
@@ -282,6 +287,278 @@ class EMGPipelineGUI:
         db_scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
         self.db_results_text.config(yscrollcommand=db_scrollbar.set)
     
+    def setup_report_tab(self, tab):
+        """Set up the report generation tab."""
+        # Report generation frame
+        report_frame = ttk.LabelFrame(tab, text="Generate EMG Reports", padding="10")
+        report_frame.pack(fill=tk.X, pady=10)
+        
+        # Report source selection
+        self.report_source_type = tk.StringVar(value="date")
+        ttk.Radiobutton(
+            report_frame, 
+            text="By Date", 
+            variable=self.report_source_type, 
+            value="date",
+            command=self.update_report_source_ui
+        ).grid(row=0, column=0, sticky=tk.W, pady=(5, 0))
+        
+        ttk.Radiobutton(
+            report_frame, 
+            text="By Session ID", 
+            variable=self.report_source_type, 
+            value="session_id",
+            command=self.update_report_source_ui
+        ).grid(row=0, column=1, sticky=tk.W, pady=(5, 0))
+        
+        # Date selection
+        ttk.Label(report_frame, text="Date:").grid(row=1, column=0, sticky=tk.W, pady=(10, 0))
+        self.report_date_var = tk.StringVar()
+        date_entry = ttk.Entry(report_frame, textvariable=self.report_date_var, width=20)
+        date_entry.grid(row=1, column=1, sticky=tk.W, padx=(5, 5), pady=(10, 0))
+        
+        # Date picker button
+        date_button = ttk.Button(
+            report_frame, 
+            text="Choose Date", 
+            command=self.open_date_picker
+        )
+        date_button.grid(row=1, column=2, padx=(0, 5), pady=(10, 0))
+        
+        # Sessions list (for date-based selection)
+        self.sessions_frame = ttk.LabelFrame(report_frame, text="Sessions", padding="10")
+        self.sessions_frame.grid(row=2, column=0, columnspan=3, sticky='ew', pady=(10, 0))
+        
+        # Sessions list scrollable
+        sessions_scroll = ttk.Scrollbar(self.sessions_frame)
+        sessions_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.sessions_list = tk.Listbox(
+            self.sessions_frame, 
+            selectmode=tk.MULTIPLE, 
+            yscrollcommand=sessions_scroll.set,
+            height=5
+        )
+        self.sessions_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        sessions_scroll.config(command=self.sessions_list.yview)
+        
+        # Find sessions button
+        find_sessions_button = ttk.Button(
+            report_frame, 
+            text="Find Sessions", 
+            command=self.find_sessions
+        )
+        find_sessions_button.grid(row=3, column=0, columnspan=3, pady=(10, 0))
+        
+        # Output directory selection
+        ttk.Label(report_frame, text="Output Directory:").grid(row=4, column=0, sticky=tk.W, pady=(10, 0))
+        self.report_output_var = tk.StringVar(value="reports")
+        output_entry = ttk.Entry(report_frame, textvariable=self.report_output_var, width=50)
+        output_entry.grid(row=4, column=1, sticky=tk.EW, padx=(5, 5), pady=(10, 0))
+        
+        # Browse output directory button
+        ttk.Button(
+            report_frame, 
+            text="Browse...", 
+            command=self.browse_report_output_dir
+        ).grid(row=4, column=2, padx=(0, 5), pady=(10, 0))
+        
+        # Generate report button
+        generate_button = ttk.Button(
+            report_frame, 
+            text="Generate Reports", 
+            command=self.start_report_generation
+        )
+        generate_button.grid(row=5, column=0, columnspan=3, pady=(10, 5))
+        
+        # Output frame for logs
+        output_frame = ttk.LabelFrame(tab, text="Report Generation Log", padding="10")
+        output_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Log text widget
+        self.report_log_text = tk.Text(output_frame, wrap=tk.WORD, height=15)
+        self.report_log_text.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(output_frame, command=self.report_log_text.yview)
+        scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
+        self.report_log_text.config(yscrollcommand=scrollbar.set)
+        
+        # Configure grid
+        report_frame.columnconfigure(1, weight=1)
+
+    def update_report_source_ui(self):
+        """Update UI based on report source type."""
+        source_type = self.report_source_type.get()
+        
+        if source_type == "date":
+            # Show date-related widgets
+            self.report_date_var.set("")
+            self.sessions_list.delete(0, tk.END)
+            self.sessions_frame.grid()
+        else:
+            # Hide date and sessions widgets
+            self.sessions_frame.grid_remove()
+            self.report_date_var.set("")
+
+    def browse_report_output_dir(self):
+        """Browse for report output directory."""
+        dir_path = filedialog.askdirectory(title="Select Output Directory for Reports")
+        if dir_path:
+            self.report_output_var.set(dir_path)
+
+    def open_date_picker(self):
+        """Open a date picker dialog."""
+        from tkcalendar import Calendar, DateEntry
+        
+        # Create a top-level window for date selection
+        top = tk.Toplevel(self.root)
+        top.title("Select Date")
+        
+        # Create a calendar widget
+        cal = DateEntry(
+            top, 
+            width=12, 
+            background='darkblue', 
+            foreground='white', 
+            borderwidth=2,
+            date_pattern='yyyy-mm-dd'
+        )
+        cal.pack(padx=10, pady=10)
+        
+        def set_date():
+            """Set the selected date and close the window."""
+            selected_date = cal.get_date().strftime('%Y-%m-%d')
+            self.report_date_var.set(selected_date)
+            top.destroy()
+        
+        # Add a button to confirm date selection
+        ttk.Button(top, text="Select", command=set_date).pack(pady=10)
+
+    def find_sessions(self):
+        """Find sessions for the selected date."""
+        # Clear previous sessions
+        self.sessions_list.delete(0, tk.END)
+        
+        # Get selected date
+        selected_date = self.report_date_var.get()
+        
+        if not selected_date:
+            messagebox.showerror("Error", "Please select a date first.")
+            return
+        
+        # Connect to database and fetch sessions
+        try:
+            db = DBConnector(self.db_config)
+            conn = db.connect()
+            
+            if not conn:
+                messagebox.showerror("Error", "Failed to connect to database.")
+                return
+            
+            cursor = conn.cursor()
+            
+            # Query to find sessions for the selected date
+            cursor.execute("""
+                SELECT numeric_id, athlete_name, session_type, collection_date 
+                FROM emg_sessions 
+                WHERE DATE(date_recorded) = %s OR DATE(collection_date) = %s
+            """, (selected_date, selected_date))
+            
+            sessions = cursor.fetchall()
+            
+            if not sessions:
+                messagebox.showinfo("No Sessions", f"No sessions found for {selected_date}")
+                return
+            
+            # Populate sessions list
+            for session in sessions:
+                numeric_id, athlete_name, session_type, collection_date = session
+                display_text = f"ID: {numeric_id} | Athlete: {athlete_name} | Type: {session_type}"
+                self.sessions_list.insert(tk.END, display_text)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to retrieve sessions: {str(e)}")
+        finally:
+            # Always close the connection
+            if 'conn' in locals():
+                db.disconnect()
+
+    def start_report_generation(self):
+        """Start generating reports."""
+        # Clear previous log
+        self.report_log_text.delete(1.0, tk.END)
+        
+        # Get output directory
+        output_dir = self.report_output_var.get()
+        
+        # Validate output directory
+        if not output_dir:
+            messagebox.showerror("Error", "Please specify an output directory.")
+            return
+        
+        # Ensure output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Create report generator
+        report_generator = SimpleEMGReportGenerator(
+            db_config=self.db_config, 
+            output_dir=output_dir
+        )
+        
+        # Determine sessions to process
+        if self.report_source_type.get() == "session_id":
+            # Single session ID
+            session_ids = [self.report_session_var.get()]
+        else:
+            # Multiple sessions from list
+            selected_indices = self.sessions_list.curselection()
+            
+            if not selected_indices:
+                messagebox.showerror("Error", "Please select at least one session.")
+                return
+            
+                # Extract session IDs from the listbox selection
+    # Extract session IDs from the listbox selection
+            session_ids = []
+            for index in selected_indices:
+                session_text = self.sessions_list.get(index)
+                # Extract numeric_id from the display text
+                numeric_id = session_text.split('|')[0].split(':')[1].strip()
+                session_ids.append(numeric_id)
+        # Run report generation in a thread
+        def generate_reports():
+            success_count = 0
+            for session_id in session_ids:
+                try:
+                    self.append_report_log(f"Generating report for session: {session_id}")
+                    report_path = report_generator.generate_report(session_id)
+                    
+                    if report_path:
+                        success_count += 1
+                        self.append_report_log(f"  ✓ Report generated: {report_path}")
+                    else:
+                        self.append_report_log(f"  ✗ Failed to generate report for session {session_id}")
+                
+                except Exception as e:
+                    self.append_report_log(f"Error generating report for session {session_id}: {str(e)}")
+            
+            # Final summary
+            self.append_report_log(f"Report generation complete. "
+                                    f"Successfully generated {success_count}/{len(session_ids)} reports.")
+        
+        # Start report generation in a separate thread
+        threading.Thread(target=generate_reports, daemon=True).start()
+
+    def append_report_log(self, message):
+        """Append message to report generation log."""
+        def log_update():
+            self.report_log_text.insert(tk.END, message + "\n")
+            self.report_log_text.see(tk.END)
+        
+        # Use after method to ensure thread-safe GUI update
+        self.root.after(0, log_update)
+
     def update_env_status(self):
         """Update the environment variables status display."""
         self.env_status_text.config(state=tk.NORMAL)
@@ -668,19 +945,19 @@ For more details, see the README file or check the log file (emg_pipeline.log).
             # Get recent sessions
             self.db_results_text.insert(tk.END, "Recent Sessions:\n")
             cursor.execute("""
-            SELECT session_id, date_recorded, athlete_name, session_type, processed_date 
+            SELECT session_id, date_recorded, athlete_name, session_type, collection_date 
             FROM emg_sessions 
-            ORDER BY processed_date DESC 
+            ORDER BY collection_date DESC 
             LIMIT 5
             """)
             
             recent_sessions = cursor.fetchall()
             if recent_sessions:
                 for session in recent_sessions:
-                    session_id, date_recorded, athlete_name, session_type, processed_date = session
+                    session_id, date_recorded, athlete_name, session_type, collection_date = session
                     self.db_results_text.insert(tk.END, f"- {session_id}\n")
                     self.db_results_text.insert(tk.END, f"  Date: {date_recorded}, Athlete: {athlete_name}\n")
-                    self.db_results_text.insert(tk.END, f"  Type: {session_type}, Processed: {processed_date}\n\n")
+                    self.db_results_text.insert(tk.END, f"  Type: {session_type}, Processed: {collection_date}\n\n")
             else:
                 self.db_results_text.insert(tk.END, "No sessions found.\n")
             
