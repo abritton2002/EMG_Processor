@@ -57,7 +57,56 @@ class EMGPipeline:
         bool
             True if successful, False otherwise
         """
-        return self.db.create_tables()
+        conn = self.db.connect()
+        if not conn:
+            logger.error("Failed to connect to database")
+            return False
+            
+        try:
+            cursor = conn.cursor()
+            
+            # Create or update EMG throws table with new columns for spectral entropy, wavelet, and coactivation metrics
+            try:
+                # Check if the new columns exist already
+                cursor.execute("SHOW COLUMNS FROM emg_throws LIKE 'muscle1_spectral_entropy'")
+                column_exists = cursor.fetchone()
+                
+                # Add new columns if they don't exist
+                if not column_exists:
+                    logger.info("Adding new metric columns to emg_throws table")
+                    
+                    # Add spectral entropy columns
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_spectral_entropy FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_spectral_entropy FLOAT")
+                    
+                    # Add wavelet energy columns
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_wavelet_energy_low FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_wavelet_energy_mid FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_wavelet_energy_high FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_wavelet_energy_low FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_wavelet_energy_mid FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_wavelet_energy_high FLOAT")
+                    
+                    # Add coactivation columns
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_index FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_correlation FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_temporal_overlap FLOAT")
+                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_waveform_similarity FLOAT")
+                    
+                    conn.commit()
+                    logger.info("Successfully added new metric columns")
+            except Exception as e:
+                logger.error(f"Error adding new columns: {e}")
+                conn.rollback()
+                
+            # Continue with regular table creation
+            return self.db.create_tables()
+                
+        except Exception as e:
+            logger.error(f"Error setting up database: {e}")
+            return False
+        finally:
+            self.db.disconnect()
     
     def process_file(self, file_path):
         """
@@ -112,6 +161,15 @@ class EMGPipeline:
                 throws_muscle1, muscle1_time, muscle1_fs
             )
             
+            # Calculate coactivation metrics between muscles
+            coactivation_metrics = self.processor.calculate_muscle_coactivation(
+                muscle1_metrics, muscle2_metrics,
+                throws_muscle1, throws_muscle2,
+                muscle1_filtered, muscle2_filtered,
+                muscle1_time, muscle2_time,
+                muscle1_fs
+            )
+            
             # Prepare session data with additional metadata
             session_data = {
                 'session_id': session_id,
@@ -147,15 +205,24 @@ class EMGPipeline:
             # Prepare throw data with dynamic muscle names
             throw_data = []
             for i in range(len(throws_muscle2)):
-                start_idx, end_idx = throws_muscle2[i]
                 throw_row = {
                     'session_id': session_id,
                     'throw_number': i + 1,
-                    'start_time': muscle2_time[start_idx],
-                    'end_time': muscle2_time[end_idx],
+                    'start_time': muscle2_time[throws_muscle2[i][0]],
+                    'end_time': muscle2_time[throws_muscle2[i][1]],
                     'duration': muscle2_metrics['throw_durations'][i],
                     
-                    # Muscle2 metrics
+                    # Muscle1 metrics - original metrics
+                    'muscle1_median_freq': muscle1_metrics['median_freqs'][i],
+                    'muscle1_mean_freq': muscle1_metrics['mean_freqs'][i],
+                    'muscle1_bandwidth': muscle1_metrics['bandwidth'][i],
+                    'muscle1_peak_amplitude': muscle1_metrics['peak_amplitudes'][i],
+                    'muscle1_rms_value': muscle1_metrics['rms_values'][i],
+                    'muscle1_rise_time': muscle1_metrics['rise_times'][i],
+                    'muscle1_throw_integral': muscle1_metrics['throw_integrals'][i],
+                    'muscle1_work_rate': muscle1_metrics['work_rates'][i],
+                    
+                    # Muscle2 metrics - original metrics
                     'muscle2_median_freq': muscle2_metrics['median_freqs'][i],
                     'muscle2_mean_freq': muscle2_metrics['mean_freqs'][i],
                     'muscle2_bandwidth': muscle2_metrics['bandwidth'][i],
@@ -165,16 +232,27 @@ class EMGPipeline:
                     'muscle2_throw_integral': muscle2_metrics['throw_integrals'][i],
                     'muscle2_work_rate': muscle2_metrics['work_rates'][i],
                     
-                    # Muscle1 metrics
-                    'muscle1_median_freq': muscle1_metrics['median_freqs'][i],
-                    'muscle1_mean_freq': muscle1_metrics['mean_freqs'][i],
-                    'muscle1_bandwidth': muscle1_metrics['bandwidth'][i],
-                    'muscle1_peak_amplitude': muscle1_metrics['peak_amplitudes'][i],
-                    'muscle1_rms_value': muscle1_metrics['rms_values'][i],
-                    'muscle1_rise_time': muscle1_metrics['rise_times'][i],
-                    'muscle1_throw_integral': muscle1_metrics['throw_integrals'][i],
-                    'muscle1_work_rate': muscle1_metrics['work_rates'][i]
+                    # NEW: Spectral entropy metrics
+                    'muscle1_spectral_entropy': muscle1_metrics['spectral_entropies'][i],
+                    'muscle2_spectral_entropy': muscle2_metrics['spectral_entropies'][i],
+                    
+                    # NEW: Wavelet energy metrics
+                    'muscle1_wavelet_energy_low': muscle1_metrics['wavelet_energy_low'][i],
+                    'muscle1_wavelet_energy_mid': muscle1_metrics['wavelet_energy_mid'][i],
+                    'muscle1_wavelet_energy_high': muscle1_metrics['wavelet_energy_high'][i],
+                    'muscle2_wavelet_energy_low': muscle2_metrics['wavelet_energy_low'][i],
+                    'muscle2_wavelet_energy_mid': muscle2_metrics['wavelet_energy_mid'][i],
+                    'muscle2_wavelet_energy_high': muscle2_metrics['wavelet_energy_high'][i],
                 }
+                
+                # Add coactivation metrics if available
+                if coactivation_metrics:
+                    throw_row.update({
+                        'coactivation_index': coactivation_metrics['ci_falconer'][i],
+                        'coactivation_correlation': coactivation_metrics['correlation'][i],
+                        'coactivation_temporal_overlap': coactivation_metrics['temporal_overlap'][i],
+                        'coactivation_waveform_similarity': coactivation_metrics['waveform_similarity'][i],
+                    })
                 
                 # Replace NaN values with None for database insertion
                 for key, value in throw_row.items():
@@ -277,48 +355,48 @@ class EMGPipeline:
             cursor.execute("SELECT LAST_INSERT_ID()")
             numeric_id = cursor.fetchone()[0]
             
-            # Insert throw data with new column name
+            # Insert throw data with all metrics
             if throw_data:
+                # Construct dynamic SQL query based on the first throw's keys
+                first_throw = throw_data[0]
+                throw_columns = []
+                placeholders = []
+                
+                # Start with required columns
+                throw_columns.append("session_numeric_id")
+                throw_columns.append("trial_number")
+                throw_columns.append("start_time")
+                throw_columns.append("end_time")
+                throw_columns.append("duration")
+                
+                # Add all metric columns dynamically
+                for key in first_throw.keys():
+                    if key not in ['session_id', 'throw_number', 'start_time', 'end_time', 'duration']:
+                        throw_columns.append(key)
+                
+                # Create placeholders for all columns
+                placeholders = ["%s"] * len(throw_columns)
+                
+                # Construct SQL query
+                insert_query = f"""
+                INSERT INTO emg_throws (
+                    {', '.join(throw_columns)}
+                ) VALUES ({', '.join(placeholders)})
+                """
+                
+                # Prepare values for each throw
                 throw_values = []
                 for throw in throw_data:
-                    throw_values.append((
-                        numeric_id,  # Use numeric_id instead of session_id
-                        throw['throw_number'],  # This will now be trial_number in the database
-                        throw['start_time'],
-                        throw['end_time'],
-                        throw['duration'],
-                        
-                        # Muscle1 metrics
-                        throw['muscle1_median_freq'],
-                        throw['muscle1_mean_freq'],
-                        throw['muscle1_bandwidth'],
-                        throw['muscle1_peak_amplitude'],
-                        throw['muscle1_rms_value'],
-                        throw['muscle1_rise_time'],
-                        throw['muscle1_throw_integral'],
-                        throw['muscle1_work_rate'],
-                        
-                        # Muscle2 metrics
-                        throw['muscle2_median_freq'],
-                        throw['muscle2_mean_freq'],
-                        throw['muscle2_bandwidth'],
-                        throw['muscle2_peak_amplitude'],
-                        throw['muscle2_rms_value'],
-                        throw['muscle2_rise_time'],
-                        throw['muscle2_throw_integral'],
-                        throw['muscle2_work_rate']
-                    ))
+                    values = [numeric_id, throw['throw_number'], throw['start_time'], throw['end_time'], throw['duration']]
+                    
+                    # Add all metric values in the same order as columns
+                    for key in throw_columns[5:]:  # Skip the first 5 required columns
+                        values.append(throw.get(key))
+                    
+                    throw_values.append(tuple(values))
                 
-                # Use executemany for better performance
-                cursor.executemany("""
-                INSERT INTO emg_throws (
-                    session_numeric_id, trial_number, start_time, end_time, duration,
-                    muscle1_median_freq, muscle1_mean_freq, muscle1_bandwidth, muscle1_peak_amplitude, muscle1_rms_value,
-                    muscle1_rise_time, muscle1_throw_integral, muscle1_work_rate,
-                    muscle2_median_freq, muscle2_mean_freq, muscle2_bandwidth, muscle2_peak_amplitude, muscle2_rms_value,
-                    muscle2_rise_time, muscle2_throw_integral, muscle2_work_rate
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, throw_values)
+                # Execute insert
+                cursor.executemany(insert_query, throw_values)
             
             # Insert time series data in batches with numeric_id
             if not timeseries_data.empty:
@@ -486,10 +564,10 @@ def main():
     
     # Database configuration (hardcoded for simplicity)
     db_config = {
-        'host': '10.200.200.107',
-        'user': 'scriptuser1',
-        'password': 'YabinMarshed2023@#$',
-        'database': 'theia_pitching_db'
+        'host': os.getenv('DB_HOST'),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'database': os.getenv('DB_NAME')
     }
     
     # Initialize pipeline

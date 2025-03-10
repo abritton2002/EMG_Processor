@@ -5,6 +5,7 @@ from scipy.fft import fft, fftfreq
 import logging
 import re
 import datetime
+import pywt  # New import for wavelet analysis
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -366,6 +367,150 @@ class EMGProcessor:
         
         return throws_fcu
     
+    def calculate_spectral_entropy(self, signal, fs, nperseg=256):
+        """
+        Calculate spectral entropy of an EMG signal.
+        
+        Parameters:
+        -----------
+        signal : numpy.ndarray
+            EMG signal
+        fs : float
+            Sampling frequency
+        nperseg : int
+            Length of each segment for FFT calculation
+            
+        Returns:
+        --------
+        float
+            Spectral entropy value
+        """
+        from scipy.signal import welch
+        
+        # Calculate power spectral density
+        f, psd = welch(signal, fs=fs, nperseg=nperseg)
+        
+        # Normalize PSD to get probability distribution
+        psd_norm = psd / np.sum(psd)
+        
+        # Calculate entropy (avoid log(0))
+        psd_norm = psd_norm[psd_norm > 0]
+        entropy = -np.sum(psd_norm * np.log2(psd_norm))
+        
+        return entropy
+    
+    def wavelet_analysis(self, signal, fs, wavelet='db4', max_level=5):
+        """
+        Perform wavelet decomposition on EMG signal and extract features.
+        
+        Parameters:
+        -----------
+        signal : numpy.ndarray
+            EMG signal
+        fs : float
+            Sampling frequency
+        wavelet : str
+            Wavelet type (default: 'db4' - Daubechies 4)
+        max_level : int
+            Maximum decomposition level
+            
+        Returns:
+        --------
+        dict
+            Dictionary of wavelet features
+        """
+        # Perform wavelet decomposition
+        coeffs = pywt.wavedec(signal, wavelet, level=max_level)
+        
+        # Extract features from each level
+        features = {}
+        for i, coeff in enumerate(coeffs):
+            if i == 0:
+                level_name = 'approximation'
+            else:
+                level_name = f'detail_{i}'
+            
+            # Energy at this level
+            energy = np.sum(coeff**2)
+            features[f'{level_name}_energy'] = energy
+            
+            # Mean absolute value
+            features[f'{level_name}_mav'] = np.mean(np.abs(coeff))
+            
+            # Variance
+            features[f'{level_name}_var'] = np.var(coeff)
+        
+        # Calculate relative energy in each band
+        total_energy = sum(features[k] for k in features if k.endswith('_energy'))
+        for i in range(max_level + 1):
+            if i == 0:
+                level_name = 'approximation'
+            else:
+                level_name = f'detail_{i}'
+            features[f'{level_name}_rel_energy'] = features[f'{level_name}_energy'] / total_energy if total_energy > 0 else 0
+        
+        return features
+    
+    def calculate_coactivation_indices(self, muscle1_emg, muscle2_emg, fs):
+        """
+        Calculate coactivation indices between two muscles.
+        
+        Parameters:
+        -----------
+        muscle1_emg : numpy.ndarray
+            EMG signal of first muscle
+        muscle2_emg : numpy.ndarray
+            EMG signal of second muscle
+        fs : float
+            Sampling frequency
+            
+        Returns:
+        --------
+        dict
+            Dictionary of coactivation indices
+        """
+        # Ensure signals are of the same length
+        min_len = min(len(muscle1_emg), len(muscle2_emg))
+        muscle1_emg = muscle1_emg[:min_len]
+        muscle2_emg = muscle2_emg[:min_len]
+        
+        # Normalize EMG signals
+        muscle1_norm = muscle1_emg / (np.max(muscle1_emg) if np.max(muscle1_emg) > 0 else 1)
+        muscle2_norm = muscle2_emg / (np.max(muscle2_emg) if np.max(muscle2_emg) > 0 else 1)
+        
+        # Rectify signals
+        muscle1_rect = np.abs(muscle1_norm)
+        muscle2_rect = np.abs(muscle2_norm)
+        
+        # Calculate coactivation index (CI) as per Falconer & Winter method
+        # CI = 2 * common area between normalized EMG profiles / total area
+        common_area = np.minimum(muscle1_rect, muscle2_rect).sum()
+        total_area = muscle1_rect.sum() + muscle2_rect.sum()
+        ci_falconer = 2 * common_area / total_area if total_area > 0 else 0
+        
+        # Calculate cross-correlation
+        correlation = np.correlate(muscle1_rect, muscle2_rect, mode='valid')[0] / min_len
+        
+        # Calculate temporal overlap
+        active_threshold = 0.1  # Threshold for considering muscle active
+        muscle1_active = muscle1_rect > active_threshold
+        muscle2_active = muscle2_rect > active_threshold
+        both_active = np.logical_and(muscle1_active, muscle2_active)
+        temporal_overlap = np.sum(both_active) / min_len
+        
+        # Calculate waveform similarity index
+        diff_norm = np.sum((muscle1_rect - muscle2_rect) ** 2)
+        sum_norm = np.sum(muscle1_rect ** 2) + np.sum(muscle2_rect ** 2)
+        waveform_similarity = 1 - (diff_norm / sum_norm if sum_norm > 0 else 0)
+        
+        # Return all indices
+        return {
+            'ci_falconer': ci_falconer,
+            'correlation': correlation,
+            'temporal_overlap': temporal_overlap,
+            'waveform_similarity': waveform_similarity
+        }
+    
     def calculate_comprehensive_metrics(self, emg_filtered, emg_rectified, emg_rms, emg_envelope, throws, time, fs):
         """
         Calculate comprehensive metrics for each throw.
@@ -413,6 +558,14 @@ class EMGProcessor:
         throw_integrals = np.zeros(throw_count)
         throw_durations = np.zeros(throw_count)
         work_rates = np.zeros(throw_count)
+        
+        # NEW: Spectral entropy metrics
+        spectral_entropies = np.zeros(throw_count)
+        
+        # NEW: Wavelet energy metrics
+        wavelet_energy_low = np.zeros(throw_count)
+        wavelet_energy_mid = np.zeros(throw_count)
+        wavelet_energy_high = np.zeros(throw_count)
         
         # Process each throw for comprehensive metrics
         for i, (start, end) in enumerate(throws):
@@ -485,6 +638,37 @@ class EMGProcessor:
                 lower_band_idx = np.where(cumpower >= cumpower[-1]*0.16)[0][0]
                 upper_band_idx = np.where(cumpower >= cumpower[-1]*0.84)[0][0]
                 bandwidth[i] = freqs[freq_mask][upper_band_idx] - freqs[freq_mask][lower_band_idx]
+            
+            # NEW: Calculate spectral entropy
+            spectral_entropies[i] = self.calculate_spectral_entropy(segment_filtered, fs)
+            
+            # NEW: Calculate wavelet features
+            try:
+                wavelet_features = self.wavelet_analysis(segment_filtered, fs)
+                
+                # Map wavelet levels to frequency bands
+                # Note: exact frequency bands depend on the sampling frequency and wavelet type
+                # detail_1: ~fs/4 to fs/2 Hz (high frequency)
+                # detail_2: ~fs/8 to fs/4 Hz (mid-high frequency)
+                # detail_3: ~fs/16 to fs/8 Hz (mid frequency)
+                # detail_4 & detail_5: lower frequencies
+                
+                # Low frequency band (detail levels 4-5)
+                wavelet_energy_low[i] = (wavelet_features.get('detail_4_rel_energy', 0) + 
+                                        wavelet_features.get('detail_5_rel_energy', 0) + 
+                                        wavelet_features.get('approximation_rel_energy', 0))
+                
+                # Mid frequency band (detail levels 2-3)
+                wavelet_energy_mid[i] = (wavelet_features.get('detail_2_rel_energy', 0) + 
+                                        wavelet_features.get('detail_3_rel_energy', 0))
+                
+                # High frequency band (detail level 1)
+                wavelet_energy_high[i] = wavelet_features.get('detail_1_rel_energy', 0)
+            except Exception as e:
+                logger.warning(f"Failed to calculate wavelet features for throw {i+1}: {e}")
+                wavelet_energy_low[i] = 0
+                wavelet_energy_mid[i] = 0
+                wavelet_energy_high[i] = 0
         
         # Calculate throw indices for plotting
         throw_indices = np.arange(1, throw_count + 1)
@@ -516,16 +700,85 @@ class EMGProcessor:
             
             # Workload metrics
             'throw_integrals': throw_integrals,
-            'work_rates': work_rates
+            'work_rates': work_rates,
+            
+            # NEW: Spectral entropy metrics
+            'spectral_entropies': spectral_entropies,
+            
+            # NEW: Wavelet energy metrics
+            'wavelet_energy_low': wavelet_energy_low,
+            'wavelet_energy_mid': wavelet_energy_mid,
+            'wavelet_energy_high': wavelet_energy_high
         }
         
         return metrics
-
-# For direct testing
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    processor = EMGProcessor()
-    # Test filename parsing
-    test_filename = "03012025_TRAQ123_JohnDoe_mocap.csv"
-    parsed = processor.parse_filename(test_filename)
-    print(f"Parsed filename: {parsed}")
+    
+    def calculate_muscle_coactivation(self, muscle1_metrics, muscle2_metrics, 
+                                     muscle1_throws, muscle2_throws, 
+                                     muscle1_filtered, muscle2_filtered,
+                                     muscle1_time, muscle2_time, fs):
+        """
+        Calculate coactivation metrics between two muscles for all throws.
+        
+        Parameters:
+        -----------
+        muscle1_metrics : dict
+            Metrics dictionary for first muscle
+        muscle2_metrics : dict
+            Metrics dictionary for second muscle
+        muscle1_throws : list
+            List of throw indices for first muscle
+        muscle2_throws : list
+            List of throw indices for second muscle
+        muscle1_filtered : numpy.ndarray
+            Filtered EMG signal for first muscle
+        muscle2_filtered : numpy.ndarray
+            Filtered EMG signal for second muscle
+        muscle1_time : numpy.ndarray
+            Time array for first muscle
+        muscle2_time : numpy.ndarray
+            Time array for second muscle
+        fs : float
+            Sampling frequency
+            
+        Returns:
+        --------
+        dict
+            Dictionary with coactivation metrics for each throw
+        """
+        throw_count = len(muscle1_throws)
+        if throw_count != len(muscle2_throws):
+            logger.warning(f"Throw count mismatch: {throw_count} vs {len(muscle2_throws)}")
+            return None
+        
+        # Initialize coactivation metrics arrays
+        ci_falconer_values = np.zeros(throw_count)
+        correlation_values = np.zeros(throw_count)
+        temporal_overlap_values = np.zeros(throw_count)
+        waveform_similarity_values = np.zeros(throw_count)
+        
+        # Calculate coactivation indices for each throw
+        for i in range(throw_count):
+            # Extract segments for this throw
+            m1_start, m1_end = muscle1_throws[i]
+            m2_start, m2_end = muscle2_throws[i]
+            
+            m1_segment = muscle1_filtered[m1_start:m1_end]
+            m2_segment = muscle2_filtered[m2_start:m2_end]
+            
+            # Calculate coactivation metrics
+            coactivation = self.calculate_coactivation_indices(m1_segment, m2_segment, fs)
+            
+            # Store values
+            ci_falconer_values[i] = coactivation['ci_falconer']
+            correlation_values[i] = coactivation['correlation']
+            temporal_overlap_values[i] = coactivation['temporal_overlap']
+            waveform_similarity_values[i] = coactivation['waveform_similarity']
+        
+        # Return metrics dictionary
+        return {
+            'ci_falconer': ci_falconer_values,
+            'correlation': correlation_values,
+            'temporal_overlap': temporal_overlap_values,
+            'waveform_similarity': waveform_similarity_values
+        }

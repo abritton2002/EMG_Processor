@@ -8,3 +8,4 @@ PyPDF2>=2.0.0
 reportlab>=3.6.1
 matplotlib>=3.4.0
 seaborn>=0.11.2
+pywt>=1.1.0

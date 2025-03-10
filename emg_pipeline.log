@@ -269,3 +269,77 @@ NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
 2025-03-07 10:42:01,241 - emg_pipeline - INFO - Successfully saved data for session 030525_021140_ZaneRose_veloday to database
 2025-03-07 10:42:01,241 - db_connector - INFO - Database connection closed
 2025-03-07 10:42:01,242 - emg_pipeline - INFO - Directory processing complete. Successfully processed 6 of 6 files.
+2025-03-10 09:23:20,395 - emg_processor - INFO - EMG Processor initialized
+2025-03-10 09:23:20,395 - db_connector - INFO - Database connector initialized
+2025-03-10 09:23:20,396 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-10 09:23:20,396 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-10 09:25:22,190 - emg_processor - INFO - EMG Processor initialized
+2025-03-10 09:25:22,190 - db_connector - INFO - Database connector initialized
+2025-03-10 09:25:22,190 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-10 09:25:22,190 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-10 09:25:41,648 - emg_processor - INFO - EMG Processor initialized
+2025-03-10 09:25:41,648 - db_connector - INFO - Database connector initialized
+2025-03-10 09:25:41,649 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-10 09:25:41,649 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-10 09:25:41,654 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet (recursive=True)
+2025-03-10 09:25:41,978 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:25:42,058 - emg_pipeline - INFO - Adding new metric columns to emg_throws table
+2025-03-10 09:25:43,178 - emg_pipeline - INFO - Successfully added new metric columns
+2025-03-10 09:25:43,655 - db_connector - INFO - Database tables created/verified successfully
+2025-03-10 09:25:43,655 - db_connector - INFO - Database connection closed
+2025-03-10 09:25:43,656 - emg_pipeline - INFO - Found 6 files to process
+2025-03-10 09:25:43,670 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-10 09:25:43,671 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-19
+2025-03-10 09:25:43,672 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-10 09:25:47,836 - emg_processor - INFO - Data loaded: FCU: 1486361 samples, FCR: 2535557 samples
+2025-03-10 09:25:47,837 - emg_processor - INFO - Found 2 muscles in file
+2025-03-10 09:25:49,828 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:25:49,988 - emg_pipeline - INFO - Session 021925_117946_AlexBritton_longform already exists. Removing old data...
+2025-03-10 09:31:51,665 - emg_pipeline - INFO - Successfully saved data for session 021925_117946_AlexBritton_longform to database
+2025-03-10 09:31:51,666 - db_connector - INFO - Database connection closed
+2025-03-10 09:31:51,668 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-10 09:31:51,669 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-10 09:31:51,669 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-10 09:31:52,803 - emg_processor - INFO - Data loaded: FCU: 459969 samples, FCR: 459969 samples
+2025-03-10 09:31:52,803 - emg_processor - INFO - Found 2 muscles in file
+2025-03-10 09:31:53,528 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:31:53,689 - emg_pipeline - INFO - Session 022725_117958_CarterWallace_mocap already exists. Removing old data...
+2025-03-10 09:33:02,018 - emg_pipeline - INFO - Successfully saved data for session 022725_117958_CarterWallace_mocap to database
+2025-03-10 09:33:02,019 - db_connector - INFO - Database connection closed
+2025-03-10 09:33:02,019 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-10 09:33:02,020 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-10 09:33:02,020 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-10 09:33:03,228 - emg_processor - INFO - Data loaded: FCU: 662099 samples, FCR: 662099 samples
+2025-03-10 09:33:03,228 - emg_processor - INFO - Found 2 muscles in file
+2025-03-10 09:33:04,049 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:33:04,208 - emg_pipeline - INFO - Session 022725_118107_DarielFregio_mocap already exists. Removing old data...
+2025-03-10 09:34:53,011 - emg_pipeline - INFO - Successfully saved data for session 022725_118107_DarielFregio_mocap to database
+2025-03-10 09:34:53,012 - db_connector - INFO - Database connection closed
+2025-03-10 09:34:53,012 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-10 09:34:53,012 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-10 09:34:53,013 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-10 09:34:56,193 - emg_processor - INFO - Data loaded: FCU: 1217362 samples, FCR: 1217362 samples
+2025-03-10 09:34:56,193 - emg_processor - INFO - Found 2 muscles in file
+2025-03-10 09:34:57,865 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:34:58,026 - emg_pipeline - INFO - Session 030425_102245_MateoHamm_mocap already exists. Removing old data...
+2025-03-10 09:38:00,419 - emg_pipeline - INFO - Successfully saved data for session 030425_102245_MateoHamm_mocap to database
+2025-03-10 09:38:00,420 - db_connector - INFO - Database connection closed
+2025-03-10 09:38:00,420 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-10 09:38:00,420 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-10 09:38:00,420 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-10 09:38:02,610 - emg_processor - INFO - Data loaded: FCU: 823803 samples, FCR: 823803 samples
+2025-03-10 09:38:02,610 - emg_processor - INFO - Found 2 muscles in file
+2025-03-10 09:38:03,817 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:38:03,976 - emg_pipeline - INFO - Session 030425_118085_JayceBlair_mocap already exists. Removing old data...
+2025-03-10 09:40:13,393 - emg_pipeline - INFO - Successfully saved data for session 030425_118085_JayceBlair_mocap to database
+2025-03-10 09:40:13,393 - db_connector - INFO - Database connection closed
+2025-03-10 09:40:13,395 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-10 09:40:13,396 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-05
+2025-03-10 09:40:13,399 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-10 09:40:20,570 - emg_processor - INFO - Data loaded: FCU: 2556901 samples, FCR: 2556901 samples
+2025-03-10 09:40:20,570 - emg_processor - INFO - Found 2 muscles in file
+2025-03-10 09:40:24,026 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-10 09:40:24,187 - emg_pipeline - INFO - Session 030525_021140_ZaneRose_veloday already exists. Removing old data...
+2025-03-10 09:46:26,421 - emg_pipeline - INFO - Successfully saved data for session 030525_021140_ZaneRose_veloday to database
+2025-03-10 09:46:26,422 - db_connector - INFO - Database connection closed
+2025-03-10 09:46:26,427 - emg_pipeline - INFO - Directory processing complete. Successfully processed 6 of 6 files.
