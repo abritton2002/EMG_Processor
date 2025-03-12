@@ -298,7 +298,8 @@ class EMGPipeline:
     
     def match_throws_to_velocity(self):
         """
-        Match EMG throws to velocity data from trials and poi tables
+        Match EMG throws to velocity data from trials and poi tables.
+        Uses both date and name for matching sessions.
         
         Returns:
         --------
@@ -315,73 +316,203 @@ class EMGPipeline:
             
             cursor = conn.cursor(pymysql.cursors.DictCursor)
             
-            # First, check the data in trials and poi tables
-            cursor.execute("SELECT COUNT(*) as trial_count FROM trials")
-            trial_count = cursor.fetchone()['trial_count']
-            logger.info(f"Total trials: {trial_count}")
-            
-            cursor.execute("SELECT COUNT(*) as poi_count FROM poi")
-            poi_count = cursor.fetchone()['poi_count']
-            logger.info(f"Total POI entries: {poi_count}")
-            
-            # Check throws with absolute timestamps
-            cursor.execute("SELECT COUNT(*) as throws_with_timestamp FROM emg_throws WHERE absolute_timestamp IS NOT NULL")
-            throws_with_timestamp = cursor.fetchone()['throws_with_timestamp']
-            logger.info(f"Throws with absolute timestamp: {throws_with_timestamp}")
-            
-            # Complex query to match throws with trials and poi data
-            update_query = """
-            UPDATE emg_throws t
-            INNER JOIN trials tr ON 
-                t.absolute_timestamp BETWEEN tr.time - INTERVAL 1 SECOND AND tr.time + INTERVAL 1 SECOND
-            INNER JOIN poi p ON tr.session_trial = p.session_trial
-            SET 
-                t.session_trial = tr.session_trial,
-                t.pitch_speed_mph = p.pitch_speed_mph,
-                t.velocity_match_quality = 'exact'
-            WHERE 
-                t.absolute_timestamp IS NOT NULL
-            """
-            
-            # Execute the update
-            cursor.execute(update_query)
-            
-            # Commit the changes
-            conn.commit()
-            
-            # Log the results
+            # First, get all EMG sessions with dates
             cursor.execute("""
-            SELECT 
-                velocity_match_quality, 
-                COUNT(*) as count 
-            FROM emg_throws 
-            GROUP BY velocity_match_quality
+                SELECT numeric_id, athlete_name, date_recorded, filename 
+                FROM emg_sessions
+                WHERE date_recorded IS NOT NULL
+                ORDER BY date_recorded DESC
+            """)
+            emg_sessions = cursor.fetchall()
+            logger.info(f"Found {len(emg_sessions)} EMG sessions to process")
+            
+            # Process each EMG session
+            for emg_session in emg_sessions:
+                session_id = emg_session['numeric_id']
+                athlete_name = emg_session['athlete_name']
+                session_date = emg_session['date_recorded']
+                
+                logger.info(f"Processing session for {athlete_name} on {session_date}")
+                
+                # Format the athlete name - convert from "AlexBritton" to "Alex Britton"
+                # Add space before capital letters except the first one
+                formatted_name = ""
+                for i, char in enumerate(athlete_name):
+                    if i > 0 and char.isupper():
+                        formatted_name += " " + char
+                    else:
+                        formatted_name += char
+                
+                logger.info(f"Searching for user with name: {formatted_name} on date: {session_date}")
+                
+                # Use the query that matches on both name and date
+                cursor.execute(f"""
+                    SELECT sessions.session, sessions.date, users.traq, users.name
+                    FROM sessions
+                    INNER JOIN users ON users.user = sessions.user
+                    WHERE users.name = '{formatted_name}'
+                    AND DATE(sessions.date) = DATE('{session_date}')
+                    ORDER BY sessions.date DESC
+                    LIMIT 1
+                """)
+                
+                pitching_session = cursor.fetchone()
+                
+                if not pitching_session:
+                    logger.warning(f"No exact match. Trying partial match for {formatted_name} on date {session_date}")
+                    
+                    # Try partial match with first name but still match on date
+                    first_name = formatted_name.split()[0]
+                    cursor.execute(f"""
+                        SELECT sessions.session, sessions.date, users.traq, users.name
+                        FROM sessions
+                        INNER JOIN users ON users.user = sessions.user
+                        WHERE users.name LIKE '%{first_name}%'
+                        AND DATE(sessions.date) = DATE('{session_date}')
+                        ORDER BY sessions.date DESC
+                        LIMIT 1
+                    """)
+                    
+                    pitching_session = cursor.fetchone()
+                
+                if not pitching_session:
+                    logger.warning(f"No matching pitching session found for {athlete_name} on {session_date}")
+                    continue
+                    
+                pitching_session_id = pitching_session['session']
+                athlete_name_in_db = pitching_session['name']
+                session_date_in_db = pitching_session['date']
+                
+                logger.info(f"Found matching session {pitching_session_id} for {athlete_name_in_db} on {session_date_in_db}")
+                
+                # Get EMG throws for this session
+                cursor.execute(f"""
+                    SELECT throw_id, trial_number, start_time, end_time
+                    FROM emg_throws
+                    WHERE session_numeric_id = {session_id}
+                    ORDER BY trial_number
+                """)
+                
+                emg_throws = cursor.fetchall()
+                logger.info(f"Found {len(emg_throws)} EMG throws to match")
+                
+                if not emg_throws:
+                    continue
+                
+                # Get velocity data
+                cursor.execute(f"""
+                    SELECT session_trial, pitch_speed_mph
+                    FROM poi
+                    WHERE session_trial LIKE '{pitching_session_id}_%'
+                    ORDER BY session_trial
+                """)
+                
+                velocity_data = cursor.fetchall()
+                logger.info(f"Found {len(velocity_data)} velocity records")
+                
+                if not velocity_data:
+                    logger.warning(f"No velocity data found for session {pitching_session_id}")
+                    continue
+                
+                # Get timing information
+                cursor.execute(f"""
+                    SELECT t.session_trial, t.time, p.pitch_speed_mph
+                    FROM trials t
+                    JOIN poi p ON t.session_trial = p.session_trial
+                    WHERE t.session_trial LIKE '{pitching_session_id}_%'
+                    ORDER BY t.time
+                """)
+                
+                trials = cursor.fetchall()
+                logger.info(f"Found {len(trials)} trials with timing information")
+                
+                if not trials:
+                    logger.warning(f"No trial timing data found for session {pitching_session_id}")
+                    continue
+                
+                # Match throws to trials
+                # If number of throws matches number of trials, use sequence matching
+                if len(emg_throws) == len(trials):
+                    logger.info("Using sequence matching (counts match)")
+                    match_count = 0
+                    
+                    for i in range(len(emg_throws)):
+                        throw = emg_throws[i]
+                        trial = trials[i]
+                        
+                        cursor.execute(f"""
+                            UPDATE emg_throws
+                            SET 
+                                session_trial = '{trial['session_trial']}',
+                                pitch_speed_mph = {trial['pitch_speed_mph']},
+                                velocity_match_quality = 'sequence_matched'
+                            WHERE throw_id = {throw['throw_id']}
+                        """)
+                        match_count += 1
+                    
+                    logger.info(f"Matched {match_count} throws by sequence")
+                else:
+                    # If counts don't match, we'll use a best-effort approach
+                    logger.info("Using time-order matching (counts differ)")
+                    
+                    # Sort both lists to ensure they're in ascending order
+                    emg_throws_sorted = sorted(emg_throws, key=lambda x: x['trial_number'])
+                    trials_sorted = sorted(trials, key=lambda x: x['time'])
+                    
+                    # Use the smaller of the two lists as our limit
+                    match_limit = min(len(emg_throws_sorted), len(trials_sorted))
+                    match_count = 0
+                    
+                    for i in range(match_limit):
+                        throw = emg_throws_sorted[i]
+                        trial = trials_sorted[i]
+                        
+                        cursor.execute(f"""
+                            UPDATE emg_throws
+                            SET 
+                                session_trial = '{trial['session_trial']}',
+                                pitch_speed_mph = {trial['pitch_speed_mph']},
+                                velocity_match_quality = 'ordered_time_matched'
+                            WHERE throw_id = {throw['throw_id']}
+                        """)
+                        match_count += 1
+                    
+                    logger.info(f"Matched {match_count} throws by time order")
+                
+                # Commit the updates for this session
+                conn.commit()
+                logger.info(f"Committed {match_count} matches to database")
+            
+            # Check the results
+            cursor.execute("""
+                SELECT velocity_match_quality, COUNT(*) as count 
+                FROM emg_throws 
+                GROUP BY velocity_match_quality
             """)
             
             match_results = cursor.fetchall()
-            
             logger.info("Velocity Matching Results:")
             for result in match_results:
-                logger.info(f"{result['velocity_match_quality']}: {result['count']} throws")
+                quality = result['velocity_match_quality'] if result['velocity_match_quality'] else 'None'
+                logger.info(f"{quality}: {result['count']} throws")
             
-            # Check joins
+            # Show some examples of matched throws
             cursor.execute("""
-            SELECT 
-                COUNT(*) as matched_count,
-                MIN(t.absolute_timestamp) as min_timestamp,
-                MAX(t.absolute_timestamp) as max_timestamp,
-                MIN(tr.time) as min_trial_time,
-                MAX(tr.time) as max_trial_time
-            FROM emg_throws t
-            INNER JOIN trials tr ON 
-                t.absolute_timestamp BETWEEN tr.time - INTERVAL 1 SECOND AND tr.time + INTERVAL 1 SECOND
-            INNER JOIN poi p ON tr.session_trial = p.session_trial
+                SELECT et.throw_id, es.athlete_name, et.trial_number, 
+                    et.session_trial, et.pitch_speed_mph, et.velocity_match_quality
+                FROM emg_throws et
+                JOIN emg_sessions es ON et.session_numeric_id = es.numeric_id
+                WHERE et.velocity_match_quality IS NOT NULL
+                LIMIT 10
             """)
+            matched_examples = cursor.fetchall()
             
-            join_details = cursor.fetchone()
-            logger.info(f"Matched throws: {join_details['matched_count']}")
-            logger.info(f"Throw timestamp range: {join_details['min_timestamp']} to {join_details['max_timestamp']}")
-            logger.info(f"Trial time range: {join_details['min_trial_time']} to {join_details['max_trial_time']}")
+            if matched_examples:
+                logger.info("Examples of matched throws:")
+                for example in matched_examples:
+                    logger.info(f"Throw ID: {example['throw_id']}, Athlete: {example['athlete_name']}, " +
+                            f"Trial: {example['trial_number']}, Session Trial: {example['session_trial']}, " +
+                            f"Velocity: {example['pitch_speed_mph']} mph")
             
             return True
         

@@ -1295,3 +1295,203 @@ AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
 2025-03-12 15:28:41,387 - emg_pipeline - INFO - Matched throws: 0
 2025-03-12 15:28:41,387 - emg_pipeline - INFO - Throw timestamp range: None to None
 2025-03-12 15:28:41,387 - emg_pipeline - INFO - Trial time range: None to None
+2025-03-12 15:52:49,224 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:52:49,224 - db_connector - INFO - Database connector initialized
+2025-03-12 15:52:49,224 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:52:49,224 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:52:57,297 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:52:57,297 - db_connector - INFO - Database connector initialized
+2025-03-12 15:52:57,298 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:52:57,298 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:52:57,299 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:52:57,299 - db_connector - INFO - Database connector initialized
+2025-03-12 15:52:57,299 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:52:57,299 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:52:57,868 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:52:57,948 - emg_pipeline - INFO - Found 7 EMG sessions to process
+2025-03-12 15:52:57,948 - emg_pipeline - INFO - Processing session for AlexBritton on 2025-02-19
+2025-03-12 15:52:58,027 - emg_pipeline - WARNING - No matching pitching session found for AlexBritton on 2025-02-19
+2025-03-12 15:52:58,028 - emg_pipeline - INFO - Processing session for CarterWallace on 2025-02-27
+2025-03-12 15:52:58,108 - emg_pipeline - WARNING - No matching pitching session found for CarterWallace on 2025-02-27
+2025-03-12 15:52:58,109 - emg_pipeline - INFO - Processing session for DarielFregio on 2025-02-27
+2025-03-12 15:52:58,304 - emg_pipeline - WARNING - No matching pitching session found for DarielFregio on 2025-02-27
+2025-03-12 15:52:58,305 - emg_pipeline - INFO - Processing session for MateoHamm on 2025-03-04
+2025-03-12 15:52:58,386 - emg_pipeline - WARNING - No matching pitching session found for MateoHamm on 2025-03-04
+2025-03-12 15:52:58,386 - emg_pipeline - INFO - Processing session for JayceBlair on 2025-03-04
+2025-03-12 15:52:58,465 - emg_pipeline - WARNING - No matching pitching session found for JayceBlair on 2025-03-04
+2025-03-12 15:52:58,465 - emg_pipeline - INFO - Processing session for ZaneRose on 2025-03-05
+2025-03-12 15:52:58,621 - emg_pipeline - WARNING - No matching pitching session found for ZaneRose on 2025-03-05
+2025-03-12 15:52:58,622 - emg_pipeline - INFO - Processing session for ZanRose on 2025-03-10
+2025-03-12 15:52:58,832 - emg_pipeline - WARNING - No matching pitching session found for ZanRose on 2025-03-10
+2025-03-12 15:52:58,988 - emg_pipeline - INFO - Velocity Matching Results:
+2025-03-12 15:52:58,988 - emg_pipeline - INFO - no_match: 145 throws
+2025-03-12 15:59:50,062 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:59:50,062 - db_connector - INFO - Database connector initialized
+2025-03-12 15:59:50,062 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:59:50,063 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:59:57,197 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:59:57,197 - db_connector - INFO - Database connector initialized
+2025-03-12 15:59:57,198 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:59:57,198 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:59:57,199 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:59:57,199 - db_connector - INFO - Database connector initialized
+2025-03-12 15:59:57,199 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:59:57,199 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:59:57,633 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:59:57,713 - emg_pipeline - INFO - Found 7 EMG sessions to process
+2025-03-12 15:59:57,713 - emg_pipeline - INFO - Processing session for ZanRose
+2025-03-12 15:59:57,714 - emg_pipeline - INFO - Searching for user with name: Zan Rose
+2025-03-12 15:59:57,794 - emg_pipeline - INFO - Found matching session 2271 for Zan Rose on 2024-12-18
+2025-03-12 15:59:57,877 - emg_pipeline - INFO - Found 27 EMG throws to match
+2025-03-12 15:59:57,957 - emg_pipeline - INFO - Found 8 velocity records
+2025-03-12 15:59:58,039 - emg_pipeline - INFO - Found 8 trials with timing information
+2025-03-12 15:59:58,039 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 15:59:58,911 - emg_pipeline - INFO - Matched 8 throws by time order
+2025-03-12 15:59:58,989 - emg_pipeline - INFO - Committed 8 matches to database
+2025-03-12 15:59:58,989 - emg_pipeline - INFO - Processing session for ZaneRose
+2025-03-12 15:59:58,989 - emg_pipeline - INFO - Searching for user with name: Zane Rose
+2025-03-12 15:59:59,145 - emg_pipeline - WARNING - No exact name match. Trying partial match for Zane Rose
+2025-03-12 15:59:59,238 - emg_pipeline - WARNING - No matching pitching session found for ZaneRose
+2025-03-12 15:59:59,239 - emg_pipeline - INFO - Processing session for MateoHamm
+2025-03-12 15:59:59,239 - emg_pipeline - INFO - Searching for user with name: Mateo Hamm
+2025-03-12 15:59:59,318 - emg_pipeline - INFO - Found matching session 2870 for Mateo Hamm on 2025-03-04
+2025-03-12 15:59:59,396 - emg_pipeline - INFO - Found 19 EMG throws to match
+2025-03-12 15:59:59,475 - emg_pipeline - INFO - Found 10 velocity records
+2025-03-12 15:59:59,554 - emg_pipeline - INFO - Found 10 trials with timing information
+2025-03-12 15:59:59,554 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 16:00:00,337 - emg_pipeline - INFO - Matched 10 throws by time order
+2025-03-12 16:00:00,492 - emg_pipeline - INFO - Committed 10 matches to database
+2025-03-12 16:00:00,493 - emg_pipeline - INFO - Processing session for JayceBlair
+2025-03-12 16:00:00,493 - emg_pipeline - INFO - Searching for user with name: Jayce Blair
+2025-03-12 16:00:00,572 - emg_pipeline - INFO - Found matching session 2869 for Jayce Blair on 2025-03-04
+2025-03-12 16:00:00,652 - emg_pipeline - INFO - Found 16 EMG throws to match
+2025-03-12 16:00:00,810 - emg_pipeline - INFO - Found 7 velocity records
+2025-03-12 16:00:01,010 - emg_pipeline - INFO - Found 7 trials with timing information
+2025-03-12 16:00:01,011 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 16:00:01,562 - emg_pipeline - INFO - Matched 7 throws by time order
+2025-03-12 16:00:01,641 - emg_pipeline - INFO - Committed 7 matches to database
+2025-03-12 16:00:01,642 - emg_pipeline - INFO - Processing session for CarterWallace
+2025-03-12 16:00:01,642 - emg_pipeline - INFO - Searching for user with name: Carter Wallace
+2025-03-12 16:00:01,721 - emg_pipeline - INFO - Found matching session 2843 for Carter Wallace on 2025-02-27
+2025-03-12 16:00:01,800 - emg_pipeline - INFO - Found 8 EMG throws to match
+2025-03-12 16:00:01,879 - emg_pipeline - INFO - Found 8 velocity records
+2025-03-12 16:00:01,959 - emg_pipeline - INFO - Found 8 trials with timing information
+2025-03-12 16:00:01,959 - emg_pipeline - INFO - Using sequence matching (counts match)
+2025-03-12 16:00:02,585 - emg_pipeline - INFO - Matched 8 throws by sequence
+2025-03-12 16:00:02,663 - emg_pipeline - INFO - Committed 8 matches to database
+2025-03-12 16:00:02,664 - emg_pipeline - INFO - Processing session for DarielFregio
+2025-03-12 16:00:02,664 - emg_pipeline - INFO - Searching for user with name: Dariel Fregio
+2025-03-12 16:00:02,743 - emg_pipeline - INFO - Found matching session 2842 for Dariel Fregio on 2025-02-27
+2025-03-12 16:00:02,822 - emg_pipeline - INFO - Found 10 EMG throws to match
+2025-03-12 16:00:02,902 - emg_pipeline - INFO - Found 11 velocity records
+2025-03-12 16:00:02,982 - emg_pipeline - INFO - Found 11 trials with timing information
+2025-03-12 16:00:02,983 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 16:00:03,969 - emg_pipeline - INFO - Matched 10 throws by time order
+2025-03-12 16:00:04,048 - emg_pipeline - INFO - Committed 10 matches to database
+2025-03-12 16:00:04,049 - emg_pipeline - INFO - Processing session for AlexBritton
+2025-03-12 16:00:04,050 - emg_pipeline - INFO - Searching for user with name: Alex Britton
+2025-03-12 16:00:04,132 - emg_pipeline - INFO - Found matching session 2795 for Alex Britton on 2025-02-19
+2025-03-12 16:00:04,222 - emg_pipeline - INFO - Found 30 EMG throws to match
+2025-03-12 16:00:04,303 - emg_pipeline - INFO - Found 30 velocity records
+2025-03-12 16:00:04,387 - emg_pipeline - INFO - Found 30 trials with timing information
+2025-03-12 16:00:04,390 - emg_pipeline - INFO - Using sequence matching (counts match)
+2025-03-12 16:00:07,018 - emg_pipeline - INFO - Matched 30 throws by sequence
+2025-03-12 16:00:07,174 - emg_pipeline - INFO - Committed 30 matches to database
+2025-03-12 16:00:07,254 - emg_pipeline - INFO - Velocity Matching Results:
+2025-03-12 16:00:07,254 - emg_pipeline - INFO - no_match: 72 throws
+2025-03-12 16:00:07,255 - emg_pipeline - INFO - ordered_time_matched: 35 throws
+2025-03-12 16:00:07,255 - emg_pipeline - INFO - sequence_matched: 38 throws
+2025-03-12 16:00:07,412 - emg_pipeline - INFO - Examples of matched throws:
+2025-03-12 16:00:07,413 - emg_pipeline - INFO - Throw ID: 264, Athlete: AlexBritton, Trial: 1, Session Trial: 2795_1, Velocity: 70.8 mph
+2025-03-12 16:00:07,415 - emg_pipeline - INFO - Throw ID: 265, Athlete: AlexBritton, Trial: 2, Session Trial: 2795_2, Velocity: 71.2 mph
+2025-03-12 16:00:07,416 - emg_pipeline - INFO - Throw ID: 266, Athlete: AlexBritton, Trial: 3, Session Trial: 2795_3, Velocity: 72.8 mph
+2025-03-12 16:00:07,417 - emg_pipeline - INFO - Throw ID: 267, Athlete: AlexBritton, Trial: 4, Session Trial: 2795_4, Velocity: 73.6 mph
+2025-03-12 16:00:07,418 - emg_pipeline - INFO - Throw ID: 268, Athlete: AlexBritton, Trial: 5, Session Trial: 2795_5, Velocity: 72.9 mph
+2025-03-12 16:00:07,419 - emg_pipeline - INFO - Throw ID: 269, Athlete: AlexBritton, Trial: 6, Session Trial: 2795_6, Velocity: 66.1 mph
+2025-03-12 16:00:07,420 - emg_pipeline - INFO - Throw ID: 270, Athlete: AlexBritton, Trial: 7, Session Trial: 2795_7, Velocity: 67.0 mph
+2025-03-12 16:00:07,421 - emg_pipeline - INFO - Throw ID: 271, Athlete: AlexBritton, Trial: 8, Session Trial: 2795_8, Velocity: 76.2 mph
+2025-03-12 16:00:07,422 - emg_pipeline - INFO - Throw ID: 272, Athlete: AlexBritton, Trial: 9, Session Trial: 2795_9, Velocity: 77.9 mph
+2025-03-12 16:00:07,424 - emg_pipeline - INFO - Throw ID: 273, Athlete: AlexBritton, Trial: 10, Session Trial: 2795_10, Velocity: 78.5 mph
+2025-03-12 16:04:19,561 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 16:04:19,562 - db_connector - INFO - Database connector initialized
+2025-03-12 16:04:19,562 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 16:04:19,562 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 16:04:23,882 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 16:04:23,883 - db_connector - INFO - Database connector initialized
+2025-03-12 16:04:23,883 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 16:04:23,883 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 16:04:23,884 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 16:04:23,884 - db_connector - INFO - Database connector initialized
+2025-03-12 16:04:23,884 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 16:04:23,885 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 16:04:24,445 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 16:04:24,524 - emg_pipeline - INFO - Found 7 EMG sessions to process
+2025-03-12 16:04:24,524 - emg_pipeline - INFO - Processing session for ZanRose on 2025-03-10
+2025-03-12 16:04:24,525 - emg_pipeline - INFO - Searching for user with name: Zan Rose on date: 2025-03-10
+2025-03-12 16:04:24,604 - emg_pipeline - WARNING - No exact match. Trying partial match for Zan Rose on date 2025-03-10
+2025-03-12 16:04:24,761 - emg_pipeline - WARNING - No matching pitching session found for ZanRose on 2025-03-10
+2025-03-12 16:04:24,761 - emg_pipeline - INFO - Processing session for ZaneRose on 2025-03-05
+2025-03-12 16:04:24,762 - emg_pipeline - INFO - Searching for user with name: Zane Rose on date: 2025-03-05
+2025-03-12 16:04:24,852 - emg_pipeline - WARNING - No exact match. Trying partial match for Zane Rose on date 2025-03-05
+2025-03-12 16:04:24,940 - emg_pipeline - WARNING - No matching pitching session found for ZaneRose on 2025-03-05
+2025-03-12 16:04:24,941 - emg_pipeline - INFO - Processing session for MateoHamm on 2025-03-04
+2025-03-12 16:04:24,941 - emg_pipeline - INFO - Searching for user with name: Mateo Hamm on date: 2025-03-04
+2025-03-12 16:04:25,020 - emg_pipeline - INFO - Found matching session 2870 for Mateo Hamm on 2025-03-04
+2025-03-12 16:04:25,100 - emg_pipeline - INFO - Found 19 EMG throws to match
+2025-03-12 16:04:25,180 - emg_pipeline - INFO - Found 10 velocity records
+2025-03-12 16:04:25,261 - emg_pipeline - INFO - Found 10 trials with timing information
+2025-03-12 16:04:25,262 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 16:04:26,052 - emg_pipeline - INFO - Matched 10 throws by time order
+2025-03-12 16:04:26,132 - emg_pipeline - INFO - Committed 10 matches to database
+2025-03-12 16:04:26,132 - emg_pipeline - INFO - Processing session for JayceBlair on 2025-03-04
+2025-03-12 16:04:26,132 - emg_pipeline - INFO - Searching for user with name: Jayce Blair on date: 2025-03-04
+2025-03-12 16:04:26,212 - emg_pipeline - INFO - Found matching session 2869 for Jayce Blair on 2025-03-04
+2025-03-12 16:04:26,292 - emg_pipeline - INFO - Found 16 EMG throws to match
+2025-03-12 16:04:26,370 - emg_pipeline - INFO - Found 7 velocity records
+2025-03-12 16:04:26,451 - emg_pipeline - INFO - Found 7 trials with timing information
+2025-03-12 16:04:26,452 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 16:04:27,125 - emg_pipeline - INFO - Matched 7 throws by time order
+2025-03-12 16:04:27,204 - emg_pipeline - INFO - Committed 7 matches to database
+2025-03-12 16:04:27,205 - emg_pipeline - INFO - Processing session for CarterWallace on 2025-02-27
+2025-03-12 16:04:27,205 - emg_pipeline - INFO - Searching for user with name: Carter Wallace on date: 2025-02-27
+2025-03-12 16:04:27,285 - emg_pipeline - INFO - Found matching session 2843 for Carter Wallace on 2025-02-27
+2025-03-12 16:04:27,365 - emg_pipeline - INFO - Found 8 EMG throws to match
+2025-03-12 16:04:27,444 - emg_pipeline - INFO - Found 8 velocity records
+2025-03-12 16:04:27,523 - emg_pipeline - INFO - Found 8 trials with timing information
+2025-03-12 16:04:27,523 - emg_pipeline - INFO - Using sequence matching (counts match)
+2025-03-12 16:04:28,305 - emg_pipeline - INFO - Matched 8 throws by sequence
+2025-03-12 16:04:28,461 - emg_pipeline - INFO - Committed 8 matches to database
+2025-03-12 16:04:28,462 - emg_pipeline - INFO - Processing session for DarielFregio on 2025-02-27
+2025-03-12 16:04:28,463 - emg_pipeline - INFO - Searching for user with name: Dariel Fregio on date: 2025-02-27
+2025-03-12 16:04:28,542 - emg_pipeline - INFO - Found matching session 2842 for Dariel Fregio on 2025-02-27
+2025-03-12 16:04:28,621 - emg_pipeline - INFO - Found 10 EMG throws to match
+2025-03-12 16:04:28,701 - emg_pipeline - INFO - Found 11 velocity records
+2025-03-12 16:04:28,783 - emg_pipeline - INFO - Found 11 trials with timing information
+2025-03-12 16:04:28,785 - emg_pipeline - INFO - Using time-order matching (counts differ)
+2025-03-12 16:04:29,648 - emg_pipeline - INFO - Matched 10 throws by time order
+2025-03-12 16:04:29,727 - emg_pipeline - INFO - Committed 10 matches to database
+2025-03-12 16:04:29,729 - emg_pipeline - INFO - Processing session for AlexBritton on 2025-02-19
+2025-03-12 16:04:29,730 - emg_pipeline - INFO - Searching for user with name: Alex Britton on date: 2025-02-19
+2025-03-12 16:04:29,810 - emg_pipeline - INFO - Found matching session 2795 for Alex Britton on 2025-02-19
+2025-03-12 16:04:29,998 - emg_pipeline - INFO - Found 30 EMG throws to match
+2025-03-12 16:04:30,078 - emg_pipeline - INFO - Found 30 velocity records
+2025-03-12 16:04:30,237 - emg_pipeline - INFO - Found 30 trials with timing information
+2025-03-12 16:04:30,238 - emg_pipeline - INFO - Using sequence matching (counts match)
+2025-03-12 16:04:33,450 - emg_pipeline - INFO - Matched 30 throws by sequence
+2025-03-12 16:04:33,529 - emg_pipeline - INFO - Committed 30 matches to database
+2025-03-12 16:04:33,609 - emg_pipeline - INFO - Velocity Matching Results:
+2025-03-12 16:04:33,610 - emg_pipeline - INFO - None: 8 throws
+2025-03-12 16:04:33,610 - emg_pipeline - INFO - no_match: 72 throws
+2025-03-12 16:04:33,610 - emg_pipeline - INFO - ordered_time_matched: 27 throws
+2025-03-12 16:04:33,610 - emg_pipeline - INFO - sequence_matched: 38 throws
+2025-03-12 16:04:33,690 - emg_pipeline - INFO - Examples of matched throws:
+2025-03-12 16:04:33,692 - emg_pipeline - INFO - Throw ID: 264, Athlete: AlexBritton, Trial: 1, Session Trial: 2795_1, Velocity: 70.8 mph
+2025-03-12 16:04:33,692 - emg_pipeline - INFO - Throw ID: 265, Athlete: AlexBritton, Trial: 2, Session Trial: 2795_2, Velocity: 71.2 mph
+2025-03-12 16:04:33,693 - emg_pipeline - INFO - Throw ID: 266, Athlete: AlexBritton, Trial: 3, Session Trial: 2795_3, Velocity: 72.8 mph
+2025-03-12 16:04:33,694 - emg_pipeline - INFO - Throw ID: 267, Athlete: AlexBritton, Trial: 4, Session Trial: 2795_4, Velocity: 73.6 mph
+2025-03-12 16:04:33,695 - emg_pipeline - INFO - Throw ID: 268, Athlete: AlexBritton, Trial: 5, Session Trial: 2795_5, Velocity: 72.9 mph
+2025-03-12 16:04:33,697 - emg_pipeline - INFO - Throw ID: 269, Athlete: AlexBritton, Trial: 6, Session Trial: 2795_6, Velocity: 66.1 mph
+2025-03-12 16:04:33,698 - emg_pipeline - INFO - Throw ID: 270, Athlete: AlexBritton, Trial: 7, Session Trial: 2795_7, Velocity: 67.0 mph
+2025-03-12 16:04:33,699 - emg_pipeline - INFO - Throw ID: 271, Athlete: AlexBritton, Trial: 8, Session Trial: 2795_8, Velocity: 76.2 mph
+2025-03-12 16:04:33,700 - emg_pipeline - INFO - Throw ID: 272, Athlete: AlexBritton, Trial: 9, Session Trial: 2795_9, Velocity: 77.9 mph
+2025-03-12 16:04:33,701 - emg_pipeline - INFO - Throw ID: 273, Athlete: AlexBritton, Trial: 10, Session Trial: 2795_10, Velocity: 78.5 mph
