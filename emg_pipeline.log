@@ -522,3 +522,276 @@ NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
 2025-03-10 14:21:35,627 - db_connector - INFO - Database connector initialized
 2025-03-10 14:21:35,949 - db_connector - INFO - Connected to database theia_pitching_db
 2025-03-10 14:21:36,031 - db_connector - INFO - Database connection closed
+2025-03-11 10:50:56,599 - emg_processor - INFO - EMG Processor initialized
+2025-03-11 10:50:56,600 - db_connector - INFO - Database connector initialized
+2025-03-11 10:50:56,600 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-11 10:50:56,601 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-11 10:51:04,517 - db_connector - INFO - Database connector initialized
+2025-03-11 10:51:04,841 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 10:51:04,921 - db_connector - INFO - Database connection closed
+2025-03-11 10:52:12,978 - emg_processor - INFO - EMG Processor initialized
+2025-03-11 10:52:12,979 - db_connector - INFO - Database connector initialized
+2025-03-11 10:52:12,979 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-11 10:52:12,979 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-11 10:52:21,915 - db_connector - INFO - Database connector initialized
+2025-03-11 10:52:22,234 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 10:52:22,315 - db_connector - INFO - Database connection closed
+2025-03-11 10:52:26,425 - db_connector - INFO - Database connector initialized
+2025-03-11 10:54:09,925 - emg_processor - INFO - EMG Processor initialized
+2025-03-11 10:54:09,925 - db_connector - INFO - Database connector initialized
+2025-03-11 10:54:09,926 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-11 10:54:09,926 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-11 10:54:18,908 - db_connector - INFO - Database connector initialized
+2025-03-11 10:54:19,228 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 10:54:19,307 - db_connector - INFO - Database connection closed
+2025-03-11 10:54:21,390 - db_connector - INFO - Database connector initialized
+2025-03-11 10:54:21,391 - emg_report_generator - INFO - Enhanced EMG Report Generator initialized
+2025-03-11 10:54:21,710 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 10:54:22,109 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 10:54:22,599 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 10:54:42,803 - emg_report_generator - INFO - Fetched 1000000 rows for session 13
+2025-03-11 10:54:43,218 - emg_report_generator - INFO - Downsampled from 1000000 to 50000 points
+2025-03-11 10:54:52,244 - emg_report_generator - INFO - Enhanced PDF report generated: reports\031025_021140_ZanRose_veloday_enhanced_report.pdf
+2025-03-11 11:06:22,953 - emg_processor - INFO - EMG Processor initialized
+2025-03-11 11:06:22,953 - db_connector - INFO - Database connector initialized
+2025-03-11 11:06:22,954 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-11 11:06:22,954 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-11 11:06:30,039 - db_connector - INFO - Database connector initialized
+2025-03-11 11:06:30,360 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:06:30,440 - db_connector - INFO - Database connection closed
+2025-03-11 11:06:32,121 - db_connector - INFO - Database connector initialized
+2025-03-11 11:06:32,122 - emg_report_generator - INFO - Enhanced EMG Report Generator initialized
+2025-03-11 11:06:32,441 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:06:32,838 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:06:33,241 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:06:53,353 - emg_report_generator - INFO - Fetched 1000000 rows for session 13
+2025-03-11 11:06:53,557 - emg_report_generator - INFO - Downsampled from 1000000 to 50000 points
+2025-03-11 11:06:57,038 - emg_report_generator - ERROR - Error creating enhanced PDF report for session 13: 'freq_ratio'
+2025-03-11 11:06:57,102 - emg_report_generator - ERROR - Traceback (most recent call last):
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pandas\core\indexes\base.py", line 3805, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\\_libs\\hashtable_class_helper.pxi", line 7081, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\\_libs\\hashtable_class_helper.pxi", line 7089, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'freq_ratio'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_report_generator.py", line 937, in create_pdf_report
+    fatigue_plot = self.create_fatigue_analysis_plot(throws_df, session_info)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_report_generator.py", line 616, in create_fatigue_analysis_plot
+    throws_df['freq_ratio'],
+    ~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pandas\core\frame.py", line 4102, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    raise KeyError(key) from err
+KeyError: 'freq_ratio'
+
+2025-03-11 11:08:05,011 - emg_processor - INFO - EMG Processor initialized
+2025-03-11 11:08:05,012 - db_connector - INFO - Database connector initialized
+2025-03-11 11:08:05,012 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-11 11:08:05,013 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-11 11:08:13,112 - db_connector - INFO - Database connector initialized
+2025-03-11 11:08:13,433 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:08:13,514 - db_connector - INFO - Database connection closed
+2025-03-11 11:08:15,353 - db_connector - INFO - Database connector initialized
+2025-03-11 11:08:15,354 - emg_report_generator - INFO - Enhanced EMG Report Generator initialized
+2025-03-11 11:08:15,674 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:08:16,072 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:08:16,473 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-11 11:08:36,232 - emg_report_generator - INFO - Fetched 1000000 rows for session 13
+2025-03-11 11:08:36,426 - emg_report_generator - INFO - Downsampled from 1000000 to 50000 points
+2025-03-11 11:08:44,464 - emg_report_generator - INFO - Enhanced PDF report generated: reports\031025_021140_ZanRose_veloday_enhanced_report.pdf
+2025-03-12 09:24:52,841 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 09:24:52,842 - db_connector - INFO - Database connector initialized
+2025-03-12 09:24:52,842 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 09:24:52,842 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 09:25:03,056 - db_connector - INFO - Database connector initialized
+2025-03-12 09:25:03,383 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:25:03,466 - db_connector - INFO - Database connection closed
+2025-03-12 09:25:05,277 - db_connector - INFO - Database connector initialized
+2025-03-12 09:25:42,631 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 09:25:42,631 - db_connector - INFO - Database connector initialized
+2025-03-12 09:25:42,631 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 09:25:42,631 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 09:25:51,645 - db_connector - INFO - Database connector initialized
+2025-03-12 09:25:51,965 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:25:52,047 - db_connector - INFO - Database connection closed
+2025-03-12 09:25:53,415 - db_connector - INFO - Database connector initialized
+2025-03-12 09:25:53,415 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 09:26:43,745 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 09:26:43,745 - db_connector - INFO - Database connector initialized
+2025-03-12 09:26:43,745 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 09:26:43,745 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 09:26:53,935 - db_connector - INFO - Database connector initialized
+2025-03-12 09:26:54,255 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:26:54,336 - db_connector - INFO - Database connection closed
+2025-03-12 09:26:56,479 - db_connector - INFO - Database connector initialized
+2025-03-12 09:26:56,480 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 09:26:56,804 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:26:57,205 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:26:57,606 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:27:28,084 - emg_report_generator - INFO - Fetched 1653696 rows for session 13
+2025-03-12 09:27:28,226 - emg_report_generator - INFO - Downsampled timeseries from 1653696 to 50112 points
+2025-03-12 09:27:32,844 - emg_report_generator - INFO - PDF report generated: reports\031025_021140_ZanRose_veloday_emg_report.pdf
+2025-03-12 09:33:36,752 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 09:33:36,756 - db_connector - INFO - Database connector initialized
+2025-03-12 09:33:36,756 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 09:33:36,756 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 09:33:45,252 - db_connector - INFO - Database connector initialized
+2025-03-12 09:33:45,581 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:33:45,662 - db_connector - INFO - Database connection closed
+2025-03-12 09:33:47,362 - db_connector - INFO - Database connector initialized
+2025-03-12 09:33:47,362 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 09:33:47,692 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:33:48,091 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:33:48,491 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:34:47,693 - emg_report_generator - INFO - Fetched 1653696 rows for session 13
+2025-03-12 09:34:47,826 - emg_report_generator - INFO - Downsampled timeseries from 1653696 to 50112 points
+2025-03-12 09:34:53,381 - emg_report_generator - INFO - PDF report generated: reports\031025_021140_ZanRose_veloday_emg_report.pdf
+2025-03-12 09:36:46,631 - db_connector - INFO - Database connector initialized
+2025-03-12 09:36:46,949 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:36:48,165 - db_connector - INFO - Database connection closed
+2025-03-12 09:37:24,638 - db_connector - INFO - Database connector initialized
+2025-03-12 09:37:24,968 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:25,051 - db_connector - INFO - Database connection closed
+2025-03-12 09:37:28,238 - db_connector - INFO - Database connector initialized
+2025-03-12 09:37:28,240 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 09:37:28,558 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:28,962 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:29,368 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:36,929 - emg_report_generator - INFO - Fetched 459969 rows for session 8
+2025-03-12 09:37:36,966 - emg_report_generator - INFO - Downsampled timeseries from 459969 to 51108 points
+2025-03-12 09:37:41,508 - emg_report_generator - INFO - PDF report generated: reports\022725_117958_CarterWallace_mocap_emg_report.pdf
+2025-03-12 09:37:41,870 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:42,270 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:42,678 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:37:53,327 - emg_report_generator - INFO - Fetched 662099 rows for session 9
+2025-03-12 09:37:53,381 - emg_report_generator - INFO - Downsampled timeseries from 662099 to 50931 points
+2025-03-12 09:37:58,097 - emg_report_generator - INFO - PDF report generated: reports\022725_118107_DarielFregio_mocap_emg_report.pdf
+2025-03-12 09:41:06,059 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 09:41:06,060 - db_connector - INFO - Database connector initialized
+2025-03-12 09:41:06,060 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 09:41:06,060 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 09:41:23,082 - db_connector - INFO - Database connector initialized
+2025-03-12 09:41:23,406 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:23,482 - db_connector - INFO - Database connection closed
+2025-03-12 09:41:27,943 - db_connector - INFO - Database connector initialized
+2025-03-12 09:41:27,943 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 09:41:28,262 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:28,662 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:29,074 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:36,532 - emg_report_generator - INFO - Fetched 459969 rows for session 8
+2025-03-12 09:41:36,575 - emg_report_generator - INFO - Downsampled timeseries from 459969 to 51108 points
+2025-03-12 09:41:41,079 - emg_report_generator - INFO - PDF report generated: reports\022725_117958_CarterWallace_mocap_emg_report.pdf
+2025-03-12 09:41:41,432 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:41,832 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:42,242 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 09:41:52,692 - emg_report_generator - INFO - Fetched 662099 rows for session 9
+2025-03-12 09:41:52,732 - emg_report_generator - INFO - Downsampled timeseries from 662099 to 50931 points
+2025-03-12 09:41:57,412 - emg_report_generator - INFO - PDF report generated: reports\022725_118107_DarielFregio_mocap_emg_report.pdf
+2025-03-12 10:10:40,176 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 10:10:40,176 - db_connector - INFO - Database connector initialized
+2025-03-12 10:10:40,177 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 10:10:40,177 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 10:10:53,263 - db_connector - INFO - Database connector initialized
+2025-03-12 10:10:53,843 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:10:53,926 - db_connector - INFO - Database connection closed
+2025-03-12 10:10:56,798 - db_connector - INFO - Database connector initialized
+2025-03-12 10:10:56,800 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 10:10:57,391 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:10:58,292 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:10:59,032 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:11:06,650 - emg_report_generator - INFO - Fetched 459969 rows for session 8
+2025-03-12 10:11:06,693 - emg_report_generator - INFO - Downsampled timeseries from 459969 to 51108 points
+2025-03-12 10:11:08,347 - emg_report_generator - ERROR - Error creating PDF report for session 8: name 'rolling_df' is not defined
+2025-03-12 10:11:08,350 - emg_report_generator - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_report_generator.py", line 834, in create_pdf_report
+    frequency_content = self.create_frequency_content_plot(throws_df, session_info)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_report_generator.py", line 611, in create_frequency_content_plot
+    if column in rolling_df.columns:
+                 ^^^^^^^^^^
+NameError: name 'rolling_df' is not defined
+
+2025-03-12 10:11:08,881 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:11:09,632 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:11:10,333 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:11:21,188 - emg_report_generator - INFO - Fetched 662099 rows for session 9
+2025-03-12 10:11:21,235 - emg_report_generator - INFO - Downsampled timeseries from 662099 to 50931 points
+2025-03-12 10:11:22,687 - emg_report_generator - ERROR - Error creating PDF report for session 9: name 'rolling_df' is not defined
+2025-03-12 10:11:22,690 - emg_report_generator - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_report_generator.py", line 834, in create_pdf_report
+    frequency_content = self.create_frequency_content_plot(throws_df, session_info)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_report_generator.py", line 611, in create_frequency_content_plot
+    if column in rolling_df.columns:
+                 ^^^^^^^^^^
+NameError: name 'rolling_df' is not defined
+
+2025-03-12 10:12:56,002 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 10:12:56,003 - db_connector - INFO - Database connector initialized
+2025-03-12 10:12:56,003 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 10:12:56,003 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 10:13:08,026 - db_connector - INFO - Database connector initialized
+2025-03-12 10:13:08,491 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:08,573 - db_connector - INFO - Database connection closed
+2025-03-12 10:13:10,516 - db_connector - INFO - Database connector initialized
+2025-03-12 10:13:10,517 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 10:13:11,009 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:11,788 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:12,489 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:20,192 - emg_report_generator - INFO - Fetched 459969 rows for session 8
+2025-03-12 10:13:20,226 - emg_report_generator - INFO - Downsampled timeseries from 459969 to 51108 points
+2025-03-12 10:13:24,192 - emg_report_generator - INFO - PDF report generated: reports\022725_117958_CarterWallace_mocap_emg_report.pdf
+2025-03-12 10:13:24,678 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:25,422 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:26,126 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:13:39,255 - emg_report_generator - INFO - Fetched 662099 rows for session 9
+2025-03-12 10:13:39,298 - emg_report_generator - INFO - Downsampled timeseries from 662099 to 50931 points
+2025-03-12 10:13:43,380 - emg_report_generator - INFO - PDF report generated: reports\022725_118107_DarielFregio_mocap_emg_report.pdf
+2025-03-12 10:24:00,639 - db_connector - INFO - Database connector initialized
+2025-03-12 10:24:01,167 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:01,249 - db_connector - INFO - Database connection closed
+2025-03-12 10:24:03,726 - db_connector - INFO - Database connector initialized
+2025-03-12 10:24:03,727 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 10:24:04,325 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:05,079 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:05,779 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:25,849 - emg_report_generator - INFO - Fetched 1217362 rows for session 10
+2025-03-12 10:24:25,972 - emg_report_generator - INFO - Downsampled timeseries from 1217362 to 50724 points
+2025-03-12 10:24:30,295 - emg_report_generator - INFO - PDF report generated: reports\030425_102245_MateoHamm_mocap_emg_report.pdf
+2025-03-12 10:24:30,833 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:31,577 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:32,280 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:24:48,080 - emg_report_generator - INFO - Fetched 823803 rows for session 11
+2025-03-12 10:24:48,131 - emg_report_generator - INFO - Downsampled timeseries from 823803 to 51488 points
+2025-03-12 10:24:52,368 - emg_report_generator - INFO - PDF report generated: reports\030425_118085_JayceBlair_mocap_emg_report.pdf
+2025-03-12 10:25:04,666 - db_connector - INFO - Database connector initialized
+2025-03-12 10:25:05,124 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:25:05,209 - db_connector - INFO - Database connection closed
+2025-03-12 10:25:07,069 - db_connector - INFO - Database connector initialized
+2025-03-12 10:25:07,071 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 10:25:07,525 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:25:08,279 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:25:08,984 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:26:15,497 - emg_report_generator - INFO - Fetched 2556901 rows for session 12
+2025-03-12 10:26:15,676 - emg_report_generator - INFO - Downsampled timeseries from 2556901 to 50136 points
+2025-03-12 10:26:20,680 - emg_report_generator - INFO - PDF report generated: reports\030525_021140_ZaneRose_veloday_emg_report.pdf
+2025-03-12 10:26:37,163 - db_connector - INFO - Database connector initialized
+2025-03-12 10:26:37,709 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:26:37,792 - db_connector - INFO - Database connection closed
+2025-03-12 10:26:40,796 - db_connector - INFO - Database connector initialized
+2025-03-12 10:26:40,797 - emg_report_generator - INFO - Professional EMG Report Generator initialized
+2025-03-12 10:26:41,333 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:26:42,077 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:26:42,778 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 10:27:13,321 - emg_report_generator - INFO - Fetched 1653696 rows for session 13
+2025-03-12 10:27:13,423 - emg_report_generator - INFO - Downsampled timeseries from 1653696 to 50112 points
+2025-03-12 10:27:17,787 - emg_report_generator - INFO - PDF report generated: reports\031025_021140_ZanRose_veloday_emg_report.pdf

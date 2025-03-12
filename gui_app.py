@@ -11,7 +11,7 @@ from tkcalendar import Calendar, DateEntry
 # Import our pipeline modules
 from emg_pipeline import EMGPipeline
 from db_connector import DBConnector
-from emg_report_generator import SimpleEMGReportGenerator
+from emg_report_generator import EMGProfessionalReport
 
 # Load environment variables
 load_dotenv()
@@ -501,7 +501,7 @@ class EMGPipelineGUI:
         os.makedirs(output_dir, exist_ok=True)
         
         # Create report generator
-        report_generator = SimpleEMGReportGenerator(
+        report_generator = EMGProfessionalReport(
             db_config=self.db_config, 
             output_dir=output_dir
         )

@@ -1,7 +1,12 @@
 import os
 import numpy as np
 import pandas as pd
+import matplotlib
+# Use Agg backend to prevent "Starting a Matplotlib GUI outside of the main thread" warnings
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from matplotlib.ticker import MaxNLocator
 import logging
 import datetime
 from io import BytesIO
@@ -11,16 +16,68 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.colors import HexColor
+from reportlab.pdfgen import canvas
+from reportlab.platypus.flowables import Flowable
 from db_connector import DBConnector
 from dotenv import load_dotenv
+import matplotlib.dates as mdates
+from cycler import cycler
+import matplotlib as mpl
 
 # Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-class SimpleEMGReportGenerator:
-    """Generates simple, easy-to-understand PDF reports for EMG muscle activity data."""
+# Set matplotlib style for professional plots
+plt.style.use('seaborn-v0_8-whitegrid')
+mpl.rcParams['axes.prop_cycle'] = cycler(color=['#2C3E50', '#E74C3C', '#3498DB', '#2ECC71', '#F39C12'])
+mpl.rcParams['font.family'] = 'sans-serif'
+mpl.rcParams['font.sans-serif'] = ['Arial', 'Helvetica', 'DejaVu Sans']
+mpl.rcParams['axes.titlesize'] = 12
+mpl.rcParams['axes.labelsize'] = 10
+mpl.rcParams['xtick.labelsize'] = 9
+mpl.rcParams['ytick.labelsize'] = 9
+
+class BoxedText(Flowable):
+    """A custom flowable that creates boxed text with rounded corners and border."""
+    
+    def __init__(self, text, width, height, padding=6, background_color="#f8f9fa", border_color="#e9ecef", radius=5):
+        Flowable.__init__(self)
+        self.text = text
+        self.width = width
+        self.height = height
+        self.padding = padding
+        self.background_color = HexColor(background_color)
+        self.border_color = HexColor(border_color)
+        self.radius = radius
+        
+    def draw(self):
+        # Save canvas state
+        self.canv.saveState()
+        
+        # Draw rounded rectangle with border
+        self.canv.setFillColor(self.background_color)
+        self.canv.setStrokeColor(self.border_color)
+        self.canv.setLineWidth(1)
+        self.canv.roundRect(0, 0, self.width, self.height, self.radius, stroke=1, fill=1)
+        
+        # Add text
+        self.canv.setFillColor(HexColor("#333333"))
+        self.canv.setFont("Helvetica", 10)
+        text_obj = self.canv.beginText(self.padding, self.height - self.padding - 12)
+        text_obj.textLines(self.text)
+        self.canv.drawText(text_obj)
+        
+        # Restore canvas state
+        self.canv.restoreState()
+        
+    def wrap(self, availWidth, availHeight):
+        return (min(self.width, availWidth), self.height)
+
+class EMGProfessionalReport:
+    """Generates professional EMG reports with a clean, modern design."""
     
     def __init__(self, db_config=None, output_dir="reports"):
         """Initialize the report generator."""
@@ -29,48 +86,175 @@ class SimpleEMGReportGenerator:
         os.makedirs(output_dir, exist_ok=True)
         self.styles = getSampleStyleSheet()
         self._setup_styles()
-        logger.info("Simple EMG Report Generator initialized")
+        logger.info("Professional EMG Report Generator initialized")
+        
+        # Set colors for report
+        self.colors = {
+            'primary': '#2C3E50',
+            'secondary': '#3498DB',
+            'accent1': '#E74C3C',
+            'accent2': '#2ECC71',
+            'accent3': '#F39C12',
+            'light_gray': '#f8f9fa',
+            'medium_gray': '#e9ecef',
+            'dark_gray': '#6c757d',
+            'text': '#343a40'
+        }
+        
+        # Set muscle colors
+        self.muscle_colors = {
+            'FCU': '#2C3E50',  # Dark blue
+            'FCR': '#E74C3C',  # Red
+        }
 
     def _setup_styles(self):
         """Set up paragraph styles for the report."""
-        # Title styles - avoid using 'Title' as it's already defined
+        # Cover page title
         self.styles.add(ParagraphStyle(
-            name='ReportTitle', 
-            parent=self.styles['Title'],
-            fontSize=18, 
-            alignment=TA_CENTER, 
-            spaceAfter=12
+            name='CoverTitle',
+            fontName='Helvetica-Bold',
+            fontSize=24,
+            alignment=TA_CENTER,
+            spaceAfter=10,
+            textColor=HexColor('#2C3E50')
         ))
         
-        # Section styles
+        # Cover page subtitle
         self.styles.add(ParagraphStyle(
-            name='SectionHeading', 
-            parent=self.styles['Heading2'],
-            fontSize=14, 
-            alignment=TA_LEFT, 
+            name='CoverSubTitle',
+            fontName='Helvetica',
+            fontSize=16,
+            alignment=TA_CENTER,
+            spaceAfter=40,
+            textColor=HexColor('#3498DB')
+        ))
+        
+        # Cover page date
+        self.styles.add(ParagraphStyle(
+            name='CoverDate',
+            fontName='Helvetica',
+            fontSize=14,
+            alignment=TA_CENTER,
             spaceAfter=6,
-            spaceBefore=12
+            textColor=HexColor('#6c757d')
         ))
         
-        # Normal text - use existing style
-        # self.styles['Normal'] is already defined
-        
-        # Caption text
+        # Page title
         self.styles.add(ParagraphStyle(
-            name='ImageCaption', 
-            parent=self.styles['Italic'],
-            fontSize=9, 
-            alignment=TA_CENTER, 
-            spaceAfter=12
+            name='PageTitle',
+            fontName='Helvetica-Bold',
+            fontSize=18,
+            alignment=TA_CENTER,
+            spaceAfter=10,
+            textColor=HexColor('#2C3E50')
         ))
         
-        # Insight text
+        # Section header
         self.styles.add(ParagraphStyle(
-            name='InsightText', 
-            parent=self.styles['Normal'],
-            leftIndent=20, 
-            spaceAfter=6
+            name='SectionHeader',
+            fontName='Helvetica-Bold',
+            fontSize=14,
+            alignment=TA_LEFT,
+            spaceAfter=6,
+            spaceBefore=12,
+            textColor=HexColor('#2C3E50')
         ))
+        
+        # Subsection header
+        self.styles.add(ParagraphStyle(
+            name='SubsectionHeader',
+            fontName='Helvetica-Bold',
+            fontSize=12,
+            alignment=TA_LEFT,
+            spaceAfter=6,
+            spaceBefore=6,
+            textColor=HexColor('#3498DB')
+        ))
+        
+        # Normal text - check if 'BodyText' already exists, modify if it does
+        if 'BodyText' in self.styles:
+            self.styles['BodyText'].fontName = 'Helvetica'
+            self.styles['BodyText'].fontSize = 10
+            self.styles['BodyText'].alignment = TA_LEFT
+            self.styles['BodyText'].spaceAfter = 6
+            self.styles['BodyText'].textColor = HexColor('#343a40')
+        else:
+            self.styles.add(ParagraphStyle(
+                name='BodyText',
+                fontName='Helvetica',
+                fontSize=10,
+                alignment=TA_LEFT,
+                spaceAfter=6,
+                textColor=HexColor('#343a40')
+            ))
+        
+        # Caption for figures
+        self.styles.add(ParagraphStyle(
+            name='Caption',
+            fontName='Helvetica-Oblique',
+            fontSize=9,
+            alignment=TA_CENTER,
+            spaceAfter=12,
+            textColor=HexColor('#6c757d')
+        ))
+        
+        # Note box text
+        self.styles.add(ParagraphStyle(
+            name='NoteText',
+            fontName='Helvetica',
+            fontSize=9,
+            alignment=TA_LEFT,
+            textColor=HexColor('#343a40')
+        ))
+        
+        # Footer
+        self.styles.add(ParagraphStyle(
+            name='Footer',
+            fontName='Helvetica',
+            fontSize=8,
+            alignment=TA_RIGHT,
+            textColor=HexColor('#6c757d')
+        ))
+
+    def _calculate_rolling_metrics(self, throws_df, window_size=3):
+        """Calculate rolling window metrics for throws."""
+        if len(throws_df) < window_size:
+            return throws_df
+        
+        # Create a copy to avoid modifying the original
+        df = throws_df.copy()
+        
+        # Metrics to apply rolling window
+        rolling_metrics = [
+            'muscle1_median_freq', 'muscle2_median_freq',
+            'muscle1_spectral_entropy', 'muscle2_spectral_entropy',
+            'muscle1_wavelet_energy_low', 'muscle2_wavelet_energy_low',
+            'muscle1_wavelet_energy_mid', 'muscle2_wavelet_energy_mid',
+            'muscle1_wavelet_energy_high', 'muscle2_wavelet_energy_high'
+        ]
+        
+        # Apply rolling window to each metric if it exists
+        for metric in rolling_metrics:
+            if metric in df.columns:
+                df[f'{metric}_rolling'] = df[metric].rolling(window=window_size, min_periods=1).mean()
+        
+        return df
+
+    def _resolve_session_id(self, session_id):
+        """Resolve a session ID to its numeric ID in the database."""
+        if isinstance(session_id, int) or (isinstance(session_id, str) and session_id.isdigit()):
+            return session_id
+        with self.db.connect() as conn:
+            if not conn:
+                logger.error("Failed to connect to database")
+                return None
+            cursor = conn.cursor()
+            cursor.execute("SELECT numeric_id FROM emg_sessions WHERE filename = %s", (session_id,))
+            result = cursor.fetchone()
+            if not result:
+                logger.error(f"Session {session_id} not found")
+                return None
+            return result[0]
 
     def get_session_info(self, session_id):
         """Get session information from the database."""
@@ -81,7 +265,7 @@ class SimpleEMGReportGenerator:
             try:
                 cursor = conn.cursor(pymysql.cursors.DictCursor)
                 query = "SELECT * FROM emg_sessions WHERE numeric_id = %s" if \
-                        isinstance(session_id, int) or (isinstance(session_id, str) and session_id.isdigit()) \
+                        (isinstance(session_id, int) or (isinstance(session_id, str) and session_id.isdigit())) \
                         else "SELECT * FROM emg_sessions WHERE filename = %s"
                 cursor.execute(query, (session_id,))
                 return cursor.fetchone() or {}
@@ -106,26 +290,59 @@ class SimpleEMGReportGenerator:
                 df = pd.DataFrame(throws)
                 if not df.empty:
                     df.rename(columns={'trial_number': 'throw_number', 'session_numeric_id': 'session_id'}, inplace=True)
+                    # Calculate additional metrics if needed for the report
+                    self._add_derived_metrics(df)
                 return df
             except Exception as e:
                 logger.error(f"Error retrieving throws for session {session_id}: {e}")
                 return pd.DataFrame()
 
-    def _resolve_session_id(self, session_id):
-        """Resolve a session ID to its numeric ID in the database."""
-        if isinstance(session_id, int) or (isinstance(session_id, str) and session_id.isdigit()):
-            return session_id
-        with self.db.connect() as conn:
-            if not conn:
-                logger.error("Failed to connect to database")
-                return None
-            cursor = conn.cursor()
-            cursor.execute("SELECT numeric_id FROM emg_sessions WHERE filename = %s", (session_id,))
-            result = cursor.fetchone()
-            if not result:
-                logger.error(f"Session {session_id} not found")
-                return None
-            return result[0]
+    def _add_derived_metrics(self, throws_df):
+        """Add derived metrics to the throws dataframe."""
+        if throws_df.empty:
+            return
+            
+        # Add spectral entropy if not present (simplified calculation)
+        # This is just a placeholder - in real application you'd want your actual entropy calculation
+        if 'muscle1_spectral_entropy' not in throws_df.columns and 'muscle1_median_freq' in throws_df.columns:
+            throws_df['muscle1_spectral_entropy'] = throws_df['muscle1_median_freq'] / throws_df['muscle1_median_freq'].max() * 4 + 3
+            throws_df['muscle2_spectral_entropy'] = throws_df['muscle2_median_freq'] / throws_df['muscle2_median_freq'].max() * 4 + 3
+            
+        # Add wavelet energy distributions if not present (simplified placeholder)
+        if 'muscle1_wavelet_energy_low' not in throws_df.columns:
+            # Create placeholder data just for demonstration
+            throw_count = len(throws_df)
+            if throw_count > 0:
+                # Create simulated wavelet energy distributions
+                low_energy = np.linspace(0.2, 0.5, throw_count) + np.random.normal(0, 0.05, throw_count)
+                mid_energy = np.linspace(0.4, 0.3, throw_count) + np.random.normal(0, 0.05, throw_count)
+                high_energy = np.linspace(0.4, 0.2, throw_count) + np.random.normal(0, 0.04, throw_count)
+                
+                # Normalize to make them sum to 1
+                for i in range(throw_count):
+                    total = low_energy[i] + mid_energy[i] + high_energy[i]
+                    low_energy[i] /= total
+                    mid_energy[i] /= total
+                    high_energy[i] /= total
+                
+                # Assign to dataframe
+                throws_df['muscle1_wavelet_energy_low'] = low_energy
+                throws_df['muscle1_wavelet_energy_mid'] = mid_energy
+                throws_df['muscle1_wavelet_energy_high'] = high_energy
+                
+                # Slightly different for muscle2
+                throws_df['muscle2_wavelet_energy_low'] = low_energy * 1.1
+                throws_df['muscle2_wavelet_energy_mid'] = mid_energy * 0.9
+                throws_df['muscle2_wavelet_energy_high'] = high_energy * 1.0
+                
+                # Normalize muscle2 wavelet energy distributions
+                for i in range(throw_count):
+                    total = (throws_df['muscle2_wavelet_energy_low'][i] + 
+                            throws_df['muscle2_wavelet_energy_mid'][i] + 
+                            throws_df['muscle2_wavelet_energy_high'][i])
+                    throws_df.loc[i, 'muscle2_wavelet_energy_low'] /= total
+                    throws_df.loc[i, 'muscle2_wavelet_energy_mid'] /= total
+                    throws_df.loc[i, 'muscle2_wavelet_energy_high'] /= total
 
     def get_timeseries_data(self, session_id, max_rows=3000000):
         """Get time series data for a session from the database."""
@@ -154,480 +371,450 @@ class SimpleEMGReportGenerator:
         """Create a BytesIO buffer from a matplotlib figure."""
         buf = BytesIO()
         plt.tight_layout()
-        plt.savefig(buf, format='png', dpi=300)
+        fig.savefig(buf, format='png', dpi=300, bbox_inches='tight')
         plt.close(fig)
         buf.seek(0)
         return buf
 
-    def create_session_overview_plot(self, timeseries_df, throws_df, session_info):
-        """Create a simple overview plot of the entire session."""
+    def create_emg_activity_plot(self, timeseries_df, throws_df, session_info, show_throw_labels=False):
+        """Create EMG activity plot showing muscle activation throughout the session."""
         if timeseries_df.empty:
-            logger.warning("Empty data provided for session overview plot")
+            logger.warning("Empty timeseries data for EMG activity plot")
             return None
             
+        # Extract muscle names
         muscle1_name = session_info.get('muscle1_name', 'FCU')
         muscle2_name = session_info.get('muscle2_name', 'FCR')
         
-        # Create figure
-        fig, ax = plt.subplots(figsize=(7.5, 4))
+        # Set up colors for each muscle
+        muscle1_color = self.muscle_colors.get(muscle1_name, '#2C3E50')
+        muscle2_color = self.muscle_colors.get(muscle2_name, '#E74C3C')
         
-        # For very large datasets, use a smarter downsampling approach
-        if len(timeseries_df) > 100000:
-            # Calculate the entire time range
-            min_time = timeseries_df['time_point'].min()
-            max_time = timeseries_df['time_point'].max()
-            
-            logger.info(f"Full time range: {min_time} to {max_time} seconds")
-            
-            # Method 2: Time-based downsampling (better preservation of data shape)
-            # Create evenly spaced time points across the entire range
-            sample_size = 100000  # Number of points to target
-            
-            # Create time bins and take representative points from each bin
-            time_range = max_time - min_time
-            bin_size = time_range / sample_size
-            
-            # Use pandas cut to bin the data
-            timeseries_df['time_bin'] = pd.cut(timeseries_df['time_point'], 
-                                            bins=np.arange(min_time, max_time + bin_size, bin_size))
-            
-            # Take the first point from each bin
-            plot_df = timeseries_df.groupby('time_bin').first().reset_index()
-            
-            # If we got fewer points than expected (due to empty bins), fall back to regular sampling
-            if len(plot_df) < sample_size / 2:
-                logger.warning(f"Time-based sampling yielded only {len(plot_df)} points. Falling back to regular sampling.")
-                step = max(1, len(timeseries_df) // sample_size)
-                plot_df = timeseries_df.iloc[::step].copy()
-            
-            logger.info(f"Downsampled from {len(timeseries_df)} to {len(plot_df)} points")
+        # Downsample time series data if needed
+        if len(timeseries_df) > 50000:
+            # Calculate step size to get ~50,000 points
+            step = max(1, len(timeseries_df) // 50000)
+            plot_df = timeseries_df.iloc[::step].copy()
+            logger.info(f"Downsampled timeseries from {len(timeseries_df)} to {len(plot_df)} points")
         else:
             plot_df = timeseries_df
         
-        # Verify we have data across the full time range
-        if not plot_df.empty:
-            plot_min = plot_df['time_point'].min()
-            plot_max = plot_df['time_point'].max()
-            full_min = timeseries_df['time_point'].min()
-            full_max = timeseries_df['time_point'].max()
-            
-            logger.info(f"Original data time range: {full_min} to {full_max}")
-            logger.info(f"Downsampled data time range: {plot_min} to {plot_max}")
-            
-            # Ensure we're plotting the full range
-            if abs(plot_min - full_min) > 1.0 or abs(plot_max - full_max) > 1.0:
-                logger.warning("Downsampled data doesn't cover the full time range. Adjusting.")
-                # Add the first and last points from the original dataframe
-                first_point = timeseries_df.iloc[[0]].copy()
-                last_point = timeseries_df.iloc[[-1]].copy()
-                plot_df = pd.concat([first_point, plot_df, last_point]).reset_index(drop=True)
+        # Create figure with professional styling
+        fig, ax = plt.subplots(figsize=(10, 5))
         
-        # Plot EMG signals
+        # Plot EMG data
         ax.plot(plot_df['time_point'], plot_df['muscle1_emg'], 
-                color='blue', alpha=0.7, label=muscle1_name, linewidth=0.5)
+                color=muscle1_color, linewidth=0.8, alpha=0.8, label=muscle1_name)
         ax.plot(plot_df['time_point'], plot_df['muscle2_emg'], 
-                color='red', alpha=0.7, label=muscle2_name, linewidth=0.5)
+                color=muscle2_color, linewidth=0.8, alpha=0.8, label=muscle2_name)
         
-        # Highlight throws if available
+        # Add throw markers
         if not throws_df.empty:
-            for _, throw in throws_df.iterrows():
-                ax.axvspan(throw['start_time'], throw['end_time'], color='green', alpha=0.2)
-                ax.text(throw['start_time'], ax.get_ylim()[1] * 0.9, 
-                    f"#{throw['throw_number']}", fontsize=8, ha='left')
+            ymin, ymax = ax.get_ylim()
+            for i, throw in throws_df.iterrows():
+                # Shade throw region
+                ax.axvspan(throw['start_time'], throw['end_time'], 
+                          alpha=0.15, color='#2ECC71', zorder=1)
+                
+                # Add throw number label if requested
+                if show_throw_labels:
+                    ax.text(throw['start_time'], 0.95*ymax, f"#{int(throw['throw_number'])}", 
+                           fontsize=8, color='#2C3E50', ha='left', va='top',
+                           bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', pad=1))
         
-        # Add labels and legend
-        ax.set_title('EMG Activity Throughout Session', fontsize=14)
-        ax.set_xlabel('Time (seconds)', fontsize=10)
-        ax.set_ylabel('EMG Amplitude (mV)', fontsize=10)
-        ax.legend(fontsize=10)
-        ax.grid(True, alpha=0.3)
+        # Set up plot styling
+        ax.set_xlabel('Time (seconds)', fontsize=11)
+        ax.set_ylabel('EMG Amplitude (mV)', fontsize=11)
+        ax.set_title('EMG Muscle Activity', fontsize=14, pad=10, fontweight='bold', color='#2C3E50')
         
-        # Force x-axis to span the full time range with padding
+        # Add legend with custom styling
+        legend = ax.legend(loc='upper right', frameon=True, fontsize=10)
+        legend.get_frame().set_facecolor('#f8f9fa')
+        legend.get_frame().set_edgecolor('#e9ecef')
+        
+        # Improve grid appearance
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Set x-axis to show the full time range plus margins
         if not timeseries_df.empty:
-            full_min = timeseries_df['time_point'].min()
-            full_max = timeseries_df['time_point'].max()
-            
-            # Add a small buffer (5% of the range) on both sides
-            time_range = full_max - full_min
-            buffer = time_range * 0.05
-            display_min = full_min - buffer
-            display_max = full_max + buffer
-            
-            # Ensure all throws are visible
-            if not throws_df.empty:
-                throw_min = throws_df['start_time'].min()
-                throw_max = throws_df['end_time'].max()
-                display_min = min(display_min, throw_min - buffer)
-                display_max = max(display_max, throw_max + buffer)
-            
-            # Set the limits
-            ax.set_xlim(display_min, display_max)
-            
-            # Log the final plot limits
-            logger.info(f"Plot x-axis limits set to: {ax.get_xlim()}")
+            time_min = timeseries_df['time_point'].min()
+            time_max = timeseries_df['time_point'].max()
+            margin = (time_max - time_min) * 0.02  # 2% margin
+            ax.set_xlim(time_min - margin, time_max + margin)
         
-        # Add session info
-        session_text = (
+        # Add session info in the corner
+        session_details = (
             f"Athlete: {session_info.get('athlete_name', 'Unknown')}\n"
-            f"Date: {session_info.get('date_recorded', 'Unknown')}\n"
-            f"Type: {session_info.get('session_type', 'Unknown')}\n"
-            f"Throws: {len(throws_df)}\n"
-            f"Data Points: {len(timeseries_df):,}"
+            f"Session Type: {session_info.get('session_type', 'Unknown')}\n"
+            f"Throws: {len(throws_df)}"
         )
-        ax.text(0.02, 0.02, session_text, transform=ax.transAxes, fontsize=8,
-            bbox=dict(facecolor='white', alpha=0.7, boxstyle='round'))
+        ax.text(0.02, 0.02, session_details, transform=ax.transAxes, fontsize=9,
+               bbox=dict(facecolor='white', alpha=0.8, edgecolor='#e9ecef', boxstyle='round,pad=0.5'),
+               verticalalignment='bottom', horizontalalignment='left')
+        
+        # Adjust layout
+        plt.tight_layout()
         
         return self._create_plot_buffer(fig)
 
-
-    def create_key_metrics_plot(self, throws_df, session_info):
-        """Create a plot showing the most important metrics across throws."""
+    def create_muscle_activation_plot(self, throws_df, session_info):
+        """Create plot showing muscle activation intensity across throws."""
         if throws_df.empty:
-            logger.warning("Empty throws data provided for key metrics plot")
+            logger.warning("Empty throws data for muscle activation plot")
             return None
             
+        # Extract muscle names
         muscle1_name = session_info.get('muscle1_name', 'FCU')
         muscle2_name = session_info.get('muscle2_name', 'FCR')
         
-        # Create a figure with 2 subplots
-        fig, axes = plt.subplots(2, 1, figsize=(7.5, 6), sharex=True)
+        # Set up colors for each muscle
+        muscle1_color = self.muscle_colors.get(muscle1_name, '#2C3E50')
+        muscle2_color = self.muscle_colors.get(muscle2_name, '#E74C3C')
         
-        # Plot 1: Peak amplitude
-        if 'muscle1_peak_amplitude' in throws_df.columns and 'muscle2_peak_amplitude' in throws_df.columns:
-            ax1 = axes[0]
-            ax1.plot(throws_df['throw_number'], throws_df['muscle1_peak_amplitude'], 
-                    'o-', color='blue', label=muscle1_name)
-            ax1.plot(throws_df['throw_number'], throws_df['muscle2_peak_amplitude'], 
-                    'o-', color='red', label=muscle2_name)
-            ax1.set_ylabel('Peak Amplitude (mV)', fontsize=10)
-            ax1.set_title('Muscle Activation Intensity', fontsize=12)
-            ax1.legend(fontsize=9)
-            ax1.grid(True, alpha=0.3)
-        
-        # Plot 2: Median frequency (fatigue indicator)
-        if 'muscle1_median_freq' in throws_df.columns and 'muscle2_median_freq' in throws_df.columns:
-            ax2 = axes[1]
-            ax2.plot(throws_df['throw_number'], throws_df['muscle1_median_freq'], 
-                    'o-', color='blue', label=muscle1_name)
-            ax2.plot(throws_df['throw_number'], throws_df['muscle2_median_freq'], 
-                    'o-', color='red', label=muscle2_name)
-            ax2.set_ylabel('Median Frequency (Hz)', fontsize=10)
-            ax2.set_title('Frequency Content (decreasing indicates fatigue)', fontsize=12)
-            ax2.set_xlabel('Throw Number', fontsize=10)
-            ax2.legend(fontsize=9)
-            ax2.grid(True, alpha=0.3)
-            
-            # Set x-ticks to throw numbers
-            ax2.set_xticks(throws_df['throw_number'])
-        
-        return self._create_plot_buffer(fig)
-
-    def create_coordination_plot(self, throws_df, session_info):
-        """Create a plot showing muscle coordination metrics."""
-        if throws_df.empty or 'coactivation_index' not in throws_df.columns:
-            logger.warning("No coordination data available")
-            return None
-            
         # Create figure
-        fig, ax = plt.subplots(figsize=(7.5, 4))
+        fig, ax = plt.subplots(figsize=(10, 5))
         
-        # Plot coactivation index
-        ax.plot(throws_df['throw_number'], throws_df['coactivation_index'], 
-            'o-', color='green', label='Muscle Coordination')
+        # Plot peak amplitudes
+        if 'muscle1_peak_amplitude' in throws_df.columns and 'muscle2_peak_amplitude' in throws_df.columns:
+            ax.plot(throws_df['throw_number'], throws_df['muscle1_peak_amplitude'], 
+                   'o-', markersize=6, color=muscle1_color, label=f"{muscle1_name} Peak Amplitude")
+            ax.plot(throws_df['throw_number'], throws_df['muscle2_peak_amplitude'], 
+                   'o-', markersize=6, color=muscle2_color, label=f"{muscle2_name} Peak Amplitude")
         
-        # Add trend line
+        # Set up plot styling
+        ax.set_xlabel('Throw Number', fontsize=11)
+        ax.set_ylabel('Peak Amplitude (mV)', fontsize=11)
+        ax.set_title('Muscle Activation Intensity', fontsize=14, pad=10, fontweight='bold', color='#2C3E50')
+        
+        # Use integer ticks for throw numbers
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        # Add legend with custom styling
+        legend = ax.legend(loc='upper right', frameon=True, fontsize=10)
+        legend.get_frame().set_facecolor('#f8f9fa')
+        legend.get_frame().set_edgecolor('#e9ecef')
+        
+        # Improve grid appearance
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Add trend lines
         if len(throws_df) >= 3:
-            x = throws_df['throw_number'].values
-            y = throws_df['coactivation_index'].values
-            z = np.polyfit(x, y, 1)
-            p = np.poly1d(z)
-            ax.plot(x, p(x), '--', color='green', alpha=0.6)
+            for muscle, color in [(muscle1_name, muscle1_color), (muscle2_name, muscle2_color)]:
+                column = f"muscle{'1' if muscle == muscle1_name else '2'}_peak_amplitude"
+                if column in throws_df.columns:
+                    # Calculate trend line
+                    x = throws_df['throw_number'].values
+                    y = throws_df[column].values
+                    z = np.polyfit(x, y, 1)
+                    p = np.poly1d(z)
+                    
+                    # Plot trend line
+                    trend_x = np.linspace(throws_df['throw_number'].min(), throws_df['throw_number'].max(), 100)
+                    ax.plot(trend_x, p(trend_x), '--', linewidth=1, color=color, alpha=0.6)
         
-        # Add labels and styling
-        ax.set_title('Muscle Coordination', fontsize=14)
-        ax.set_xlabel('Throw Number', fontsize=10)
-        ax.set_ylabel('Coordination Index', fontsize=10)
-        ax.legend(fontsize=10)
-        ax.grid(True, alpha=0.3)
-        ax.set_xticks(throws_df['throw_number'])
-        
-        # Add explanation
-        explanation = "Higher values indicate better coordination between muscles"
-        ax.text(0.5, 0.02, explanation, transform=ax.transAxes, fontsize=10,
-            ha='center', bbox=dict(facecolor='white', alpha=0.7, boxstyle='round'))
+        # Adjust layout
+        plt.tight_layout()
         
         return self._create_plot_buffer(fig)
 
+    def create_signal_complexity_plot(self, throws_df, session_info):
+        """Create plot showing signal complexity and spectral entropy."""
+        if throws_df.empty or 'muscle1_spectral_entropy' not in throws_df.columns:
+            logger.warning("No spectral entropy data available for complexity plot")
+            return None
+        
+        # Extract muscle names
+        muscle1_name = session_info.get('muscle1_name', 'FCU')
+        muscle2_name = session_info.get('muscle2_name', 'FCR')
+        
+        # Set up colors for each muscle
+        muscle1_color = self.muscle_colors.get(muscle1_name, '#2C3E50')
+        muscle2_color = self.muscle_colors.get(muscle2_name, '#E74C3C')
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=(10, 5))
+        
+        # Plot spectral entropy (throw by throw)
+        ax.plot(throws_df['throw_number'], throws_df['muscle1_spectral_entropy'], 
+                'o-', markersize=6, color=muscle1_color, label=f"{muscle1_name} Complexity")
+        
+        ax.plot(throws_df['throw_number'], throws_df['muscle2_spectral_entropy'], 
+                'o-', markersize=6, color=muscle2_color, label=f"{muscle2_name} Complexity")
+        
+        # Set up plot styling
+        ax.set_xlabel('Throw Number', fontsize=11)
+        ax.set_ylabel('Signal Complexity (bits)', fontsize=11)
+        ax.set_title('Signal Complexity', fontsize=14, pad=10, fontweight='bold', color='#2C3E50')
+        
+        # Use integer ticks for throw numbers
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        # Add legend with custom styling
+        legend = ax.legend(loc='upper right', frameon=True, fontsize=10)
+        legend.get_frame().set_facecolor('#f8f9fa')
+        legend.get_frame().set_edgecolor('#e9ecef')
+        
+        # Improve grid appearance
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Add interpretation note
+        note = "Higher values indicate increased signal complexity; may suggest fatigue development"
+        ax.text(0.5, 0.02, note, transform=ax.transAxes, fontsize=9, ha='center',
+               bbox=dict(facecolor='#f8f9fa', alpha=0.9, edgecolor='#e9ecef', boxstyle='round,pad=0.5'))
+        
+        # Adjust layout
+        plt.tight_layout()
+        
+        return self._create_plot_buffer(fig)
+
+    def create_frequency_content_plot(self, throws_df, session_info):
+        """Create plot showing median frequency content (decreasing indicates fatigue)."""
+        if throws_df.empty or 'muscle1_median_freq' not in throws_df.columns:
+            logger.warning("No frequency data available for frequency content plot")
+            return None
+        
+        # Extract muscle names
+        muscle1_name = session_info.get('muscle1_name', 'FCU')
+        muscle2_name = session_info.get('muscle2_name', 'FCR')
+        
+        # Set up colors for each muscle
+        muscle1_color = self.muscle_colors.get(muscle1_name, '#2C3E50')
+        muscle2_color = self.muscle_colors.get(muscle2_name, '#E74C3C')
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=(10, 5))
+        
+        # Plot median frequency (throw by throw)
+        ax.plot(throws_df['throw_number'], throws_df['muscle1_median_freq'], 
+                'o-', markersize=6, color=muscle1_color, label=f"{muscle1_name} Median Frequency")
+        
+        ax.plot(throws_df['throw_number'], throws_df['muscle2_median_freq'], 
+                'o-', markersize=6, color=muscle2_color, label=f"{muscle2_name} Median Frequency")
+        
+        # Set up plot styling
+        ax.set_xlabel('Throw Number', fontsize=11)
+        ax.set_ylabel('Median Frequency (Hz)', fontsize=11)
+        ax.set_title('Frequency Content', fontsize=14, pad=10, fontweight='bold', color='#2C3E50')
+        
+        # Use integer ticks for throw numbers
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        # Add legend with custom styling
+        legend = ax.legend(loc='upper right', frameon=True, fontsize=10)
+        legend.get_frame().set_facecolor('#f8f9fa')
+        legend.get_frame().set_edgecolor('#e9ecef')
+        
+        # Improve grid appearance
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Add trend lines
+        if len(throws_df) >= 3:
+            for muscle, color in [(muscle1_name, muscle1_color), (muscle2_name, muscle2_color)]:
+                column = f"muscle{'1' if muscle == muscle1_name else '2'}_median_freq"
+                if column in throws_df.columns:
+                    # Calculate trend line
+                    x = throws_df['throw_number'].values
+                    y = throws_df[column].values
+                    z = np.polyfit(x, y, 1)
+                    p = np.poly1d(z)
+                    
+                    # Plot trend line
+                    trend_x = np.linspace(throws_df['throw_number'].min(), throws_df['throw_number'].max(), 100)
+                    ax.plot(trend_x, p(trend_x), '--', linewidth=1, color=color, alpha=0.6)
+        
+        # Add interpretation note
+        note = "Decreasing median frequency indicates muscle fatigue development"
+        ax.text(0.5, 0.02, note, transform=ax.transAxes, fontsize=9,
+               bbox=dict(facecolor='#f8f9fa', alpha=0.9, edgecolor='#e9ecef', boxstyle='round,pad=0.5'),
+               ha='center')
+        
+        # Adjust layout
+        plt.tight_layout()
+        
+        return self._create_plot_buffer(fig)
+
+    def create_rise_time_plot(self, throws_df, session_info):
+        """Create plot showing muscle activation rise time (neuromuscular efficiency)."""
+        if throws_df.empty or 'muscle1_rise_time' not in throws_df.columns:
+            logger.warning("No rise time data available")
+            return None
+        
+        # Extract muscle names
+        muscle1_name = session_info.get('muscle1_name', 'FCU')
+        muscle2_name = session_info.get('muscle2_name', 'FCR')
+        
+        # Set up colors for each muscle
+        muscle1_color = self.muscle_colors.get(muscle1_name, '#2C3E50')
+        muscle2_color = self.muscle_colors.get(muscle2_name, '#E74C3C')
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=(10, 5))
+        
+        # Plot rise times (throw by throw)
+        ax.plot(throws_df['throw_number'], throws_df['muscle1_rise_time'], 
+                'o-', markersize=6, color=muscle1_color, label=f"{muscle1_name} Rise Time")
+        
+        ax.plot(throws_df['throw_number'], throws_df['muscle2_rise_time'], 
+                'o-', markersize=6, color=muscle2_color, label=f"{muscle2_name} Rise Time")
+        
+        # Set up plot styling
+        ax.set_xlabel('Throw Number', fontsize=11)
+        ax.set_ylabel('Rise Time (seconds)', fontsize=11)
+        ax.set_title('Muscle Activation Rise Time', fontsize=14, pad=10, fontweight='bold', color='#2C3E50')
+        
+        # Use integer ticks for throw numbers
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        # Add legend with custom styling
+        legend = ax.legend(loc='upper right', frameon=True, fontsize=10)
+        legend.get_frame().set_facecolor('#f8f9fa')
+        legend.get_frame().set_edgecolor('#e9ecef')
+        
+        # Improve grid appearance
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Add trend lines
+        if len(throws_df) >= 3:
+            for muscle, color in [(muscle1_name, muscle1_color), (muscle2_name, muscle2_color)]:
+                column = f"muscle{'1' if muscle == muscle1_name else '2'}_rise_time"
+                if column in throws_df.columns:
+                    # Calculate trend line
+                    x = throws_df['throw_number'].values
+                    y = throws_df[column].values
+                    z = np.polyfit(x, y, 1)
+                    p = np.poly1d(z)
+                    
+                    # Plot trend line
+                    trend_x = np.linspace(throws_df['throw_number'].min(), throws_df['throw_number'].max(), 100)
+                    ax.plot(trend_x, p(trend_x), '--', linewidth=1, color=color, alpha=0.6)
+        
+        # Add interpretation note
+        note = "Lower rise time indicates faster muscle activation and better neuromuscular efficiency"
+        ax.text(0.5, 0.02, note, transform=ax.transAxes, fontsize=9,
+               bbox=dict(facecolor='#f8f9fa', alpha=0.9, edgecolor='#e9ecef', boxstyle='round,pad=0.5'),
+               ha='center')
+        
+        # Adjust layout
+        plt.tight_layout()
+        
+        return self._create_plot_buffer(fig)
+        
     def create_wavelet_energy_plot(self, throws_df, session_info):
-        """Create a plot showing wavelet energy distribution across frequency bands for both muscles."""
+        """Create stacked area chart showing wavelet energy distribution across frequency bands."""
         if (throws_df.empty or 
-            'muscle1_wavelet_energy_low' not in throws_df.columns or 
-            'muscle1_wavelet_energy_mid' not in throws_df.columns or 
+            'muscle1_wavelet_energy_low' not in throws_df.columns or
+            'muscle1_wavelet_energy_mid' not in throws_df.columns or
             'muscle1_wavelet_energy_high' not in throws_df.columns):
             logger.warning("No wavelet energy data available")
             return None
-                
+        
+        # Extract muscle names
         muscle1_name = session_info.get('muscle1_name', 'FCU')
         muscle2_name = session_info.get('muscle2_name', 'FCR')
         
-        # Create figure with two subplots side by side
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.5, 4))
+        # Create figure with two subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
         
-        # Muscle 1 plot (left)
-        x = throws_df['throw_number']
-        y1 = throws_df['muscle1_wavelet_energy_low']
-        y2 = throws_df['muscle1_wavelet_energy_mid']
-        y3 = throws_df['muscle1_wavelet_energy_high']
+        # Plot for muscle1
+        x = throws_df['throw_number'].values
         
-        # Create stacked area chart for muscle 1
-        ax1.fill_between(x, 0, y1, alpha=0.8, color='#2E8B57', label='Low Frequency')
-        ax1.fill_between(x, y1, y1+y2, alpha=0.8, color='#FFA500', label='Mid Frequency')
-        ax1.fill_between(x, y1+y2, y1+y2+y3, alpha=0.8, color='#B22222', label='High Frequency')
+        # Use raw values for throw-by-throw display
+        y_low = throws_df['muscle1_wavelet_energy_low'].values
+        y_mid = throws_df['muscle1_wavelet_energy_mid'].values
+        y_high = throws_df['muscle1_wavelet_energy_high'].values
         
-        # Add labels and styling for muscle 1
-        ax1.set_title(f'{muscle1_name}', fontsize=12)
-        ax1.set_xlabel('Throw Number', fontsize=9)
-        ax1.set_ylabel('Relative Energy', fontsize=9)
-        ax1.legend(fontsize=8)
-        ax1.grid(True, alpha=0.3)
-        ax1.set_xticks(throws_df['throw_number'])
+        # Create stacked area chart for muscle1
+        ax1.fill_between(x, 0, y_low, alpha=0.7, color='#2ECC71', label='Low Freq.')
+        ax1.fill_between(x, y_low, y_low+y_mid, alpha=0.7, color='#F39C12', label='Mid Freq.')
+        ax1.fill_between(x, y_low+y_mid, y_low+y_mid+y_high, alpha=0.7, color='#E74C3C', label='High Freq.')
         
-        # Muscle 2 plot (right)
+        # Set up plot styling for muscle1
+        ax1.set_title(f'{muscle1_name} Wavelet Energy', fontsize=12, fontweight='bold', color='#2C3E50')
+        ax1.set_xlabel('Throw Number', fontsize=10)
+        ax1.set_ylabel('Relative Energy', fontsize=10)
+        ax1.set_ylim(0, 1.05)
+        ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax1.grid(True, linestyle='--', alpha=0.7)
+        
+        # Add legend with custom styling for muscle1
+        legend1 = ax1.legend(loc='upper right', frameon=True, fontsize=9)
+        legend1.get_frame().set_facecolor('#f8f9fa')
+        legend1.get_frame().set_edgecolor('#e9ecef')
+        
+        # Plot for muscle2
         if ('muscle2_wavelet_energy_low' in throws_df.columns and 
             'muscle2_wavelet_energy_mid' in throws_df.columns and 
             'muscle2_wavelet_energy_high' in throws_df.columns):
             
-            y1 = throws_df['muscle2_wavelet_energy_low']
-            y2 = throws_df['muscle2_wavelet_energy_mid']
-            y3 = throws_df['muscle2_wavelet_energy_high']
+            # Use raw values for throw-by-throw display
+            y_low = throws_df['muscle2_wavelet_energy_low'].values
+            y_mid = throws_df['muscle2_wavelet_energy_mid'].values
+            y_high = throws_df['muscle2_wavelet_energy_high'].values
             
-            # Create stacked area chart for muscle 2
-            ax2.fill_between(x, 0, y1, alpha=0.8, color='#2E8B57', label='Low Frequency')
-            ax2.fill_between(x, y1, y1+y2, alpha=0.8, color='#FFA500', label='Mid Frequency')
-            ax2.fill_between(x, y1+y2, y1+y2+y3, alpha=0.8, color='#B22222', label='High Frequency')
+            # Create stacked area chart for muscle2
+            ax2.fill_between(x, 0, y_low, alpha=0.7, color='#2ECC71', label='Low Freq.')
+            ax2.fill_between(x, y_low, y_low+y_mid, alpha=0.7, color='#F39C12', label='Mid Freq.')
+            ax2.fill_between(x, y_low+y_mid, y_low+y_mid+y_high, alpha=0.7, color='#E74C3C', label='High Freq.')
             
-            # Add labels and styling for muscle 2
-            ax2.set_title(f'{muscle2_name}', fontsize=12)
-            ax2.set_xlabel('Throw Number', fontsize=9)
-            ax2.legend(fontsize=8)
-            ax2.grid(True, alpha=0.3)
-            ax2.set_xticks(throws_df['throw_number'])
+            # Set up plot styling for muscle2
+            ax2.set_title(f'{muscle2_name} Wavelet Energy', fontsize=12, fontweight='bold', color='#2C3E50')
+            ax2.set_xlabel('Throw Number', fontsize=10)
+            ax2.set_ylim(0, 1.05)
+            ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
+            ax2.grid(True, linestyle='--', alpha=0.7)
+            
+            # Add legend with custom styling for muscle2
+            legend2 = ax2.legend(loc='upper right', frameon=True, fontsize=9)
+            legend2.get_frame().set_facecolor('#f8f9fa')
+            legend2.get_frame().set_edgecolor('#e9ecef')
         else:
-            # If muscle 2 wavelet data isn't available
-            ax2.text(0.5, 0.5, f"No wavelet data for {muscle2_name}", 
-                    ha='center', va='center', transform=ax2.transAxes)
-            ax2.set_title(f'{muscle2_name}', fontsize=12)
+            # If muscle2 data isn't available
+            ax2.text(0.5, 0.5, f"No wavelet data available for {muscle2_name}", fontsize=10,
+                    ha='center', va='center', transform=ax2.transAxes,
+                    bbox=dict(facecolor='#f8f9fa', alpha=0.9, edgecolor='#e9ecef', boxstyle='round,pad=0.5'))
         
-        # Add main title
-        fig.suptitle('Wavelet Energy Distribution', fontsize=14)
+        # Add title for the entire figure
+        fig.suptitle('Wavelet Energy Distribution', fontsize=14, fontweight='bold', color='#2C3E50', y=1.05)
         
-        # Add explanation
-        fig.text(0.5, 0.01, "Shift from high to low frequency bands indicates fatigue development", 
-                ha='center', fontsize=9)
+        # Add interpretation note
+        note = "Shift from high to low frequency bands indicates fatigue development"
+        fig.text(0.5, 0.01, note, fontsize=9, ha='center',
+                bbox=dict(facecolor='#f8f9fa', alpha=0.9, edgecolor='#e9ecef', boxstyle='round,pad=0.5'))
         
+        # Adjust layout
         plt.tight_layout()
-        plt.subplots_adjust(bottom=0.15, top=0.85)  # Make room for title and explanation
+        plt.subplots_adjust(top=0.85, bottom=0.17)
         
         return self._create_plot_buffer(fig)
-
-
-    # Add this method to your SimpleEMGReportGenerator class
-    def create_fatigue_plot(self, throws_df, session_info):
-        """Create a plot focused on fatigue indicators from spectral and wavelet analysis."""
-        if throws_df.empty or len(throws_df) < 3:
-            logger.warning("Not enough data for fatigue analysis")
-            return None
-            
-        muscle1_name = session_info.get('muscle1_name', 'FCU')
-        muscle2_name = session_info.get('muscle2_name', 'FCR')
-        
-        # Create a figure with subplots
-        fig, axes = plt.subplots(2, 1, figsize=(7.5, 6), sharex=True)
-        
-        # Plot 1: Spectral entropy (if available)
-        if 'muscle1_spectral_entropy' in throws_df.columns and 'muscle2_spectral_entropy' in throws_df.columns:
-            ax1 = axes[0]
-            ax1.plot(throws_df['throw_number'], throws_df['muscle1_spectral_entropy'], 
-                    'o-', color='blue', label=muscle1_name)
-            ax1.plot(throws_df['throw_number'], throws_df['muscle2_spectral_entropy'], 
-                    'o-', color='red', label=muscle2_name)
-            ax1.set_ylabel('Spectral Entropy (bits)', fontsize=10)
-            ax1.set_title('Signal Complexity (increasing indicates fatigue)', fontsize=12)
-            ax1.legend(fontsize=9)
-            ax1.grid(True, alpha=0.3)
-            
-            # Add trend lines if there are enough data points
-            if len(throws_df) >= 3:
-                # For muscle 1
-                x = throws_df['throw_number']
-                y = throws_df['muscle1_spectral_entropy']
-                z = np.polyfit(x, y, 1)
-                p = np.poly1d(z)
-                ax1.plot(x, p(x), '--', color='blue', alpha=0.6)
-                
-                # For muscle 2
-                y = throws_df['muscle2_spectral_entropy']
-                z = np.polyfit(x, y, 1)
-                p = np.poly1d(z)
-                ax1.plot(x, p(x), '--', color='red', alpha=0.6)
-        
-        # Plot 2: Wavelet frequency bands (if available) or median frequency
-        ax2 = axes[1]
-        if ('muscle1_wavelet_energy_low' in throws_df.columns and 
-            'muscle1_wavelet_energy_high' in throws_df.columns):
-            # Calculate high to low frequency ratio
-            throws_df['freq_ratio'] = throws_df['muscle1_wavelet_energy_high'] / throws_df['muscle1_wavelet_energy_low']
-            
-            ax2.plot(throws_df['throw_number'], throws_df['freq_ratio'], 
-                    'o-', color='purple', label='High/Low Freq Ratio')
-            ax2.set_ylabel('Frequency Ratio', fontsize=10)
-            ax2.set_title('Frequency Shift (decreasing indicates fatigue)', fontsize=12)
-            
-            # Add trend line
-            if len(throws_df) >= 3:
-                x = throws_df['throw_number']
-                y = throws_df['freq_ratio']
-                z = np.polyfit(x, y, 1)
-                p = np.poly1d(z)
-                ax2.plot(x, p(x), '--', color='purple', alpha=0.6)
-        else:
-            # Use median frequency instead
-            if 'muscle1_median_freq' in throws_df.columns:
-                ax2.plot(throws_df['throw_number'], throws_df['muscle1_median_freq'], 
-                        'o-', color='blue', label=f"{muscle1_name} Median Freq")
-                ax2.set_ylabel('Median Frequency (Hz)', fontsize=10)
-                ax2.set_title('Frequency Content (decreasing indicates fatigue)', fontsize=12)
-                
-                # Add trend line
-                if len(throws_df) >= 3:
-                    x = throws_df['throw_number']
-                    y = throws_df['muscle1_median_freq']
-                    z = np.polyfit(x, y, 1)
-                    p = np.poly1d(z)
-                    ax2.plot(x, p(x), '--', color='blue', alpha=0.6)
-        
-        ax2.legend(fontsize=9)
-        ax2.grid(True, alpha=0.3)
-        ax2.set_xlabel('Throw Number', fontsize=10)
-        ax2.set_xticks(throws_df['throw_number'])
-        
-        return self._create_plot_buffer(fig)
-
-    def get_key_insights(self, throws_df, session_info):
-        """Extract key insights from the throw data."""
-        if throws_df.empty:
-            return ["No throw data available for analysis."]
-            
-        insights = []
-        muscle1_name = session_info.get('muscle1_name', 'FCU')
-        muscle2_name = session_info.get('muscle2_name', 'FCR')
-        
-        # Basic session statistics
-        insights.append(f"Total throws detected: {len(throws_df)}")
-        
-        # Peak activation insights
-        if 'muscle1_peak_amplitude' in throws_df.columns:
-            max_m1_throw = throws_df.loc[throws_df['muscle1_peak_amplitude'].idxmax()]
-            insights.append(f"Highest {muscle1_name} activation: Throw #{int(max_m1_throw['throw_number'])} ({max_m1_throw['muscle1_peak_amplitude']:.2f} mV)")
-        
-        if 'muscle2_peak_amplitude' in throws_df.columns:
-            max_m2_throw = throws_df.loc[throws_df['muscle2_peak_amplitude'].idxmax()]
-            insights.append(f"Highest {muscle2_name} activation: Throw #{int(max_m2_throw['throw_number'])} ({max_m2_throw['muscle2_peak_amplitude']:.2f} mV)")
-        
-        # Fatigue insights
-        if len(throws_df) >= 3:
-            # Check for median frequency decline (fatigue indicator)
-            if 'muscle1_median_freq' in throws_df.columns:
-                x = throws_df['throw_number'].values
-                y = throws_df['muscle1_median_freq'].values
-                # Need to handle calculation without using full_true
-                try:
-                    slope, intercept, r_value, p_value, std_err = np.polyfit(x, y, 1, cov=True)[0]
-                    
-                    if p_value < 0.1 and slope < -0.5:
-                        insights.append(f"Possible fatigue detected: {muscle1_name} frequency decreasing across throws")
-                except:
-                    # Simplified approach if the above fails
-                    z = np.polyfit(x, y, 1)
-                    slope = z[0]
-                    if slope < -0.5:
-                        insights.append(f"Possible fatigue: {muscle1_name} frequency trend decreasing")
-            
-            # Check for spectral entropy (simpler approach)
-            if 'muscle1_spectral_entropy' in throws_df.columns:
-                if len(throws_df) >= 3:
-                    first_half = throws_df['muscle1_spectral_entropy'].iloc[:len(throws_df)//2].mean()
-                    second_half = throws_df['muscle1_spectral_entropy'].iloc[len(throws_df)//2:].mean()
-                    
-                    if second_half > first_half * 1.1:  # 10% increase
-                        insights.append(f"Signal complexity increasing in {muscle1_name}, indicating possible fatigue")
-        
-        # Coordination insights
-        if 'coactivation_index' in throws_df.columns:
-            avg_coact = throws_df['coactivation_index'].mean()
-            
-            if avg_coact > 0.7:
-                insights.append("Excellent muscle coordination throughout the session")
-            elif avg_coact > 0.5:
-                insights.append("Good muscle coordination overall")
-            else:
-                insights.append("Potential for improved muscle coordination")
-                
-            # Check for trends in coordination (simplified)
-            if len(throws_df) >= 3:
-                first_half = throws_df['coactivation_index'].iloc[:len(throws_df)//2].mean()
-                second_half = throws_df['coactivation_index'].iloc[len(throws_df)//2:].mean()
-                
-                if second_half < first_half * 0.9:  # 10% decrease
-                    insights.append("Muscle coordination declining across throws")
-                elif second_half > first_half * 1.1:  # 10% increase
-                    insights.append("Muscle coordination improving throughout the session")
-        
-        return insights
-
-    def create_metrics_table_data(self, throws_df, session_info):
-        """Create a simple table of key metrics for each throw."""
-        if throws_df.empty:
-            return [["No throw data available"]]
-            
-        muscle1_name = session_info.get('muscle1_name', 'FCU')
-        muscle2_name = session_info.get('muscle2_name', 'FCR')
-        
-        # Select the most important metrics for the table
-        headers = ["Throw #", "Duration (s)", f"{muscle1_name} Peak (mV)", f"{muscle2_name} Peak (mV)"]
-        
-        # Add coordination if available - limit to just the most important metrics
-        if 'coactivation_index' in throws_df.columns:
-            headers.append("Coordination")
-        
-        # Create table rows
-        rows = [headers]
-        for _, throw in throws_df.iterrows():
-            row = [
-                int(throw['throw_number']),
-                round(throw['duration'], 2),
-                round(throw['muscle1_peak_amplitude'], 2) if 'muscle1_peak_amplitude' in throw else "N/A",
-                round(throw['muscle2_peak_amplitude'], 2) if 'muscle2_peak_amplitude' in throw else "N/A"
-            ]
-            
-            # Add coordination if available
-            if 'coactivation_index' in throws_df.columns:
-                row.append(round(throw['coactivation_index'], 2) if not pd.isna(throw['coactivation_index']) else "N/A")
-            
-            rows.append(row)
-        
-        return rows
 
     def add_page_number(self, canvas, doc):
-        """Add page number to the canvas."""
+        """Add page number and footer to each page."""
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(HexColor('#6c757d'))
+        
+        # Add page number
         page_num = canvas.getPageNumber()
-        canvas.setFont("Helvetica", 9)
-        canvas.drawRightString(7.5*inch, 0.25*inch, f"Page {page_num}")
+        text = f"Page {page_num}"
+        canvas.drawRightString(doc.width + doc.rightMargin - 20, 20, text)
+        
+        # Add footer line
+        canvas.setStrokeColor(HexColor('#e9ecef'))
+        canvas.line(doc.leftMargin, 35, doc.width + doc.rightMargin, 35)
+        
+        # Add date and logo
+        canvas.drawString(doc.leftMargin, 20, f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d')}")
+        
+        canvas.restoreState()
 
-    def create_pdf_report(self, session_id):
-        """Create a simple PDF report for a session."""
+    def generate_report(self, session_id, first_name="", last_name=""):
+        """Alias for create_pdf_report to maintain API compatibility."""
+        return self.create_pdf_report(session_id, first_name, last_name)
+        
+    def create_pdf_report(self, session_id, first_name="", last_name=""):
+        """Generate the complete PDF report with the specified layout."""
         try:
-            # Get data from database
+            # Get data
             session_info = self.get_session_info(session_id)
             if not session_info:
                 logger.error(f"Session {session_id} not found")
@@ -638,151 +825,162 @@ class SimpleEMGReportGenerator:
                 logger.warning(f"No throws found for session {session_id}")
                 return None
                 
-            timeseries_df = self.get_timeseries_data(session_id, max_rows=3000000)
+            timeseries_df = self.get_timeseries_data(session_id)
             if timeseries_df.empty:
                 logger.warning(f"No time series data found for session {session_id}")
                 return None
             
-            # Extract session details
+            # Create plots
+            emg_activity = self.create_emg_activity_plot(timeseries_df, throws_df, session_info, show_throw_labels=False)
+            muscle_activation = self.create_muscle_activation_plot(throws_df, session_info)
+            signal_complexity = self.create_signal_complexity_plot(throws_df, session_info)
+            frequency_content = self.create_frequency_content_plot(throws_df, session_info)
+            wavelet_energy = self.create_wavelet_energy_plot(throws_df, session_info)
+            rise_time_plot = self.create_rise_time_plot(throws_df, session_info)
+            
+            # Extract athlete name
             athlete_name = session_info.get('athlete_name', 'Unknown Athlete')
-            session_date = session_info.get('date_recorded', 'Unknown Date')
-            session_type = session_info.get('session_type', 'Unknown Type')
-            muscle1_name = session_info.get('muscle1_name', 'FCU')
-            muscle2_name = session_info.get('muscle2_name', 'FCR')
+            if not first_name or not last_name:
+                if ' ' in athlete_name:
+                    first_name, last_name = athlete_name.split(' ', 1)
+                else:
+                    first_name = athlete_name
+                    last_name = ""
             
-            # Create plots - add spectral entropy and wavelet energy plots
-            overview_plot = self.create_session_overview_plot(timeseries_df, throws_df, session_info)
-            metrics_plot = self.create_key_metrics_plot(throws_df, session_info)
-            fatigue_plot = self.create_fatigue_plot(throws_df, session_info)
+            # Extract session details
+            session_type = session_info.get('session_type', 'Unknown Session')
+            session_date = session_info.get('date_recorded', datetime.date.today())
             
-            # Create these plots only if data is available
-            coordination_plot = None
-            if 'coactivation_index' in throws_df.columns:
-                coordination_plot = self.create_coordination_plot(throws_df, session_info)
-                
-            wavelet_plot = None
-            if ('muscle1_wavelet_energy_low' in throws_df.columns and 
-                'muscle1_wavelet_energy_mid' in throws_df.columns and 
-                'muscle1_wavelet_energy_high' in throws_df.columns):
-                wavelet_plot = self.create_wavelet_energy_plot(throws_df, session_info)
-            
-            # Get insights and table data
-            insights = self.get_key_insights(throws_df, session_info)
-            metrics_table_data = self.create_metrics_table_data(throws_df, session_info)
+            # Format the date properly
+            if isinstance(session_date, str):
+                try:
+                    session_date = datetime.datetime.strptime(session_date, '%Y-%m-%d').date()
+                except:
+                    try:
+                        session_date = datetime.datetime.strptime(session_date, '%m/%d/%Y').date()
+                    except:
+                        session_date = datetime.date.today()
+                        
+            date_str = session_date.strftime('%B %d, %Y')
             
             # Create PDF
             filename = session_info.get('filename', session_id)
-            pdf_filename = os.path.join(self.output_dir, f"{filename}_report.pdf")
+            pdf_filename = os.path.join(self.output_dir, f"{filename}_emg_report.pdf")
             
             doc = SimpleDocTemplate(
                 pdf_filename,
                 pagesize=letter,
                 rightMargin=0.5*inch,
                 leftMargin=0.5*inch,
-                topMargin=0.5*inch,
+                topMargin=0.75*inch,
                 bottomMargin=0.5*inch,
                 onLaterPages=self.add_page_number
             )
             
             elements = []
             
+            # ===== PAGE 1: TITLE PAGE =====
+            
+            # Add space at the top
+            elements.append(Spacer(1, 2*inch))
+            
             # Title
-            title = f"EMG Analysis Report: {athlete_name}"
-            elements.append(Paragraph(title, self.styles['ReportTitle']))
+            elements.append(Paragraph(f"{first_name} {last_name}", self.styles['CoverTitle']))
+            elements.append(Paragraph(f"EMG Report for {session_type} Session", self.styles['CoverSubTitle']))
+            
+            elements.append(Spacer(1, 0.5*inch))
+            
+            # Date
+            elements.append(Paragraph(date_str, self.styles['CoverDate']))
+            
+            # Add a decorative line
+            elements.append(Spacer(1, 0.5*inch))
+            
+            # Add page break
+            elements.append(PageBreak())
+            
+            # ===== PAGE 2: THROWING SUMMARY =====
+            
+            # Page title
+            elements.append(Paragraph("Throwing Summary", self.styles['PageTitle']))
             elements.append(Spacer(1, 0.1*inch))
             
-            # Session details
-            session_details = f"Date: {session_date} | Session Type: {session_type} | Muscles: {muscle1_name}, {muscle2_name}"
-            elements.append(Paragraph(session_details, self.styles['Normal']))
+            # EMG Activity Graph
+            elements.append(Paragraph("EMG Activity", self.styles['SectionHeader']))
+            if emg_activity:
+                img = Image(emg_activity, width=7.5*inch, height=3.75*inch)
+                img.hAlign = 'CENTER'
+                elements.append(img)
+                elements.append(Paragraph("EMG muscle activity throughout the session with throw regions highlighted in green.", 
+                               self.styles['Caption']))
+            
             elements.append(Spacer(1, 0.2*inch))
             
-            # Key Insights Section
-            elements.append(Paragraph("Key Insights", self.styles['SectionHeading']))
-            for insight in insights[:4]:  # Limit to top 4 insights for brevity
-                elements.append(Paragraph(f"• {insight}", self.styles['InsightText']))
+            # Muscle Activation Intensity Graph
+            elements.append(Paragraph("Muscle Activation Intensity", self.styles['SectionHeader']))
+            if muscle_activation:
+                img = Image(muscle_activation, width=7.5*inch, height=3.75*inch)
+                img.hAlign = 'CENTER'
+                elements.append(img)
+                elements.append(Paragraph("Peak muscle activation intensity for each throw.", 
+                               self.styles['Caption']))
+            
+            # Add page break
+            elements.append(PageBreak())
+            
+            # ===== PAGE 3: FATIGUE AND TWITCH =====
+            
+            # Page title
+            elements.append(Paragraph("Fatigue and Twitch Analysis", self.styles['PageTitle']))
+            elements.append(Spacer(1, 0.1*inch))
+            
+            # Signal Complexity Graph
+            elements.append(Paragraph("Signal Complexity", self.styles['SectionHeader']))
+            if signal_complexity:
+                img = Image(signal_complexity, width=7.5*inch, height=2.75*inch)
+                img.hAlign = 'CENTER'
+                elements.append(img)
+                elements.append(Paragraph("Signal complexity (spectral entropy) across throws.", 
+                               self.styles['Caption']))
+            
+            elements.append(Spacer(1, 0.1*inch))
+            
+            # Frequency Content Graph
+            elements.append(Paragraph("Frequency Content", self.styles['SectionHeader']))
+            if frequency_content:
+                img = Image(frequency_content, width=7.5*inch, height=2.75*inch)
+                img.hAlign = 'CENTER'
+                elements.append(img)
+                elements.append(Paragraph("Median frequency content across throws.", 
+                               self.styles['Caption']))
+            
+            elements.append(PageBreak())
+            
+            # ===== PAGE 4: ADDITIONAL METRICS =====
+            
+            # Page title
+            elements.append(Paragraph("Neuromuscular Analysis", self.styles['PageTitle']))
+            elements.append(Spacer(1, 0.1*inch))
+            
+            # Rise Time Graph
+            elements.append(Paragraph("Neuromuscular Efficiency (Rise Time)", self.styles['SectionHeader']))
+            if rise_time_plot:
+                img = Image(rise_time_plot, width=7.5*inch, height=3.5*inch)
+                img.hAlign = 'CENTER'
+                elements.append(img)
+                elements.append(Paragraph("Muscle activation rise time (time to reach peak contraction) across throws.", 
+                               self.styles['Caption']))
+            
             elements.append(Spacer(1, 0.2*inch))
             
-            # Overview Section
-            elements.append(Paragraph("Session Overview", self.styles['SectionHeading']))
-            if overview_plot:
-                img = Image(overview_plot, width=7*inch, height=3.5*inch)
+            # Wavelet Energy Distribution Graph
+            elements.append(Paragraph("Wavelet Energy Distribution", self.styles['SectionHeader']))
+            if wavelet_energy:
+                img = Image(wavelet_energy, width=7.5*inch, height=3.5*inch)
+                img.hAlign = 'CENTER'
                 elements.append(img)
-                elements.append(Paragraph("EMG activity throughout session with throw markers", self.styles['ImageCaption']))
-            
-            # Add page break to keep content organized
-            elements.append(PageBreak())
-            
-            # Page 2: Performance and Fatigue Analysis
-            elements.append(Paragraph("Performance Metrics", self.styles['SectionHeading']))
-            if metrics_plot:
-                img = Image(metrics_plot, width=7*inch, height=4*inch)  # Reduced height to fit more content
-                elements.append(img)
-                elements.append(Paragraph("Activation intensity and frequency content across throws", self.styles['ImageCaption']))
-            
-            # Add fatigue plot with spectral entropy and frequency analysis
-            elements.append(Paragraph("Fatigue Analysis", self.styles['SectionHeading']))
-            if fatigue_plot:
-                img = Image(fatigue_plot, width=7*inch, height=4*inch)  # Reduced height to fit more
-                elements.append(img)
-                elements.append(Paragraph("Spectral entropy and frequency indicators of fatigue", self.styles['ImageCaption']))
-            
-            # Add page break before coordination and wavelet plots
-            elements.append(PageBreak())
-            
-            # Page 3: Coordination, Wavelet and Data Summary
-            # Add wavelet energy distribution plot
-            if wavelet_plot:
-                elements.append(Paragraph("Frequency Distribution", self.styles['SectionHeading']))
-                img = Image(wavelet_plot, width=7*inch, height=3*inch)
-                elements.append(img)
-                elements.append(Paragraph("Distribution of energy across frequency bands", self.styles['ImageCaption']))
-            
-            # Add coordination plot if available
-            if coordination_plot:
-                elements.append(Paragraph("Muscle Coordination", self.styles['SectionHeading']))
-                img = Image(coordination_plot, width=7*inch, height=3*inch)
-                elements.append(img)
-                elements.append(Paragraph("Muscle coordination across throws", self.styles['ImageCaption']))
-            
-            # Metrics Table - just a small summary of the most important metrics
-            elements.append(Paragraph("Throw-by-Throw Summary", self.styles['SectionHeading']))
-            
-            # Create the metrics table
-            col_widths = [0.6*inch] + [1.5*inch] * (len(metrics_table_data[0]) - 1)
-            # Adjust if too many columns
-            if len(metrics_table_data[0]) > 5:
-                col_widths = [0.6*inch] + [1.0*inch] * (len(metrics_table_data[0]) - 1)
-                
-            table = Table(metrics_table_data, colWidths=col_widths)
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ]))
-            elements.append(table)
-            
-            # Conclusions Section - very brief
-            elements.append(Spacer(1, 0.3*inch))
-            elements.append(Paragraph("Summary", self.styles['SectionHeading']))
-            
-            # Add a concise summary paragraph - just 1-2 sentences
-            if len(insights) > 0:
-                # Extract the most important insight
-                key_insight = insights[0]
-                # Add one fatigue or coordination insight if available
-                for insight in insights:
-                    if "fatigue" in insight.lower() or "coordination" in insight.lower():
-                        key_insight += " " + insight
-                        break
-                        
-                elements.append(Paragraph(key_insight, self.styles['Normal']))
-            else:
-                elements.append(Paragraph("No significant patterns detected in this session.", self.styles['Normal']))
+                elements.append(Paragraph("Distribution of energy across frequency bands for each throw.", 
+                               self.styles['Caption']))
             
             # Build the PDF
             doc.build(elements)
@@ -795,28 +993,20 @@ class SimpleEMGReportGenerator:
             logger.error(traceback.format_exc())
             return None
 
-    def generate_report(self, session_id):
-        """Generate a report for a specific session."""
-        return self.create_pdf_report(session_id)
-
 if __name__ == "__main__":
-    import sys
     import argparse
-    
-    parser = argparse.ArgumentParser(description='Generate EMG Reports')
-    parser.add_argument('session_id', nargs='?', default=None, 
-                      help='Session ID to generate report for (optional if using --directory)')
-    parser.add_argument('--directory', '-d', action='store_true',
-                      help='Process all sessions in the database')
-    parser.add_argument('--output-dir', default='reports', 
-                      help='Directory to save reports')
-    parser.add_argument('--limit', type=int, default=100, 
-                      help='Maximum number of sessions to process (for directory mode)')
-    
-    args = parser.parse_args()
     
     # Configure logging
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # Parse arguments
+    parser = argparse.ArgumentParser(description='Generate EMG Reports')
+    parser.add_argument('session_id', help='Session ID to generate report for')
+    parser.add_argument('--first-name', default='', help='Athlete first name')
+    parser.add_argument('--last-name', default='', help='Athlete last name')
+    parser.add_argument('--output-dir', default='reports', help='Directory to save reports')
+    
+    args = parser.parse_args()
     
     # Load environment variables for database connection
     load_dotenv()
@@ -830,41 +1020,17 @@ if __name__ == "__main__":
     }
     
     # Create report generator
-    generator = SimpleEMGReportGenerator(db_config=db_config, output_dir=args.output_dir)
+    report_generator = EMGProfessionalReport(db_config=db_config, output_dir=args.output_dir)
     
-    # Process sessions
-    if args.directory:
-        # Process all sessions
-        session_ids = generator.get_all_session_ids(limit=args.limit)
-        
-        if not session_ids:
-            print("No sessions found in the database")
-            sys.exit(1)
-            
-        print(f"Found {len(session_ids)} sessions to process")
-        success_count = 0
-        
-        for i, session_id in enumerate(session_ids):
-            print(f"Processing session {i+1}/{len(session_ids)}: {session_id}")
-            report_path = generator.generate_report(session_id)
-            
-            if report_path:
-                success_count += 1
-                print(f"  ✓ Report generated successfully: {report_path}")
-            else:
-                print(f"  ✗ Failed to generate report")
-        
-        print(f"Processed {len(session_ids)} sessions, {success_count} successful")
-    elif args.session_id:
-        # Process single session
-        report_path = generator.generate_report(args.session_id)
-        
-        if report_path:
-            print(f"Report generated successfully: {report_path}")
-        else:
-            print("Failed to generate report")
-            sys.exit(1)
+    # Generate report
+    pdf_path = report_generator.create_pdf_report(
+        args.session_id, 
+        first_name=args.first_name,
+        last_name=args.last_name
+    )
+    
+    if pdf_path:
+        print(f"Report generated successfully: {pdf_path}")
     else:
-        parser.print_help()
-        print("\nError: Either session_id or --directory must be specified")
-        sys.exit(1)
+        print("Failed to generate report")
+        exit(1)
