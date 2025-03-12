@@ -795,3 +795,503 @@ NameError: name 'rolling_df' is not defined
 2025-03-12 10:27:13,321 - emg_report_generator - INFO - Fetched 1653696 rows for session 13
 2025-03-12 10:27:13,423 - emg_report_generator - INFO - Downsampled timeseries from 1653696 to 50112 points
 2025-03-12 10:27:17,787 - emg_report_generator - INFO - PDF report generated: reports\031025_021140_ZanRose_veloday_emg_report.pdf
+2025-03-12 14:19:40,158 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:19:40,158 - db_connector - INFO - Database connector initialized
+2025-03-12 14:19:40,158 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:19:40,158 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:23:33,415 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:23:33,416 - db_connector - INFO - Database connector initialized
+2025-03-12 14:23:33,416 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:23:33,416 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:24:33,616 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:24:33,617 - db_connector - INFO - Database connector initialized
+2025-03-12 14:24:33,617 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:24:33,617 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:24:33,618 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:24:33,618 - db_connector - INFO - Database connector initialized
+2025-03-12 14:24:33,618 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:24:33,619 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:24:34,190 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:24:34,191 - emg_pipeline - ERROR - Error matching throws to velocity: name 'pymysql' is not defined
+2025-03-12 14:24:34,193 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 317, in match_throws_to_velocity
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+                         ^^^^^^^
+NameError: name 'pymysql' is not defined
+
+2025-03-12 14:26:37,052 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:26:37,053 - db_connector - INFO - Database connector initialized
+2025-03-12 14:26:37,053 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:26:37,053 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:26:44,197 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:26:44,198 - db_connector - INFO - Database connector initialized
+2025-03-12 14:26:44,198 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:26:44,199 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:26:44,199 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:26:44,200 - db_connector - INFO - Database connector initialized
+2025-03-12 14:26:44,200 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:26:44,200 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:26:44,635 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:26:44,793 - emg_pipeline - ERROR - Error matching throws to velocity: (1054, "Unknown column 't.session_trial' in 'field list'")
+2025-03-12 14:26:44,851 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 338, in match_throws_to_velocity
+    cursor.execute(update_query)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\cursors.py", line 148, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\cursors.py", line 310, in _query
+    conn.query(q)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 548, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 775, in _read_query_result
+    result.read()
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 1156, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 725, in _read_packet
+    packet.raise_for_error()
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 't.session_trial' in 'field list'")
+
+2025-03-12 14:28:08,244 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:28:08,245 - db_connector - INFO - Database connector initialized
+2025-03-12 14:28:08,245 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:28:08,245 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:28:13,610 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:28:13,610 - db_connector - INFO - Database connector initialized
+2025-03-12 14:28:13,611 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:28:13,611 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:28:13,612 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:28:13,612 - db_connector - INFO - Database connector initialized
+2025-03-12 14:28:13,613 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:28:13,613 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:28:14,058 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:28:14,258 - emg_pipeline - ERROR - Error matching throws to velocity: (1054, "Unknown column 't.session_trial' in 'field list'")
+2025-03-12 14:28:14,261 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 337, in match_throws_to_velocity
+    cursor.execute(update_query)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\cursors.py", line 148, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\cursors.py", line 310, in _query
+    conn.query(q)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 548, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 775, in _read_query_result
+    result.read()
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 1156, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 725, in _read_packet
+    packet.raise_for_error()
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 't.session_trial' in 'field list'")
+
+2025-03-12 14:30:11,932 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:30:11,933 - db_connector - INFO - Database connector initialized
+2025-03-12 14:30:11,933 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:30:11,933 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:30:15,976 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:30:15,976 - db_connector - INFO - Database connector initialized
+2025-03-12 14:30:15,977 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:30:15,977 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:30:15,978 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:30:15,978 - db_connector - INFO - Database connector initialized
+2025-03-12 14:30:15,978 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:30:15,978 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:30:16,425 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:30:16,503 - emg_pipeline - ERROR - Error matching throws to velocity: (1054, "Unknown column 't.absolute_timestamp' in 'where clause'")
+2025-03-12 14:30:16,505 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 337, in match_throws_to_velocity
+    cursor.execute(update_query)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\cursors.py", line 148, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\cursors.py", line 310, in _query
+    conn.query(q)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 548, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 775, in _read_query_result
+    result.read()
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 1156, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\connections.py", line 725, in _read_packet
+    packet.raise_for_error()
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\protocol.py", line 221, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "C:\Users\alex.britton\AppData\Local\miniconda3\envs\local\Lib\site-packages\pymysql\err.py", line 143, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 't.absolute_timestamp' in 'where clause'")
+
+2025-03-12 14:31:55,013 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:31:55,013 - db_connector - INFO - Database connector initialized
+2025-03-12 14:31:55,013 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:31:55,014 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:31:59,582 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:31:59,582 - db_connector - INFO - Database connector initialized
+2025-03-12 14:31:59,583 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:31:59,583 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:31:59,583 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:31:59,584 - db_connector - INFO - Database connector initialized
+2025-03-12 14:31:59,584 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:31:59,584 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:32:00,176 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:32:00,570 - emg_pipeline - INFO - Velocity Matching Results:
+2025-03-12 14:32:00,570 - emg_pipeline - INFO - None: 145 throws
+2025-03-12 14:36:05,157 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:36:05,158 - db_connector - INFO - Database connector initialized
+2025-03-12 14:36:05,158 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:36:05,158 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:36:14,704 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:36:14,704 - db_connector - INFO - Database connector initialized
+2025-03-12 14:36:14,705 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:36:14,705 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:36:14,712 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet (recursive=True)
+2025-03-12 14:36:15,163 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:36:15,832 - db_connector - INFO - Database tables created/verified successfully
+2025-03-12 14:36:15,832 - db_connector - INFO - Database connection closed
+2025-03-12 14:36:15,833 - emg_pipeline - INFO - Found 7 files to process
+2025-03-12 14:36:15,842 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:36:15,843 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-19
+2025-03-12 14:36:15,843 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:36:19,693 - emg_processor - INFO - Data loaded: FCU: 1486361 samples, FCR: 2535557 samples
+2025-03-12 14:36:19,693 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:36:21,214 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,214 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,215 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,215 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,215 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,216 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,216 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,216 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,217 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,217 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,217 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,217 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,218 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,218 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,218 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,218 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,218 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,219 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,219 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,219 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,219 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,219 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,220 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,220 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,220 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,220 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,220 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,221 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,221 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,221 - emg_pipeline - WARNING - Error calculating absolute timestamp: module 'datetime' has no attribute 'combine'
+2025-03-12 14:36:21,668 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:36:21,950 - emg_pipeline - INFO - Session 021925_117946_AlexBritton_longform already exists. Removing old data...
+2025-03-12 14:37:28,701 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:37:28,702 - db_connector - INFO - Database connector initialized
+2025-03-12 14:37:28,702 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:37:28,702 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:37:43,812 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:37:43,812 - db_connector - INFO - Database connector initialized
+2025-03-12 14:37:43,812 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:37:43,813 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:37:43,815 - __main__ - ERROR - Error in processing thread
+Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\gui_app.py", line 814, in run_processing
+    self.append_log(f"{'Dry run' if dry_run else 'Processing'} started at {datetime.datetime.now().strftime('%H:%M:%S')}")
+                                                                           ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:21,580 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:38:21,580 - db_connector - INFO - Database connector initialized
+2025-03-12 14:38:21,581 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:38:21,581 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:38:27,802 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:38:27,802 - db_connector - INFO - Database connector initialized
+2025-03-12 14:38:27,802 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:38:27,803 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:38:27,809 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet (recursive=True)
+2025-03-12 14:38:28,249 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:38:28,918 - db_connector - INFO - Database tables created/verified successfully
+2025-03-12 14:38:28,920 - db_connector - INFO - Database connection closed
+2025-03-12 14:38:28,922 - emg_pipeline - INFO - Found 7 files to process
+2025-03-12 14:38:28,943 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:38:28,946 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-19
+2025-03-12 14:38:28,946 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:38:32,518 - emg_processor - INFO - Data loaded: FCU: 1486361 samples, FCR: 2535557 samples
+2025-03-12 14:38:32,518 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:33,806 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:33,808 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:33,817 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:38:33,820 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:38:33,820 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-12 14:38:33,821 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:38:34,488 - emg_processor - INFO - Data loaded: FCU: 459969 samples, FCR: 459969 samples
+2025-03-12 14:38:34,488 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:34,727 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:34,729 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:34,732 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:38:34,732 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 14:38:34,733 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-12 14:38:34,733 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 14:38:35,701 - emg_processor - INFO - Data loaded: FCU: 662099 samples, FCR: 662099 samples
+2025-03-12 14:38:35,701 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:36,046 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:36,048 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:36,052 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 14:38:36,052 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 14:38:36,052 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-12 14:38:36,053 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 14:38:37,820 - emg_processor - INFO - Data loaded: FCU: 1217362 samples, FCR: 1217362 samples
+2025-03-12 14:38:37,820 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:38,576 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:38,577 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:38,583 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 14:38:38,584 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 14:38:38,584 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-12 14:38:38,584 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 14:38:39,802 - emg_processor - INFO - Data loaded: FCU: 823803 samples, FCR: 823803 samples
+2025-03-12 14:38:39,802 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:40,328 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:40,330 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:40,334 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 14:38:40,335 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 14:38:40,335 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-05
+2025-03-12 14:38:40,335 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 14:38:44,244 - emg_processor - INFO - Data loaded: FCU: 2556901 samples, FCR: 2556901 samples
+2025-03-12 14:38:44,244 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:46,462 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:46,464 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:46,480 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 14:38:46,481 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 14:38:46,481 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-10
+2025-03-12 14:38:46,481 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 14:38:49,879 - emg_processor - INFO - Data loaded: FCU: 1653696 samples, FCR: 1653696 samples
+2025-03-12 14:38:49,879 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:38:51,082 - emg_pipeline - ERROR - Error processing file C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv: type object 'datetime.datetime' has no attribute 'datetime'
+2025-03-12 14:38:51,083 - emg_pipeline - ERROR - Traceback (most recent call last):
+  File "c:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO\emg_pipeline.py", line 198, in process_file
+    'processed_date': datetime.datetime.now()
+                      ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-03-12 14:38:51,084 - emg_pipeline - ERROR - Failed to process C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 14:38:51,084 - emg_pipeline - INFO - Directory processing complete. Successfully processed 0 of 7 files.
+2025-03-12 14:39:46,914 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:39:46,914 - db_connector - INFO - Database connector initialized
+2025-03-12 14:39:46,914 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:39:46,914 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:39:53,318 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:39:53,319 - db_connector - INFO - Database connector initialized
+2025-03-12 14:39:53,319 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:39:53,319 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:39:53,324 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet (recursive=True)
+2025-03-12 14:39:53,737 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:39:54,527 - db_connector - INFO - Database tables created/verified successfully
+2025-03-12 14:39:54,528 - db_connector - INFO - Database connection closed
+2025-03-12 14:39:54,528 - emg_pipeline - INFO - Found 7 files to process
+2025-03-12 14:39:54,536 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:39:54,537 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-19
+2025-03-12 14:39:54,537 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:39:58,130 - emg_processor - INFO - Data loaded: FCU: 1486361 samples, FCR: 2535557 samples
+2025-03-12 14:39:58,130 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:40:00,184 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:40:00,343 - emg_pipeline - INFO - Session 021925_117946_AlexBritton_longform already exists. Removing old data...
+2025-03-12 14:41:18,303 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'relative_start_time' in 'field list'")
+2025-03-12 14:41:58,448 - db_connector - INFO - Database connection closed
+2025-03-12 14:41:58,450 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv to database
+2025-03-12 14:41:58,452 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:41:58,454 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-12 14:41:58,455 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:41:59,158 - emg_processor - INFO - Data loaded: FCU: 459969 samples, FCR: 459969 samples
+2025-03-12 14:41:59,159 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:42:00,046 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:42:00,204 - emg_pipeline - INFO - Session 022725_117958_CarterWallace_mocap already exists. Removing old data...
+2025-03-12 14:42:15,717 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'relative_start_time' in 'field list'")
+2025-03-12 14:42:22,610 - db_connector - INFO - Database connection closed
+2025-03-12 14:42:22,610 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv to database
+2025-03-12 14:42:22,610 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 14:42:22,611 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-12 14:42:22,611 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 14:42:23,595 - emg_processor - INFO - Data loaded: FCU: 662099 samples, FCR: 662099 samples
+2025-03-12 14:42:23,596 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:42:24,436 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:42:24,594 - emg_pipeline - INFO - Session 022725_118107_DarielFregio_mocap already exists. Removing old data...
+2025-03-12 14:42:47,344 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'relative_start_time' in 'field list'")
+2025-03-12 14:42:57,189 - db_connector - INFO - Database connection closed
+2025-03-12 14:42:57,190 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv to database
+2025-03-12 14:42:57,192 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 14:42:57,192 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-12 14:42:57,194 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 14:42:58,985 - emg_processor - INFO - Data loaded: FCU: 1217362 samples, FCR: 1217362 samples
+2025-03-12 14:42:58,985 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:43:00,190 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:43:00,347 - emg_pipeline - INFO - Session 030425_102245_MateoHamm_mocap already exists. Removing old data...
+2025-03-12 14:43:52,310 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'relative_start_time' in 'field list'")
+2025-03-12 14:44:10,095 - db_connector - INFO - Database connection closed
+2025-03-12 14:44:10,095 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv to database
+2025-03-12 14:44:10,096 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 14:44:10,096 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-12 14:44:10,096 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 14:44:11,339 - emg_processor - INFO - Data loaded: FCU: 823803 samples, FCR: 823803 samples
+2025-03-12 14:44:11,339 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:44:12,335 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:44:12,568 - emg_pipeline - INFO - Session 030425_118085_JayceBlair_mocap already exists. Removing old data...
+2025-03-12 14:44:56,287 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'relative_start_time' in 'field list'")
+2025-03-12 14:45:08,282 - db_connector - INFO - Database connection closed
+2025-03-12 14:45:08,283 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv to database
+2025-03-12 14:45:08,284 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 14:45:08,284 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-05
+2025-03-12 14:45:08,285 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 14:45:12,117 - emg_processor - INFO - Data loaded: FCU: 2556901 samples, FCR: 2556901 samples
+2025-03-12 14:45:12,118 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:45:14,705 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:45:15,019 - emg_pipeline - INFO - Session 030525_021140_ZaneRose_veloday already exists. Removing old data...
+2025-03-12 14:46:32,364 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'relative_start_time' in 'field list'")
+2025-03-12 14:47:11,086 - db_connector - INFO - Database connection closed
+2025-03-12 14:47:11,086 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv to database
+2025-03-12 14:47:11,087 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 14:47:11,087 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-10
+2025-03-12 14:47:11,087 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 14:47:14,820 - emg_processor - INFO - Data loaded: FCU: 1653696 samples, FCR: 1653696 samples
+2025-03-12 14:47:14,820 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:47:16,740 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:47:16,897 - emg_pipeline - INFO - Session 031025_021140_ZanRose_veloday already exists. Removing old data...
+2025-03-12 14:49:15,234 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:49:15,234 - db_connector - INFO - Database connector initialized
+2025-03-12 14:49:15,235 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:49:15,235 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:49:27,278 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 14:49:27,279 - db_connector - INFO - Database connector initialized
+2025-03-12 14:49:27,279 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 14:49:27,280 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 14:49:27,288 - emg_pipeline - INFO - Processing directory: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet (recursive=True)
+2025-03-12 14:49:27,727 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:49:28,645 - db_connector - INFO - Database tables created/verified successfully
+2025-03-12 14:49:28,646 - db_connector - INFO - Database connection closed
+2025-03-12 14:49:28,647 - emg_pipeline - INFO - Found 7 files to process
+2025-03-12 14:49:28,655 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:49:28,656 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-19
+2025-03-12 14:49:28,656 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\021925_117946_AlexBritton_longform.csv
+2025-03-12 14:49:32,225 - emg_processor - INFO - Data loaded: FCU: 1486361 samples, FCR: 2535557 samples
+2025-03-12 14:49:32,226 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:49:34,058 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:49:34,339 - emg_pipeline - INFO - Session 021925_117946_AlexBritton_longform already exists. Removing old data...
+2025-03-12 14:59:09,877 - emg_pipeline - INFO - Successfully saved data for session 021925_117946_AlexBritton_longform to database
+2025-03-12 14:59:09,878 - db_connector - INFO - Database connection closed
+2025-03-12 14:59:09,879 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:59:09,879 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-12 14:59:09,879 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_117958_CarterWallace_mocap.csv
+2025-03-12 14:59:10,553 - emg_processor - INFO - Data loaded: FCU: 459969 samples, FCR: 459969 samples
+2025-03-12 14:59:10,553 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 14:59:11,253 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 14:59:11,410 - emg_pipeline - INFO - Session 022725_117958_CarterWallace_mocap already exists. Removing old data...
+2025-03-12 15:00:50,577 - emg_pipeline - INFO - Successfully saved data for session 022725_117958_CarterWallace_mocap to database
+2025-03-12 15:00:50,578 - db_connector - INFO - Database connection closed
+2025-03-12 15:00:50,580 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 15:00:50,580 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-02-27
+2025-03-12 15:00:50,580 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\022725_118107_DarielFregio_mocap.csv
+2025-03-12 15:00:52,004 - emg_processor - INFO - Data loaded: FCU: 662099 samples, FCR: 662099 samples
+2025-03-12 15:00:52,004 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 15:00:53,200 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:00:53,478 - emg_pipeline - INFO - Session 022725_118107_DarielFregio_mocap already exists. Removing old data...
+2025-03-12 15:03:19,928 - emg_pipeline - INFO - Successfully saved data for session 022725_118107_DarielFregio_mocap to database
+2025-03-12 15:03:19,928 - db_connector - INFO - Database connection closed
+2025-03-12 15:03:19,929 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 15:03:19,930 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-12 15:03:19,930 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_102245_MateoHamm_mocap.csv
+2025-03-12 15:03:22,063 - emg_processor - INFO - Data loaded: FCU: 1217362 samples, FCR: 1217362 samples
+2025-03-12 15:03:22,063 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 15:03:23,923 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:03:24,237 - emg_pipeline - INFO - Session 030425_102245_MateoHamm_mocap already exists. Removing old data...
+2025-03-12 15:07:53,519 - emg_pipeline - INFO - Successfully saved data for session 030425_102245_MateoHamm_mocap to database
+2025-03-12 15:07:53,520 - db_connector - INFO - Database connection closed
+2025-03-12 15:07:53,520 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 15:07:53,521 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-04
+2025-03-12 15:07:53,521 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030425_118085_JayceBlair_mocap.csv
+2025-03-12 15:07:54,842 - emg_processor - INFO - Data loaded: FCU: 823803 samples, FCR: 823803 samples
+2025-03-12 15:07:54,842 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 15:07:56,103 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:07:56,412 - emg_pipeline - INFO - Session 030425_118085_JayceBlair_mocap already exists. Removing old data...
+2025-03-12 15:11:07,545 - emg_pipeline - INFO - Successfully saved data for session 030425_118085_JayceBlair_mocap to database
+2025-03-12 15:11:07,546 - db_connector - INFO - Database connection closed
+2025-03-12 15:11:07,547 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 15:11:07,547 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-05
+2025-03-12 15:11:07,547 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\030525_021140_ZaneRose_veloday.csv
+2025-03-12 15:11:12,355 - emg_processor - INFO - Data loaded: FCU: 2556901 samples, FCR: 2556901 samples
+2025-03-12 15:11:12,355 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 15:11:15,631 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:11:16,258 - emg_pipeline - INFO - Session 030525_021140_ZaneRose_veloday already exists. Removing old data...
+2025-03-12 15:20:30,522 - emg_pipeline - INFO - Successfully saved data for session 030525_021140_ZaneRose_veloday to database
+2025-03-12 15:20:30,523 - db_connector - INFO - Database connection closed
+2025-03-12 15:20:30,524 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 15:20:30,524 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-10
+2025-03-12 15:20:30,524 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet\031025_021140_ZanRose_veloday.csv
+2025-03-12 15:20:34,148 - emg_processor - INFO - Data loaded: FCU: 1653696 samples, FCR: 1653696 samples
+2025-03-12 15:20:34,149 - emg_processor - INFO - Found 2 muscles in file
+2025-03-12 15:20:36,135 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:20:36,291 - emg_pipeline - INFO - Session 031025_021140_ZanRose_veloday already exists. Removing old data...
+2025-03-12 15:26:20,485 - emg_pipeline - INFO - Successfully saved data for session 031025_021140_ZanRose_veloday to database
+2025-03-12 15:26:20,487 - db_connector - INFO - Database connection closed
+2025-03-12 15:26:20,492 - emg_pipeline - INFO - Directory processing complete. Successfully processed 7 of 7 files.
+2025-03-12 15:28:16,897 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:28:16,898 - db_connector - INFO - Database connector initialized
+2025-03-12 15:28:16,898 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:28:16,898 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:28:22,202 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:28:22,202 - db_connector - INFO - Database connector initialized
+2025-03-12 15:28:22,202 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:28:22,203 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:28:22,203 - emg_processor - INFO - EMG Processor initialized
+2025-03-12 15:28:22,203 - db_connector - INFO - Database connector initialized
+2025-03-12 15:28:22,203 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-12 15:28:22,203 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-12 15:28:22,769 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-12 15:28:22,870 - emg_pipeline - INFO - Total trials: 27241
+2025-03-12 15:28:22,966 - emg_pipeline - INFO - Total POI entries: 26083
+2025-03-12 15:28:23,044 - emg_pipeline - INFO - Throws with absolute timestamp: 145
+2025-03-12 15:28:39,416 - emg_pipeline - INFO - Velocity Matching Results:
+2025-03-12 15:28:39,416 - emg_pipeline - INFO - no_match: 145 throws
+2025-03-12 15:28:41,387 - emg_pipeline - INFO - Matched throws: 0
+2025-03-12 15:28:41,387 - emg_pipeline - INFO - Throw timestamp range: None to None
+2025-03-12 15:28:41,387 - emg_pipeline - INFO - Trial time range: None to None

@@ -125,10 +125,10 @@ class DBConnector:
     
     def create_tables(self):
         """
-        Create the necessary tables for the EMG pipeline if they don't exist.
+        Create the necessary tables for the EMG pipeline with updated columns
         """
         try:
-            # Create EMG Sessions table with numeric ID
+            # Create EMG Sessions table with additional columns
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_sessions (
                 numeric_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -155,7 +155,7 @@ class DBConnector:
             )
             """)
             
-            # Create raw time series data table with updated references
+            # Create raw time series data table
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_timeseries (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -168,7 +168,7 @@ class DBConnector:
             )
             """)
             
-            # Create throw details table with 'trial' instead of 'throw'
+            # Create throw details table with new columns for timestamping and velocity
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_throws (
                 throw_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -178,7 +178,14 @@ class DBConnector:
                 end_time FLOAT,
                 duration FLOAT,
                 
-                /* Muscle1 metrics */
+                # Timestamp and velocity matching columns
+                relative_start_time FLOAT,
+                absolute_timestamp DATETIME,
+                session_trial VARCHAR(100),
+                pitch_speed_mph FLOAT,
+                velocity_match_quality VARCHAR(20),
+                
+                # Muscle1 metrics
                 muscle1_median_freq FLOAT,
                 muscle1_mean_freq FLOAT,
                 muscle1_bandwidth FLOAT,
@@ -188,7 +195,7 @@ class DBConnector:
                 muscle1_throw_integral FLOAT,
                 muscle1_work_rate FLOAT,
                 
-                /* Muscle2 metrics */
+                # Muscle2 metrics
                 muscle2_median_freq FLOAT,
                 muscle2_mean_freq FLOAT,
                 muscle2_bandwidth FLOAT,
@@ -197,6 +204,24 @@ class DBConnector:
                 muscle2_rise_time FLOAT,
                 muscle2_throw_integral FLOAT,
                 muscle2_work_rate FLOAT,
+                
+                # Spectral entropy metrics
+                muscle1_spectral_entropy FLOAT,
+                muscle2_spectral_entropy FLOAT,
+                
+                # Wavelet energy metrics
+                muscle1_wavelet_energy_low FLOAT,
+                muscle1_wavelet_energy_mid FLOAT,
+                muscle1_wavelet_energy_high FLOAT,
+                muscle2_wavelet_energy_low FLOAT,
+                muscle2_wavelet_energy_mid FLOAT,
+                muscle2_wavelet_energy_high FLOAT,
+                
+                # Coactivation metrics
+                coactivation_index FLOAT,
+                coactivation_correlation FLOAT,
+                coactivation_temporal_overlap FLOAT,
+                coactivation_waveform_similarity FLOAT,
                 
                 INDEX idx_session_id (session_numeric_id),
                 FOREIGN KEY (session_numeric_id) REFERENCES emg_sessions(numeric_id) ON DELETE CASCADE
@@ -209,7 +234,7 @@ class DBConnector:
         except Exception as e:
             logger.error(f"Error creating database tables: {e}")
             return False
-        
+            
     def test_connection(self):
         """
         Test the database connection and tables.

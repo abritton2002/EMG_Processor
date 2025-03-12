@@ -278,6 +278,13 @@ class EMGPipelineGUI:
             command=self.get_record_counts
         ).pack(pady=5)
         
+        # Match throws to velocity button
+        ttk.Button(
+            ops_frame, 
+            text="Match Throws to Velocity", 
+            command=self.match_throws_to_velocity
+        ).pack(pady=5)
+        
         # Results text
         self.db_results_text = tk.Text(ops_frame, wrap=tk.WORD, height=10)
         self.db_results_text.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
@@ -681,7 +688,30 @@ For more details, see the README file or check the log file (emg_pipeline.log).
         help_scrollbar = ttk.Scrollbar(tab, command=help_text_widget.yview)
         help_scrollbar.pack(fill=tk.Y, side=tk.RIGHT)
         help_text_widget.config(yscrollcommand=help_scrollbar.set)
-    
+
+
+    def match_throws_to_velocity(self):
+        def run_matching():
+            try:
+                # Update pipeline with current database config
+                self.update_db_config()
+                
+                # Create pipeline with current config
+                pipeline = EMGPipeline(db_config=self.db_config)
+                
+                # Run velocity matching
+                success = pipeline.match_throws_to_velocity()
+                
+                # Update UI with results
+                message = "Velocity matching completed successfully." if success else "Velocity matching failed."
+                messagebox.showinfo("Velocity Matching", message)
+            
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        
+        # Run in a separate thread
+        threading.Thread(target=run_matching, daemon=True).start()
+
     def update_file_selection(self):
         """Update UI based on file selection type."""
         if self.process_type.get() == "file":

@@ -6,10 +6,10 @@ import datetime
 from pathlib import Path
 import argparse
 from tqdm import tqdm
-
+import pymysql  # Add this import
 from emg_processor import EMGProcessor
 from db_connector import DBConnector
-
+from datetime import datetime, timedelta
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -136,6 +136,10 @@ class EMGPipeline:
             muscle1_name = metadata.get('muscle1_name', 'muscle1')
             muscle2_name = metadata.get('muscle2_name', 'muscle2')
             
+            # Extract collection date and start time
+            collection_date = metadata.get('Collection_Date')
+            start_time = metadata.get('Start_Time')
+            
             # Extract sampling rates
             muscle1_fs = metadata.get('muscle1_fs', 2000)
             muscle2_fs = metadata.get('muscle2_fs', 2000)
@@ -174,8 +178,8 @@ class EMGPipeline:
             session_data = {
                 'session_id': session_id,
                 'date_recorded': file_metadata['date'],
-                'collection_date': metadata.get('Collection_Date'),
-                'start_time': metadata.get('Start_Time'),
+                'collection_date': collection_date,
+                'start_time': start_time,
                 'traq_id': file_metadata['traq_id'],
                 'athlete_name': file_metadata['athlete_name'],
                 'session_type': file_metadata['session_type'],
@@ -191,7 +195,7 @@ class EMGPipeline:
                 'muscle1_fs': muscle1_fs,
                 'muscle2_fs': muscle2_fs,
                 'file_path': file_path,
-                'processed_date': datetime.datetime.now()
+                'processed_date': datetime.now()
             }
             
             # Prepare time series data with dynamic muscle names
@@ -202,9 +206,21 @@ class EMGPipeline:
                 'muscle2_emg': muscle2_emg
             })
             
-            # Prepare throw data with dynamic muscle names
+            # Prepare throw data with new timestamp fields
             throw_data = []
             for i in range(len(throws_muscle2)):
+                # Calculate relative start time
+                relative_start = muscle2_time[throws_muscle2[i][0]]
+                
+                # Calculate absolute timestamp
+                absolute_timestamp = None
+                if collection_date and start_time:
+                    try:
+                        session_datetime = datetime.combine(collection_date, start_time)
+                        absolute_timestamp = session_datetime + timedelta(seconds=relative_start)
+                    except Exception as e:
+                        logger.warning(f"Error calculating absolute timestamp: {e}")
+                
                 throw_row = {
                     'session_id': session_id,
                     'throw_number': i + 1,
@@ -243,6 +259,13 @@ class EMGPipeline:
                     'muscle2_wavelet_energy_low': muscle2_metrics['wavelet_energy_low'][i],
                     'muscle2_wavelet_energy_mid': muscle2_metrics['wavelet_energy_mid'][i],
                     'muscle2_wavelet_energy_high': muscle2_metrics['wavelet_energy_high'][i],
+                    
+                    # New timestamp-related fields
+                    'relative_start_time': relative_start,
+                    'absolute_timestamp': absolute_timestamp,
+                    'session_trial': None,  # Will be populated during velocity matching
+                    'pitch_speed_mph': None,  # Will be populated during velocity matching
+                    'velocity_match_quality': 'no_match'  # Default match quality
                 }
                 
                 # Add coactivation metrics if available
@@ -273,6 +296,178 @@ class EMGPipeline:
             logger.error(traceback.format_exc())
             return None
     
+    def match_throws_to_velocity(self):
+        """
+        Match EMG throws to velocity data from trials and poi tables
+        
+        Returns:
+        --------
+        bool
+            True if matching was successful, False otherwise
+        """
+        conn = None
+        try:
+            # Connect to the database
+            conn = self.db.connect()
+            if not conn:
+                logger.error("Failed to connect to database")
+                return False
+            
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            # First, check the data in trials and poi tables
+            cursor.execute("SELECT COUNT(*) as trial_count FROM trials")
+            trial_count = cursor.fetchone()['trial_count']
+            logger.info(f"Total trials: {trial_count}")
+            
+            cursor.execute("SELECT COUNT(*) as poi_count FROM poi")
+            poi_count = cursor.fetchone()['poi_count']
+            logger.info(f"Total POI entries: {poi_count}")
+            
+            # Check throws with absolute timestamps
+            cursor.execute("SELECT COUNT(*) as throws_with_timestamp FROM emg_throws WHERE absolute_timestamp IS NOT NULL")
+            throws_with_timestamp = cursor.fetchone()['throws_with_timestamp']
+            logger.info(f"Throws with absolute timestamp: {throws_with_timestamp}")
+            
+            # Complex query to match throws with trials and poi data
+            update_query = """
+            UPDATE emg_throws t
+            INNER JOIN trials tr ON 
+                t.absolute_timestamp BETWEEN tr.time - INTERVAL 1 SECOND AND tr.time + INTERVAL 1 SECOND
+            INNER JOIN poi p ON tr.session_trial = p.session_trial
+            SET 
+                t.session_trial = tr.session_trial,
+                t.pitch_speed_mph = p.pitch_speed_mph,
+                t.velocity_match_quality = 'exact'
+            WHERE 
+                t.absolute_timestamp IS NOT NULL
+            """
+            
+            # Execute the update
+            cursor.execute(update_query)
+            
+            # Commit the changes
+            conn.commit()
+            
+            # Log the results
+            cursor.execute("""
+            SELECT 
+                velocity_match_quality, 
+                COUNT(*) as count 
+            FROM emg_throws 
+            GROUP BY velocity_match_quality
+            """)
+            
+            match_results = cursor.fetchall()
+            
+            logger.info("Velocity Matching Results:")
+            for result in match_results:
+                logger.info(f"{result['velocity_match_quality']}: {result['count']} throws")
+            
+            # Check joins
+            cursor.execute("""
+            SELECT 
+                COUNT(*) as matched_count,
+                MIN(t.absolute_timestamp) as min_timestamp,
+                MAX(t.absolute_timestamp) as max_timestamp,
+                MIN(tr.time) as min_trial_time,
+                MAX(tr.time) as max_trial_time
+            FROM emg_throws t
+            INNER JOIN trials tr ON 
+                t.absolute_timestamp BETWEEN tr.time - INTERVAL 1 SECOND AND tr.time + INTERVAL 1 SECOND
+            INNER JOIN poi p ON tr.session_trial = p.session_trial
+            """)
+            
+            join_details = cursor.fetchone()
+            logger.info(f"Matched throws: {join_details['matched_count']}")
+            logger.info(f"Throw timestamp range: {join_details['min_timestamp']} to {join_details['max_timestamp']}")
+            logger.info(f"Trial time range: {join_details['min_trial_time']} to {join_details['max_trial_time']}")
+            
+            return True
+        
+        except Exception as e:
+            logger.error(f"Error matching throws to velocity: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            
+            if conn:
+                conn.rollback()
+            
+            return False
+        
+        finally:
+            # Ensure connection is closed
+            if conn:
+                conn.close()
+
+    def validate_velocity_matching(self):
+        """
+        Analyze and report on the velocity matching results
+        
+        Returns:
+        --------
+        dict
+            Detailed matching statistics
+        """
+        conn = None
+        try:
+            conn = self.db.connect()
+            if not conn:
+                logger.error("Failed to connect to database")
+                return None
+            
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            # Overall matching statistics
+            cursor.execute("""
+            SELECT 
+                velocity_match_quality, 
+                COUNT(*) as total_throws,
+                ROUND(COUNT(*) / (SELECT COUNT(*) FROM emg_throws) * 100, 2) as percentage
+            FROM emg_throws 
+            GROUP BY velocity_match_quality
+            """)
+            match_quality_stats = cursor.fetchall()
+            
+            # Velocity distribution for matched throws
+            cursor.execute("""
+            SELECT 
+                ROUND(AVG(pitch_speed_mph), 2) as avg_velocity,
+                ROUND(MIN(pitch_speed_mph), 2) as min_velocity,
+                ROUND(MAX(pitch_speed_mph), 2) as max_velocity,
+                COUNT(*) as matched_throws
+            FROM emg_throws
+            WHERE pitch_speed_mph IS NOT NULL
+            """)
+            velocity_stats = cursor.fetchone()
+            
+            # Athlete-wise matching
+            cursor.execute("""
+            SELECT 
+                es.athlete_name,
+                COUNT(*) as total_throws,
+                SUM(CASE WHEN et.velocity_match_quality = 'exact' THEN 1 ELSE 0 END) as exact_matches,
+                ROUND(SUM(CASE WHEN et.velocity_match_quality = 'exact' THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) as match_percentage
+            FROM emg_throws et
+            JOIN emg_sessions es ON et.session_numeric_id = es.numeric_id
+            GROUP BY es.athlete_name
+            ORDER BY match_percentage DESC
+            """)
+            athlete_stats = cursor.fetchall()
+            
+            return {
+                'match_quality': match_quality_stats,
+                'velocity_stats': velocity_stats,
+                'athlete_matching': athlete_stats
+            }
+        
+        except Exception as e:
+            logger.error(f"Error validating velocity matching: {e}")
+            return None
+        finally:
+            if conn:
+                conn.close()
+
     def save_to_database(self, processed_data):
         """
         Save processed data to the database.
@@ -318,7 +513,7 @@ class EMGPipeline:
             date_recorded = session_data['date_recorded']
             if date_recorded is None:
                 logger.warning(f"No date parsed from filename. Using current date for session {filename}")
-                date_recorded = datetime.datetime.now().date()
+                date_recorded = datetime.now().date()
             
             cursor.execute("""
             INSERT INTO emg_sessions (
@@ -562,6 +757,15 @@ def main():
     
     args = parser.parse_args()
     
+    parser.add_argument('--match-velocity', action='store_true', 
+                        help='Match EMG throws to velocity data')
+    
+    args = parser.parse_args()
+    
+    if args.match_velocity:
+        pipeline = EMGPipeline()
+        success = pipeline.match_throws_to_velocity()
+        exit(0 if success else 1)
     # Database configuration (hardcoded for simplicity)
     db_config = {
         'host': os.getenv('DB_HOST'),
