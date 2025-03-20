@@ -283,48 +283,93 @@ class EMGProcessor:
         
         return filtered, rectified, rms, envelope
     
-    def detect_throws_fcr(self, fcr_rms, time, fs, threshold_factor=1.5, min_duration=0.2, min_separation=5):
+    def detect_throws_multi_muscle(self, fcr_rms, fcu_rms, time, fs, 
+                                threshold_factor_fcr=5, threshold_factor_fcu=1.5,
+                                min_duration=0.2, min_separation=10, 
+                                coincidence_window=0.1):
         """
-        Detect throwing motions using adaptive thresholding on FCR EMG data.
+        Detect throwing motions by considering both FCR and FCU EMG data.
         
         Parameters:
         -----------
         fcr_rms : numpy.ndarray
             RMS processed FCR EMG data
+        fcu_rms : numpy.ndarray
+            RMS processed FCU EMG data
         time : numpy.ndarray
-            Time array corresponding to FCR data
+            Time array corresponding to data
         fs : float
             Sampling frequency
-        threshold_factor : float, optional
-            Factor for adaptive threshold calculation
+        threshold_factor_fcr : float, optional
+            Factor for FCR adaptive threshold calculation
+        threshold_factor_fcu : float, optional
+            Factor for FCU adaptive threshold calculation
         min_duration : float, optional
             Minimum throw duration in seconds
         min_separation : float, optional
             Minimum separation between throws in seconds
+        coincidence_window : float, optional
+            Time window in seconds to consider activations coincident
             
         Returns:
         --------
         list
             List of (start_index, end_index) tuples for each detected throw
         """
-        # Dynamic threshold based on signal statistics
-        fcr_threshold = np.mean(fcr_rms) + threshold_factor * np.std(fcr_rms)
+        # Calculate dynamic thresholds for both muscles
+        fcr_threshold = np.mean(fcr_rms) + threshold_factor_fcr * np.std(fcr_rms)
+        fcu_threshold = np.mean(fcu_rms) + threshold_factor_fcu * np.std(fcu_rms)
         
-        # Find regions above threshold
+        # Find regions above threshold for each muscle
         fcr_above = fcr_rms > fcr_threshold
+        fcu_above = fcu_rms > fcu_threshold
         
-        # Detect throw events
+        # Calculate a combined activation signal (both muscles above threshold)
+        both_active = np.logical_and(fcr_above, fcu_above)
+        
+        # Also track activation from either muscle (helpful for detecting start and end)
+        either_active = np.logical_or(fcr_above, fcu_above)
+        
+        # Detect throw events with focus on coincident activation
         throws = []
         start = None
+        coincidence_samples = int(coincidence_window * fs)
         
-        for i in range(1, len(fcr_above)):
-            if fcr_above[i] and not fcr_above[i-1]:
-                start = i
-            elif not fcr_above[i] and fcr_above[i-1] and start is not None:
+        # Enhanced detection algorithm
+        i = 1  # Start at index 1 to avoid negative indexing
+        while i < len(time) - 1:
+            # If we haven't found a start yet
+            if start is None:
+                # Look for either muscle starting to activate
+                if either_active[i] and not either_active[i-1]:
+                    # Mark this as a potential start
+                    potential_start = i
+                    
+                    # Look ahead to see if both muscles are active within our coincidence window
+                    found_coincidence = False
+                    for j in range(i, min(i + coincidence_samples, len(both_active))):
+                        if both_active[j]:
+                            found_coincidence = True
+                            break
+                    
+                    if found_coincidence:
+                        # Confirmed: this is a throw start
+                        start = potential_start
+            # If we have a start already, look for the end
+            elif not either_active[i] and either_active[i-1]:
+                # Potential end found
                 duration = (i - start) / fs
                 if duration >= min_duration:
                     throws.append((start, i))
                 start = None
+                
+            i += 1
+        
+        # Handle any active regions that extend to the end of the data
+        if start is not None:
+            duration = (len(time) - 1 - start) / fs
+            if duration >= min_duration:
+                throws.append((start, len(time) - 1))
         
         # Filter throws by minimum separation
         if throws:
@@ -333,40 +378,9 @@ class EMGProcessor:
                 if (throws[i][0] - filtered_throws[-1][1]) / fs >= min_separation:
                     filtered_throws.append(throws[i])
             return filtered_throws
+        
         return throws
-    
-    def map_throws_to_fcu(self, throws_fcr, fcr_time, fcu_time):
-        """
-        Map FCR throw indices to FCU indices for consistent analysis.
-        
-        Parameters:
-        -----------
-        throws_fcr : list
-            List of FCR throw indices
-        fcr_time : numpy.ndarray
-            FCR time array
-        fcu_time : numpy.ndarray
-            FCU time array
-            
-        Returns:
-        --------
-        list
-            List of FCU throw indices
-        """
-        throws_fcu = []
-        for start_fcr, end_fcr in throws_fcr:
-            # Convert FCR throw time points to FCU indices
-            start_time = fcr_time[start_fcr]
-            end_time = fcr_time[end_fcr]
-            
-            # Find closest FCU indices for these time points
-            start_fcu = np.argmin(np.abs(fcu_time - start_time))
-            end_fcu = np.argmin(np.abs(fcu_time - end_time))
-            
-            throws_fcu.append((start_fcu, end_fcu))
-        
-        return throws_fcu
-    
+
     def calculate_spectral_entropy(self, signal, fs, nperseg=256):
         """
         Calculate spectral entropy of an EMG signal.

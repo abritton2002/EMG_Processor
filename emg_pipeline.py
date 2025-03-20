@@ -147,31 +147,44 @@ class EMGPipeline:
             # Preprocess EMG data
             muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope = self.processor.preprocess_emg(muscle1_emg, muscle1_fs)
             muscle2_filtered, muscle2_rectified, muscle2_rms, muscle2_envelope = self.processor.preprocess_emg(muscle2_emg, muscle2_fs)
-            
-            # Use muscle2 (formerly FCR) as primary for throw detection
-            throws_muscle2 = self.processor.detect_throws_fcr(muscle2_rms, muscle2_time, muscle2_fs)
-            
-            # Map muscle2 throw indices to muscle1 indices
-            throws_muscle1 = self.processor.map_throws_to_fcu(throws_muscle2, muscle2_time, muscle1_time)
-            
-            # Calculate metrics
+
+            # Align muscle2 data to muscle1 timeline if lengths are different
+            if len(muscle1_time) != len(muscle2_time):
+                # Use the muscle1 timeline as reference and interpolate muscle2 data to match
+                aligned_muscle2_rms = np.interp(muscle1_time, muscle2_time, muscle2_rms)
+                common_time = muscle1_time
+                common_fs = muscle1_fs
+            else:
+                aligned_muscle2_rms = muscle2_rms
+                common_time = muscle1_time
+                common_fs = muscle1_fs
+
+            # Use integrated dual-muscle detection
+            throws = self.processor.detect_throws_multi_muscle(
+                muscle1_rms, muscle2_rms, common_time, common_fs, 
+                threshold_factor_fcr=5, threshold_factor_fcu=1.5,
+                min_duration=0.2, min_separation=10, 
+                coincidence_window=0.1
+            )
+
+            # Calculate metrics for both muscles using the same throw indices
+            muscle1_metrics = self.processor.calculate_comprehensive_metrics(
+                muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope, 
+                throws, common_time, muscle1_fs
+            )
+
             muscle2_metrics = self.processor.calculate_comprehensive_metrics(
                 muscle2_filtered, muscle2_rectified, muscle2_rms, muscle2_envelope, 
-                throws_muscle2, muscle2_time, muscle2_fs
-            )
-            
-            muscle1_metrics = self.processor.calculate_comprehensive_metrics(
-                muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope,
-                throws_muscle1, muscle1_time, muscle1_fs
+                throws, common_time, muscle2_fs
             )
             
             # Calculate coactivation metrics between muscles
             coactivation_metrics = self.processor.calculate_muscle_coactivation(
                 muscle1_metrics, muscle2_metrics,
-                throws_muscle1, throws_muscle2,
+                throws, throws,  # Same throws for both muscles now
                 muscle1_filtered, muscle2_filtered,
-                muscle1_time, muscle2_time,
-                muscle1_fs
+                common_time, common_time,  # Using the common timeline
+                common_fs
             )
             
             # Prepare session data with additional metadata
@@ -208,24 +221,38 @@ class EMGPipeline:
             
             # Prepare throw data with new timestamp fields
             throw_data = []
-            for i in range(len(throws_muscle2)):
+            for i in range(len(throws)):
                 # Calculate relative start time
-                relative_start = muscle2_time[throws_muscle2[i][0]]
+                relative_start = muscle2_time[throws[i][0]]
                 
                 # Calculate absolute timestamp
                 absolute_timestamp = None
                 if collection_date and start_time:
                     try:
-                        session_datetime = datetime.combine(collection_date, start_time)
-                        absolute_timestamp = session_datetime + timedelta(seconds=relative_start)
+                        # start_time is now the finishing time
+                        recording_end_time = datetime.combine(collection_date, start_time)
+                        
+                        # Extract total collection duration from metadata
+                        total_duration = metadata.get('Collection_Length')
+                        
+                        # Convert to float if it's a string
+                        if isinstance(total_duration, str):
+                            # Remove any non-numeric characters (like "s" for seconds)
+                            total_duration = float(''.join(c for c in total_duration if c.isdigit() or c == '.'))
+                        
+                        # Calculate recording start time by subtracting total duration
+                        recording_start_time = recording_end_time - timedelta(seconds=total_duration)
+                        
+                        # Calculate absolute timestamp for this throw by adding relative start time to recording start
+                        absolute_timestamp = recording_start_time + timedelta(seconds=relative_start)
                     except Exception as e:
                         logger.warning(f"Error calculating absolute timestamp: {e}")
                 
                 throw_row = {
                     'session_id': session_id,
                     'throw_number': i + 1,
-                    'start_time': muscle2_time[throws_muscle2[i][0]],
-                    'end_time': muscle2_time[throws_muscle2[i][1]],
+                    'start_time': muscle2_time[throws[i][0]],
+                    'end_time': muscle2_time[throws[i][1]],
                     'duration': muscle2_metrics['throw_durations'][i],
                     
                     # Muscle1 metrics - original metrics
@@ -299,7 +326,7 @@ class EMGPipeline:
     def match_throws_to_velocity(self):
         """
         Match EMG throws to velocity data from trials and poi tables.
-        Uses both date and name for matching sessions with pattern-aware matching.
+        Uses trial numbers to provide more accurate matching between EMG throws and velocity data.
         
         Returns:
         --------
@@ -345,7 +372,7 @@ class EMGPipeline:
                 
                 logger.info(f"Searching for user with name: {formatted_name} on date: {session_date}")
                 
-                # Use the query that matches on both name and date
+                # Try matching on both name and date
                 cursor.execute(f"""
                     SELECT sessions.session, sessions.date, users.traq, users.name
                     FROM sessions
@@ -357,23 +384,6 @@ class EMGPipeline:
                 """)
                 
                 pitching_session = cursor.fetchone()
-                
-                if not pitching_session:
-                    logger.warning(f"No exact match. Trying partial match for {formatted_name} on date {session_date}")
-                    
-                    # Try partial match with first name but still match on date
-                    first_name = formatted_name.split()[0]
-                    cursor.execute(f"""
-                        SELECT sessions.session, sessions.date, users.traq, users.name
-                        FROM sessions
-                        INNER JOIN users ON users.user = sessions.user
-                        WHERE users.name LIKE '%{first_name}%'
-                        AND DATE(sessions.date) = DATE('{session_date}')
-                        ORDER BY sessions.date DESC
-                        LIMIT 1
-                    """)
-                    
-                    pitching_session = cursor.fetchone()
                 
                 if not pitching_session:
                     logger.warning(f"No matching pitching session found for {athlete_name} on {session_date}")
@@ -401,20 +411,7 @@ class EMGPipeline:
                 if not emg_throws:
                     continue
                 
-                # Validate EMG throws - filter out potential false throws
-                valid_emg_throws = []
-                for throw in emg_throws:
-                    # Simple validation based on amplitude and duration
-                    peak_amplitude = max(throw['muscle1_peak_amplitude'] or 0, throw['muscle2_peak_amplitude'] or 0)
-                    duration = throw['duration']
-                    
-                    # Adjust thresholds based on your data
-                    if peak_amplitude > 0.1 and 0.1 < duration < 2.0:
-                        valid_emg_throws.append(throw)
-                
-                logger.info(f"Identified {len(valid_emg_throws)}/{len(emg_throws)} valid EMG throws")
-                
-                # Get velocity data
+                # Get velocity data and extract trial numbers
                 cursor.execute(f"""
                     SELECT session_trial, pitch_speed_mph
                     FROM poi
@@ -428,6 +425,20 @@ class EMGPipeline:
                 if not velocity_data:
                     logger.warning(f"No velocity data found for session {pitching_session_id}")
                     continue
+                
+                # Extract trial numbers from session_trial strings
+                # Format is typically: "pitching_session_id_trialNumber"
+                velocity_trial_numbers = []
+                for record in velocity_data:
+                    session_trial = record['session_trial']
+                    try:
+                        # Extract the trial number after the last underscore
+                        trial_number = int(session_trial.split('_')[-1])
+                        velocity_trial_numbers.append(trial_number)
+                    except (ValueError, IndexError):
+                        logger.warning(f"Couldn't extract trial number from {session_trial}")
+                
+                logger.info(f"Extracted velocity trial numbers: {velocity_trial_numbers}")
                 
                 # Get timing information
                 cursor.execute(f"""
@@ -445,108 +456,128 @@ class EMGPipeline:
                     logger.warning(f"No trial timing data found for session {pitching_session_id}")
                     continue
                 
-                # Always use pattern matching approach
-                logger.info("Using pattern-based matching for all sessions")
+                # Extract trial numbers and create a mapping
+                trial_mapping = {}
+                for trial in trials:
+                    session_trial = trial['session_trial']
+                    try:
+                        # Extract the trial number after the last underscore
+                        trial_number = int(session_trial.split('_')[-1])
+                        trial_mapping[trial_number] = trial
+                    except (ValueError, IndexError):
+                        logger.warning(f"Couldn't extract trial number from {session_trial}")
                 
-                import numpy as np
-                import math
+                logger.info(f"Created mapping for {len(trial_mapping)} trials")
                 
-                # Calculate feature vectors for throws and trials
-                emg_features = []
-                for throw in valid_emg_throws:
-                    # Normalize trial number as primary feature
-                    norm_trial = throw['trial_number'] / len(valid_emg_throws)
-                    emg_features.append([norm_trial])
-                
-                trial_features = []
-                for i, trial in enumerate(trials):
-                    # Normalize position in sequence
-                    trial_features.append([i / len(trials)])
-                
-                # Build similarity matrix
-                similarity_matrix = np.zeros((len(valid_emg_throws), len(trials)))
-                
-                for i, throw_feat in enumerate(emg_features):
-                    for j, trial_feat in enumerate(trial_features):
-                        # Calculate similarity based on sequence position
-                        position_diff = abs(throw_feat[0] - trial_feat[0])
-                        
-                        # Higher score for closer matches in the sequence
-                        similarity = max(0, 1.0 - (position_diff * 2))
-                        
-                        # Apply non-linear scaling for better differentiation
-                        similarity = 1.0 / (1.0 + math.exp(-10 * (similarity - 0.5)))
-                        
-                        similarity_matrix[i, j] = similarity
-                
-                # Find optimal matches - greedy approach
-                matches = []
-                matched_throws = set()
-                matched_trials = set()
-                
-                # Set threshold for valid matches
-                match_threshold = 0.7
-                
-                # While we can still find good matches
-                while True:
-                    best_score = match_threshold
-                    best_i, best_j = -1, -1
-                    
-                    for i in range(len(valid_emg_throws)):
-                        if i in matched_throws:
-                            continue
-                        
-                        for j in range(len(trials)):
-                            if j in matched_trials:
-                                continue
-                            
-                            if similarity_matrix[i, j] > best_score:
-                                best_score = similarity_matrix[i, j]
-                                best_i, best_j = i, j
-                    
-                    if best_i == -1:
-                        break
-                    
-                    matches.append((best_i, best_j, best_score))
-                    matched_throws.add(best_i)
-                    matched_trials.add(best_j)
-                
-                # Apply the matches to the database
-                match_count = 0
-                
-                for throw_idx, trial_idx, confidence in matches:
-                    throw = valid_emg_throws[throw_idx]
-                    trial = trials[trial_idx]
-                    
-                    # Use shorter match quality indicators that won't exceed column length
-                    if confidence > 0.9:
-                        match_quality = 'high_conf'
-                    elif confidence > 0.8:
-                        match_quality = 'med_conf'
-                    else:
-                        match_quality = 'low_conf'
-                    
-                    cursor.execute(f"""
-                        UPDATE emg_throws
-                        SET 
-                            session_trial = '{trial['session_trial']}',
-                            pitch_speed_mph = {trial['pitch_speed_mph']},
-                            velocity_match_quality = '{match_quality}'
-                        WHERE throw_id = {throw['throw_id']}
-                    """)
-                    match_count += 1
-                
-                # Commit updates
+                # Clear any previous velocity mappings for this session
+                cursor.execute(f"""
+                    UPDATE emg_throws 
+                    SET session_trial = NULL, pitch_speed_mph = NULL, velocity_match_quality = 'no_match'
+                    WHERE session_numeric_id = {session_id}
+                """)
                 conn.commit()
-                logger.info(f"Committed {match_count} matches to database")
                 
-                # Report on match quality
-                if len(matches) == len(valid_emg_throws) and len(matches) == len(trials):
-                    logger.info(f"Perfect 1:1 mapping found for all {len(matches)} throws")
-                else:
-                    unmatched_throws = len(valid_emg_throws) - len(matches)
-                    unmatched_trials = len(trials) - len(matches)
-                    logger.info(f"Matched {len(matches)} throws. Unmatched: {unmatched_throws} throws, {unmatched_trials} trials")
+                # MATCHING STRATEGY: TRIAL NUMBER BASED
+                # First try to match EMG throw trial numbers directly to velocity trial numbers
+                match_count = 0
+                matched_throw_ids = set()
+                
+                for throw in emg_throws:
+                    emg_trial_number = throw['trial_number']
+                    
+                    # Check if this trial number exists in the trial_mapping
+                    if emg_trial_number in trial_mapping:
+                        trial = trial_mapping[emg_trial_number]
+                        
+                        cursor.execute(f"""
+                            UPDATE emg_throws
+                            SET 
+                                session_trial = '{trial['session_trial']}',
+                                pitch_speed_mph = {trial['pitch_speed_mph']},
+                                velocity_match_quality = 'direct_trial_match'
+                            WHERE throw_id = {throw['throw_id']}
+                        """)
+                        
+                        match_count += 1
+                        matched_throw_ids.add(throw['throw_id'])
+                        
+                if match_count > 0:
+                    logger.info(f"Matched {match_count} throws using direct trial number mapping")
+                    conn.commit()
+                
+                # FALLBACK STRATEGIES for throws that weren't directly matched
+                
+                # Get remaining unmatched throws
+                remaining_throws = [throw for throw in emg_throws if throw['throw_id'] not in matched_throw_ids]
+                remaining_trial_numbers = [trial_num for trial_num in trial_mapping.keys() 
+                                        if trial_num not in [throw['trial_number'] for throw in emg_throws 
+                                                            if throw['throw_id'] in matched_throw_ids]]
+                
+                if remaining_throws and remaining_trial_numbers:
+                    logger.info(f"Attempting to match {len(remaining_throws)} remaining throws to {len(remaining_trial_numbers)} remaining trials")
+                    
+                    # STRATEGY 1: If remaining counts match, use sequence matching
+                    if len(remaining_throws) == len(remaining_trial_numbers):
+                        logger.info(f"Using sequence matching for remaining throws (counts match)")
+                        
+                        # Sort both lists by their respective trial numbers
+                        remaining_throws.sort(key=lambda x: x['trial_number'])
+                        remaining_trial_numbers.sort()
+                        
+                        fallback_match_count = 0
+                        for i, throw in enumerate(remaining_throws):
+                            if i < len(remaining_trial_numbers):
+                                trial_num = remaining_trial_numbers[i]
+                                trial = trial_mapping[trial_num]
+                                
+                                cursor.execute(f"""
+                                    UPDATE emg_throws
+                                    SET 
+                                        session_trial = '{trial['session_trial']}',
+                                        pitch_speed_mph = {trial['pitch_speed_mph']},
+                                        velocity_match_quality = 'sequence_matched'
+                                    WHERE throw_id = {throw['throw_id']}
+                                """)
+                                
+                                fallback_match_count += 1
+                        
+                        logger.info(f"Matched {fallback_match_count} additional throws by sequence")
+                        conn.commit()
+                        match_count += fallback_match_count
+                    
+                    # STRATEGY 2: If counts differ, use time-ordered matching
+                    else:
+                        logger.info(f"Using time-order matching for remaining throws (counts differ)")
+                        
+                        # Sort both by trial numbers
+                        remaining_throws.sort(key=lambda x: x['trial_number'])
+                        remaining_trial_numbers.sort()
+                        
+                        # Match as many as possible in order
+                        fallback_match_count = 0
+                        match_limit = min(len(remaining_throws), len(remaining_trial_numbers))
+                        
+                        for i in range(match_limit):
+                            throw = remaining_throws[i]
+                            trial_num = remaining_trial_numbers[i]
+                            trial = trial_mapping[trial_num]
+                            
+                            cursor.execute(f"""
+                                UPDATE emg_throws
+                                SET 
+                                    session_trial = '{trial['session_trial']}',
+                                    pitch_speed_mph = {trial['pitch_speed_mph']},
+                                    velocity_match_quality = 'ordered_time_matched'
+                                WHERE throw_id = {throw['throw_id']}
+                            """)
+                            
+                            fallback_match_count += 1
+                        
+                        logger.info(f"Matched {fallback_match_count} additional throws by time order")
+                        conn.commit()
+                        match_count += fallback_match_count
+                
+                logger.info(f"Total of {match_count} throws matched for session {pitching_session_id}")
             
             # Check the results
             cursor.execute("""
@@ -567,7 +598,8 @@ class EMGPipeline:
                     et.session_trial, et.pitch_speed_mph, et.velocity_match_quality
                 FROM emg_throws et
                 JOIN emg_sessions es ON et.session_numeric_id = es.numeric_id
-                WHERE et.velocity_match_quality IS NOT NULL
+                WHERE et.velocity_match_quality IS NOT NULL AND et.velocity_match_quality != 'no_match'
+                ORDER BY et.throw_id
                 LIMIT 10
             """)
             matched_examples = cursor.fetchall()
