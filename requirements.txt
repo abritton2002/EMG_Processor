@@ -5,8 +5,12 @@ pymysql>=1.0.2
 matplotlib>=3.4.0
 reportlab>=3.6.1
 seaborn>=0.11.2
-pywt>=1.1.0
+pywt>=1.1.0       # Note: The actual package name is PyWavelets
+PyWavelets>=1.1.0  # Adding the correct package name
 PyPDF2>=2.0.0
 tqdm>=4.62.0
 python-dotenv>=0.19.0
 tkcalendar>=1.6.1
+tkinter             # Usually included with Python itself, may not need in requirements
+cycler>=0.11.0      # Used for custom matplotlib color cycles
+scikit-learn>=1.0.0 # Optional for more advanced analysis functions

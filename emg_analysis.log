@@ -1,0 +1,6 @@
+2025-03-10 14:10:58,597 - emg_processor - INFO - EMG Processor initialized
+2025-03-10 14:10:58,608 - __main__ - ERROR - Error starting application: 'EMGAnalysisGUI' object has no attribute 'update_process_mode'
+2025-03-10 14:12:54,470 - emg_processor - INFO - EMG Processor initialized
+2025-03-10 14:12:54,487 - __main__ - ERROR - Error starting application: 'EMGAnalysisGUI' object has no attribute 'start_processing'
+2025-03-10 14:14:43,972 - emg_processor - INFO - EMG Processor initialized
+2025-03-10 14:14:44,229 - __main__ - ERROR - Error starting application: 'EMGAnalysisGUI' object has no attribute 'find_sessions'
