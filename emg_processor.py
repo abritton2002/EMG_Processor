@@ -284,7 +284,7 @@ class EMGProcessor:
         return filtered, rectified, rms, envelope
     
     def detect_throws_multi_muscle(self, fcr_rms, fcu_rms, time, fs, 
-                                threshold_factor_fcr=5, threshold_factor_fcu=1.5,
+                                threshold_factor_fcr=2.75, threshold_factor_fcu=1.25,
                                 min_duration=0.2, min_separation=10, 
                                 coincidence_window=0.1):
         """

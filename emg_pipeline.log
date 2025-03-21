@@ -3303,3 +3303,139 @@ TypeError: EMGProcessor.detect_throws_multi_muscle() got an unexpected keyword a
 2025-03-20 10:49:42,745 - emg_pipeline - INFO - Throw ID: 271, Athlete: AlexBritton, Trial: 8, Session Trial: 2795_8, Velocity: 76.2 mph
 2025-03-20 10:49:42,748 - emg_pipeline - INFO - Throw ID: 272, Athlete: AlexBritton, Trial: 9, Session Trial: 2795_9, Velocity: 77.9 mph
 2025-03-20 10:49:42,749 - emg_pipeline - INFO - Throw ID: 273, Athlete: AlexBritton, Trial: 10, Session Trial: 2795_10, Velocity: 78.5 mph
+2025-03-20 14:34:49,362 - emg_processor - INFO - EMG Processor initialized
+2025-03-20 14:34:49,366 - db_connector - INFO - Database connector initialized
+2025-03-20 14:34:49,366 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-20 14:34:49,366 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:27:07,474 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:27:07,474 - db_connector - INFO - Database connector initialized
+2025-03-21 11:27:07,474 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:27:07,474 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:31:32,422 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:31:32,422 - db_connector - INFO - Database connector initialized
+2025-03-21 11:31:32,423 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:31:32,423 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:31:42,631 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:31:42,632 - db_connector - INFO - Database connector initialized
+2025-03-21 11:31:42,632 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:31:42,632 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:31:42,636 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:31:42,957 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:31:43,624 - db_connector - INFO - Database tables created/verified successfully
+2025-03-21 11:31:43,625 - db_connector - INFO - Database connection closed
+2025-03-21 11:31:43,625 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:31:43,627 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-21
+2025-03-21 11:31:43,627 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:31:45,288 - emg_processor - INFO - Data loaded: FCU: 778244 samples, FCR: 778244 samples
+2025-03-21 11:31:45,288 - emg_processor - INFO - Found 2 muscles in file
+2025-03-21 11:31:45,973 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:31:46,213 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'muscle1_id' in 'field list'")
+2025-03-21 11:31:46,294 - db_connector - INFO - Database connection closed
+2025-03-21 11:31:46,294 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv to database
+2025-03-21 11:32:51,189 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:32:51,189 - db_connector - INFO - Database connector initialized
+2025-03-21 11:32:51,189 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:32:51,189 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:32:56,212 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:32:56,212 - db_connector - INFO - Database connector initialized
+2025-03-21 11:32:56,213 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:32:56,213 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:32:56,219 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:32:56,540 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:32:57,098 - db_connector - INFO - Database tables created/verified successfully
+2025-03-21 11:32:57,100 - db_connector - INFO - Database connection closed
+2025-03-21 11:32:57,101 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:32:57,104 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-21
+2025-03-21 11:32:57,106 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:32:58,818 - emg_processor - INFO - Data loaded: FCU: 778244 samples, FCR: 778244 samples
+2025-03-21 11:32:58,818 - emg_processor - INFO - Found 2 muscles in file
+2025-03-21 11:32:59,490 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:32:59,730 - emg_pipeline - ERROR - Error saving to database: (1054, "Unknown column 'muscle1_id' in 'field list'")
+2025-03-21 11:32:59,810 - db_connector - INFO - Database connection closed
+2025-03-21 11:32:59,810 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv to database
+2025-03-21 11:34:06,430 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:34:06,430 - db_connector - INFO - Database connector initialized
+2025-03-21 11:34:06,430 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:34:06,430 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:34:12,477 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:34:12,477 - db_connector - INFO - Database connector initialized
+2025-03-21 11:34:12,477 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:34:12,477 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:34:12,482 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:34:12,802 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:34:13,387 - db_connector - INFO - Database tables created/verified successfully
+2025-03-21 11:34:13,387 - db_connector - INFO - Database connection closed
+2025-03-21 11:34:13,388 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:34:13,389 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-21
+2025-03-21 11:34:13,389 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:34:15,188 - emg_processor - INFO - Data loaded: FCU: 778244 samples, FCR: 778244 samples
+2025-03-21 11:34:15,188 - emg_processor - INFO - Found 2 muscles in file
+2025-03-21 11:34:15,890 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:34:16,050 - emg_pipeline - ERROR - Error saving to database: not enough arguments for format string
+2025-03-21 11:34:16,130 - db_connector - INFO - Database connection closed
+2025-03-21 11:34:16,130 - emg_pipeline - ERROR - Failed to save C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv to database
+2025-03-21 11:41:54,893 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:41:54,894 - db_connector - INFO - Database connector initialized
+2025-03-21 11:41:54,894 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:41:54,894 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:42:01,887 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:42:01,887 - db_connector - INFO - Database connector initialized
+2025-03-21 11:42:01,887 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:42:01,887 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:42:01,892 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:42:02,214 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:42:02,885 - db_connector - INFO - Database tables created/verified successfully
+2025-03-21 11:42:02,885 - db_connector - INFO - Database connection closed
+2025-03-21 11:42:02,885 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:42:02,886 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-21
+2025-03-21 11:42:02,886 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:42:04,431 - emg_processor - INFO - Data loaded: FCU: 778244 samples, FCR: 778244 samples
+2025-03-21 11:42:04,432 - emg_processor - INFO - Found 2 muscles in file
+2025-03-21 11:42:05,097 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:43:40,546 - emg_pipeline - INFO - Successfully saved data for session 032125_086373_RyanHarvey_veloday to database
+2025-03-21 11:43:40,548 - db_connector - INFO - Database connection closed
+2025-03-21 11:43:40,550 - emg_pipeline - INFO - Successfully processed and saved C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:46:26,979 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:46:26,980 - db_connector - INFO - Database connector initialized
+2025-03-21 11:46:26,980 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:46:26,980 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:46:33,146 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:46:33,146 - db_connector - INFO - Database connector initialized
+2025-03-21 11:46:33,147 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:46:33,147 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:46:33,155 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:46:33,479 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:46:34,039 - db_connector - INFO - Database tables created/verified successfully
+2025-03-21 11:46:34,040 - db_connector - INFO - Database connection closed
+2025-03-21 11:46:34,041 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:46:34,042 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-21
+2025-03-21 11:46:34,042 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:46:35,969 - emg_processor - INFO - Data loaded: FCU: 778244 samples, FCR: 778244 samples
+2025-03-21 11:46:35,969 - emg_processor - INFO - Found 2 muscles in file
+2025-03-21 11:46:36,696 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:46:36,856 - emg_pipeline - INFO - Session 032125_086373_RyanHarvey_veloday already exists. Removing old data...
+2025-03-21 11:48:37,878 - emg_pipeline - INFO - Successfully saved data for session 032125_086373_RyanHarvey_veloday to database
+2025-03-21 11:48:37,878 - db_connector - INFO - Database connection closed
+2025-03-21 11:48:37,879 - emg_pipeline - INFO - Successfully processed and saved C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:53:17,753 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:53:17,754 - db_connector - INFO - Database connector initialized
+2025-03-21 11:53:17,754 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:53:17,754 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:53:23,630 - emg_processor - INFO - EMG Processor initialized
+2025-03-21 11:53:23,631 - db_connector - INFO - Database connector initialized
+2025-03-21 11:53:23,631 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: C:\Users\alex.britton\Documents\DelsysTesting\EMGanalysis\V2_REPO
+2025-03-21 11:53:23,631 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-03-21 11:53:23,635 - emg_pipeline - INFO - Processing single file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:53:23,956 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:53:24,512 - db_connector - INFO - Database tables created/verified successfully
+2025-03-21 11:53:24,512 - db_connector - INFO - Database connection closed
+2025-03-21 11:53:24,513 - emg_pipeline - INFO - Processing file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:53:24,514 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-03-21
+2025-03-21 11:53:24,514 - emg_processor - INFO - Loading file: C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv
+2025-03-21 11:53:26,255 - emg_processor - INFO - Data loaded: FCU: 778244 samples, FCR: 778244 samples
+2025-03-21 11:53:26,255 - emg_processor - INFO - Found 2 muscles in file
+2025-03-21 11:53:26,940 - db_connector - INFO - Connected to database theia_pitching_db
+2025-03-21 11:53:27,101 - emg_pipeline - INFO - Session 032125_086373_RyanHarvey_veloday already exists. Removing old data...
+2025-03-21 11:55:23,073 - emg_pipeline - INFO - Successfully saved data for session 032125_086373_RyanHarvey_veloday to database
+2025-03-21 11:55:23,073 - db_connector - INFO - Database connection closed
+2025-03-21 11:55:23,074 - emg_pipeline - INFO - Successfully processed and saved C:/Users/alex.britton/Documents/DelsysTesting/Pitching_DataSet/032125_086373_RyanHarvey_veloday.csv

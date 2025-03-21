@@ -162,9 +162,9 @@ class EMGPipeline:
             # Use integrated dual-muscle detection
             throws = self.processor.detect_throws_multi_muscle(
                 muscle1_rms, muscle2_rms, common_time, common_fs, 
-                threshold_factor_fcr=5, threshold_factor_fcu=1.5,
+                threshold_factor_fcr=2.75, threshold_factor_fcu=1.25,
                 min_duration=0.2, min_separation=10, 
-                coincidence_window=0.1
+                coincidence_window=0.2
             )
 
             # Calculate metrics for both muscles using the same throw indices
@@ -201,10 +201,6 @@ class EMGPipeline:
                 'muscle2_name': metadata.get('muscle2_name'),
                 'muscle3_name': metadata.get('muscle3_name'),
                 'muscle4_name': metadata.get('muscle4_name'),
-                'muscle1_id': metadata.get('muscle1_id'),
-                'muscle2_id': metadata.get('muscle2_id'),
-                'muscle3_id': metadata.get('muscle3_id'),
-                'muscle4_id': metadata.get('muscle4_id'),
                 'muscle1_fs': muscle1_fs,
                 'muscle2_fs': muscle2_fs,
                 'file_path': file_path,
@@ -748,9 +744,8 @@ class EMGPipeline:
                 filename, date_recorded, collection_date, start_time,
                 traq_id, athlete_name, session_type,
                 muscle_count, muscle1_name, muscle2_name, muscle3_name, muscle4_name,
-                muscle1_id, muscle2_id, muscle3_id, muscle4_id,
                 muscle1_fs, muscle2_fs, file_path, processed_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 filename,
                 date_recorded,
@@ -764,10 +759,6 @@ class EMGPipeline:
                 session_data.get('muscle2_name'),
                 session_data.get('muscle3_name'),
                 session_data.get('muscle4_name'),
-                session_data.get('muscle1_id'),
-                session_data.get('muscle2_id'),
-                session_data.get('muscle3_id'),
-                session_data.get('muscle4_id'),
                 session_data.get('muscle1_fs'),
                 session_data.get('muscle2_fs'),
                 session_data['file_path'],

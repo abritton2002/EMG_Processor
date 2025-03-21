@@ -287,8 +287,8 @@ def main():
     fcr_rms = preprocess_emg(fcr_raw, fs)
     
     # Set detection parameters
-    threshold_fcr = 5
-    threshold_fcu = 1.5
+    threshold_fcr = 2.75
+    threshold_fcu = 1.25
     min_duration = 0.2
     min_separation = 10
     
