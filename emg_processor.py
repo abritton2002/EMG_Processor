@@ -241,21 +241,6 @@ class EMGProcessor:
         return muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata
     
     def preprocess_emg(self, emg_signal, fs):
-        """
-        Preprocess EMG data with multiple filtering approaches.
-        
-        Parameters:
-        -----------
-        emg_signal : numpy.ndarray
-            Raw EMG signal
-        fs : float
-            Sampling frequency
-            
-        Returns:
-        --------
-        tuple
-            (filtered, rectified, rms, envelope)
-        """
         # High-pass filter (20 Hz cutoff to remove motion artifacts)
         sos_hp = signal.butter(4, 20, 'hp', fs=fs, output='sos')
         filtered = signal.sosfilt(sos_hp, emg_signal)
@@ -283,43 +268,89 @@ class EMGProcessor:
         
         return filtered, rectified, rms, envelope
     
-    def detect_throws_multi_muscle(self, fcr_rms, fcu_rms, time, fs, 
-                                threshold_factor_fcr=2.75, threshold_factor_fcu=1.25,
-                                min_duration=0.2, min_separation=10, 
-                                coincidence_window=0.1):
+    def calculate_coactivation_indices(self, muscle1_emg, muscle2_emg, fs):
         """
-        Detect throwing motions by considering both FCR and FCU EMG data.
+        Calculate coactivation indices between two muscles.
         
         Parameters:
         -----------
-        fcr_rms : numpy.ndarray
-            RMS processed FCR EMG data
-        fcu_rms : numpy.ndarray
-            RMS processed FCU EMG data
-        time : numpy.ndarray
-            Time array corresponding to data
+        muscle1_emg : numpy.ndarray
+            EMG signal of first muscle
+        muscle2_emg : numpy.ndarray
+            EMG signal of second muscle
         fs : float
             Sampling frequency
-        threshold_factor_fcr : float, optional
-            Factor for FCR adaptive threshold calculation
-        threshold_factor_fcu : float, optional
-            Factor for FCU adaptive threshold calculation
-        min_duration : float, optional
-            Minimum throw duration in seconds
-        min_separation : float, optional
-            Minimum separation between throws in seconds
-        coincidence_window : float, optional
-            Time window in seconds to consider activations coincident
             
         Returns:
         --------
-        list
-            List of (start_index, end_index) tuples for each detected throw
+        dict
+            Dictionary of coactivation indices
         """
+        # Ensure signals are of the same length
+        min_len = min(len(muscle1_emg), len(muscle2_emg))
+        muscle1_emg = muscle1_emg[:min_len]
+        muscle2_emg = muscle2_emg[:min_len]
+        
+        # Normalize EMG signals
+        muscle1_norm = muscle1_emg / (np.max(muscle1_emg) if np.max(muscle1_emg) > 0 else 1)
+        muscle2_norm = muscle2_emg / (np.max(muscle2_emg) if np.max(muscle2_emg) > 0 else 1)
+        
+        # Rectify signals
+        muscle1_rect = np.abs(muscle1_norm)
+        muscle2_rect = np.abs(muscle2_norm)
+        
+        # Calculate coactivation index (CI) as per Falconer & Winter method
+        # CI = 2 * common area between normalized EMG profiles / total area
+        common_area = np.minimum(muscle1_rect, muscle2_rect).sum()
+        total_area = muscle1_rect.sum() + muscle2_rect.sum()
+        ci_falconer = 2 * common_area / total_area if total_area > 0 else 0
+        
+        # Calculate cross-correlation
+        correlation = np.correlate(muscle1_rect, muscle2_rect, mode='valid')[0] / min_len
+        
+        # Calculate temporal overlap
+        active_threshold = 0.1  # Threshold for considering muscle active
+        muscle1_active = muscle1_rect > active_threshold
+        muscle2_active = muscle2_rect > active_threshold
+        both_active = np.logical_and(muscle1_active, muscle2_active)
+        temporal_overlap = np.sum(both_active) / min_len
+        
+        # Calculate waveform similarity index
+        diff_norm = np.sum((muscle1_rect - muscle2_rect) ** 2)
+        sum_norm = np.sum(muscle1_rect ** 2) + np.sum(muscle2_rect ** 2)
+        waveform_similarity = 1 - (diff_norm / sum_norm if sum_norm > 0 else 0)
+        
+        # Return all indices
+        return {
+            'ci_falconer': ci_falconer,
+            'correlation': correlation,
+            'temporal_overlap': temporal_overlap,
+            'waveform_similarity': waveform_similarity
+        }
+
+    def detect_throws_multi_muscle(self, fcr_rms, fcu_rms, time, fs, 
+                                    threshold_factor_fcr=2.75, threshold_factor_fcu=1.25,
+                                    min_duration=0.2, min_separation=10, 
+                                    coincidence_window=0.2):
+        """
+        Detect throwing motions by considering both FCR and FCU EMG data.
+        
+        Parameters match those in your pipeline processing method.
+        """
+        # Diagnostic logging
+        logger.info(f"FCR RMS - Mean: {np.mean(fcr_rms)}, Std: {np.std(fcr_rms)}")
+        logger.info(f"FCU RMS - Mean: {np.mean(fcu_rms)}, Std: {np.std(fcu_rms)}")
+        
         # Calculate dynamic thresholds for both muscles
         fcr_threshold = np.mean(fcr_rms) + threshold_factor_fcr * np.std(fcr_rms)
         fcu_threshold = np.mean(fcu_rms) + threshold_factor_fcu * np.std(fcu_rms)
         
+        logger.info(f"FCR Threshold: {fcr_threshold}")
+        logger.info(f"FCU Threshold: {fcu_threshold}")
+        
+        logger.info(f"FCR samples above threshold: {np.sum(fcr_rms > fcr_threshold)} / {len(fcr_rms)}")
+        logger.info(f"FCU samples above threshold: {np.sum(fcu_rms > fcu_threshold)} / {len(fcu_rms)}")
+
         # Find regions above threshold for each muscle
         fcr_above = fcr_rms > fcr_threshold
         fcu_above = fcu_rms > fcu_threshold
@@ -379,6 +410,7 @@ class EMGProcessor:
                     filtered_throws.append(throws[i])
             return filtered_throws
         
+        logger.warning(f"No throws detected. Check threshold factors and signal characteristics.")
         return throws
 
     def calculate_spectral_entropy(self, signal, fs, nperseg=256):
@@ -465,224 +497,181 @@ class EMGProcessor:
         
         return features
     
-    def calculate_coactivation_indices(self, muscle1_emg, muscle2_emg, fs):
-        """
-        Calculate coactivation indices between two muscles.
-        
-        Parameters:
-        -----------
-        muscle1_emg : numpy.ndarray
-            EMG signal of first muscle
-        muscle2_emg : numpy.ndarray
-            EMG signal of second muscle
-        fs : float
-            Sampling frequency
-            
-        Returns:
-        --------
-        dict
-            Dictionary of coactivation indices
-        """
-        # Ensure signals are of the same length
-        min_len = min(len(muscle1_emg), len(muscle2_emg))
-        muscle1_emg = muscle1_emg[:min_len]
-        muscle2_emg = muscle2_emg[:min_len]
-        
-        # Normalize EMG signals
-        muscle1_norm = muscle1_emg / (np.max(muscle1_emg) if np.max(muscle1_emg) > 0 else 1)
-        muscle2_norm = muscle2_emg / (np.max(muscle2_emg) if np.max(muscle2_emg) > 0 else 1)
-        
-        # Rectify signals
-        muscle1_rect = np.abs(muscle1_norm)
-        muscle2_rect = np.abs(muscle2_norm)
-        
-        # Calculate coactivation index (CI) as per Falconer & Winter method
-        # CI = 2 * common area between normalized EMG profiles / total area
-        common_area = np.minimum(muscle1_rect, muscle2_rect).sum()
-        total_area = muscle1_rect.sum() + muscle2_rect.sum()
-        ci_falconer = 2 * common_area / total_area if total_area > 0 else 0
-        
-        # Calculate cross-correlation
-        correlation = np.correlate(muscle1_rect, muscle2_rect, mode='valid')[0] / min_len
-        
-        # Calculate temporal overlap
-        active_threshold = 0.1  # Threshold for considering muscle active
-        muscle1_active = muscle1_rect > active_threshold
-        muscle2_active = muscle2_rect > active_threshold
-        both_active = np.logical_and(muscle1_active, muscle2_active)
-        temporal_overlap = np.sum(both_active) / min_len
-        
-        # Calculate waveform similarity index
-        diff_norm = np.sum((muscle1_rect - muscle2_rect) ** 2)
-        sum_norm = np.sum(muscle1_rect ** 2) + np.sum(muscle2_rect ** 2)
-        waveform_similarity = 1 - (diff_norm / sum_norm if sum_norm > 0 else 0)
-        
-        # Return all indices
-        return {
-            'ci_falconer': ci_falconer,
-            'correlation': correlation,
-            'temporal_overlap': temporal_overlap,
-            'waveform_similarity': waveform_similarity
-        }
-    
     def calculate_comprehensive_metrics(self, emg_filtered, emg_rectified, emg_rms, emg_envelope, throws, time, fs):
         """
         Calculate comprehensive metrics for each throw.
-        
-        Parameters:
-        -----------
-        emg_filtered : numpy.ndarray
-            Filtered EMG signal
-        emg_rectified : numpy.ndarray
-            Rectified EMG signal
-        emg_rms : numpy.ndarray
-            RMS processed EMG signal
-        emg_envelope : numpy.ndarray
-            Envelope of EMG signal
-        throws : list
-            List of (start_index, end_index) tuples for each throw
-        time : numpy.ndarray
-            Time array
-        fs : float
-            Sampling frequency
-            
-        Returns:
-        --------
-        dict
-            Dictionary of metrics for each throw
         """
+        # If no throws detected, return empty metrics
+        if not throws:
+            logger.warning("No throws detected in the signal")
+            return {
+                'throw_indices': np.array([]),
+                'throw_timestamps': np.array([]),
+                'throw_end_times': np.array([]),
+                'throw_durations': np.array([]),
+                
+                # Frequency domain metrics
+                'median_freqs': np.array([]),
+                'mean_freqs': np.array([]),
+                'bandwidth': np.array([]),
+                
+                # Amplitude domain metrics
+                'peak_amplitudes': np.array([]),
+                'rms_values': np.array([]),
+                
+                # Temporal metrics
+                'rise_times': np.array([]),
+                'contraction_times': np.array([]),
+                'relaxation_times': np.array([]),
+                
+                # Workload metrics
+                'throw_integrals': np.array([]),
+                'work_rates': np.array([]),
+                
+                # NEW: Spectral entropy metrics
+                'spectral_entropies': np.array([]),
+                
+                # NEW: Wavelet energy metrics
+                'wavelet_energy_low': np.array([]),
+                'wavelet_energy_mid': np.array([]),
+                'wavelet_energy_high': np.array([])
+            }
+
         # Initialize metrics arrays
         throw_count = len(throws)
         
-        # Frequency domain metrics
-        median_freqs = np.zeros(throw_count)
-        mean_freqs = np.zeros(throw_count)
-        bandwidth = np.zeros(throw_count)
+        # Preallocate arrays with proper checks
+        median_freqs = np.full(throw_count, np.nan)
+        mean_freqs = np.full(throw_count, np.nan)
+        bandwidth = np.full(throw_count, np.nan)
         
-        # Amplitude domain metrics
-        peak_amplitudes = np.zeros(throw_count)
-        rms_values = np.zeros(throw_count)
+        peak_amplitudes = np.full(throw_count, np.nan)
+        rms_values = np.full(throw_count, np.nan)
         
-        # Temporal metrics
-        rise_times = np.zeros(throw_count)
-        contraction_times = np.zeros(throw_count)
-        relaxation_times = np.zeros(throw_count)
+        rise_times = np.full(throw_count, np.nan)
+        contraction_times = np.full(throw_count, np.nan)
+        relaxation_times = np.full(throw_count, np.nan)
         
-        # Workload metrics
-        throw_integrals = np.zeros(throw_count)
-        throw_durations = np.zeros(throw_count)
-        work_rates = np.zeros(throw_count)
+        throw_integrals = np.full(throw_count, np.nan)
+        throw_durations = np.full(throw_count, np.nan)
+        work_rates = np.full(throw_count, np.nan)
         
-        # NEW: Spectral entropy metrics
-        spectral_entropies = np.zeros(throw_count)
+        spectral_entropies = np.full(throw_count, np.nan)
         
-        # NEW: Wavelet energy metrics
-        wavelet_energy_low = np.zeros(throw_count)
-        wavelet_energy_mid = np.zeros(throw_count)
-        wavelet_energy_high = np.zeros(throw_count)
+        wavelet_energy_low = np.full(throw_count, np.nan)
+        wavelet_energy_mid = np.full(throw_count, np.nan)
+        wavelet_energy_high = np.full(throw_count, np.nan)
         
         # Process each throw for comprehensive metrics
         for i, (start, end) in enumerate(throws):
-            # Extract throw segments
-            segment_filtered = emg_filtered[start:end]
-            segment_rectified = emg_rectified[start:end]
-            segment_rms = emg_rms[start:end]
-            segment_envelope = emg_envelope[start:end]
-            segment_time = time[start:end] - time[start]  # Normalize time to start at 0
-            
-            # Duration
-            throw_durations[i] = segment_time[-1]
-            
-            # Amplitude domain metrics
-            peak_amplitudes[i] = np.max(segment_rectified)
-            rms_values[i] = np.sqrt(np.mean(segment_filtered**2))
-            
-            # Workload metrics - area under the curve (trapezoidal integration)
-            throw_integrals[i] = np.trapz(segment_rectified, segment_time)
-            work_rates[i] = throw_integrals[i] / throw_durations[i]
-            
-            # Temporal metrics
-            peak_idx = np.argmax(segment_envelope)
-            
-            # Rise time (time to reach 90% of max from 10% of max)
-            rise_threshold_low = 0.1 * segment_envelope[peak_idx]
-            rise_threshold_high = 0.9 * segment_envelope[peak_idx]
-            
             try:
-                rise_start_idx = np.where(segment_envelope >= rise_threshold_low)[0][0]
-                rise_end_idx = np.where(segment_envelope >= rise_threshold_high)[0][0]
-                rise_times[i] = segment_time[rise_end_idx] - segment_time[rise_start_idx]
-            except IndexError:
-                rise_times[i] = np.nan
-            
-            # Contraction and relaxation times
-            contraction_times[i] = segment_time[peak_idx] if peak_idx < len(segment_time) else np.nan
-            relaxation_times[i] = segment_time[-1] - segment_time[peak_idx] if peak_idx < len(segment_time) else np.nan
-            
-            # Frequency domain metrics
-            # Apply Hanning window to reduce spectral leakage
-            windowed = segment_filtered * np.hanning(len(segment_filtered))
-            
-            # FFT
-            fft_result = np.abs(fft(windowed))
-            
-            # Only first half of FFT is meaningful (Nyquist)
-            n = len(segment_filtered)
-            fft_result = fft_result[:n//2]
-            
-            # Frequency array
-            freqs = fftfreq(n, 1/fs)[:n//2]
-            
-            # Only consider the physiologically relevant frequency range for EMG (20-450 Hz)
-            freq_mask = (freqs >= 20) & (freqs <= 450)
-            
-            # Calculate frequency metrics
-            if np.sum(fft_result[freq_mask]) > 0:  # Avoid division by zero
-                power = fft_result[freq_mask]**2
-                cumpower = np.cumsum(power)
+                # Validate input segments
+                if start >= end or end > len(emg_filtered):
+                    logger.warning(f"Invalid throw segment for throw {i}: start={start}, end={end}")
+                    continue
                 
-                # Median frequency (point at which half the power is above and half below)
-                median_idx = np.where(cumpower >= cumpower[-1]/2)[0][0]
-                median_freqs[i] = freqs[freq_mask][median_idx]
+                # Extract throw segments
+                segment_filtered = emg_filtered[start:end]
+                segment_rectified = emg_rectified[start:end]
+                segment_rms = emg_rms[start:end]
+                segment_envelope = emg_envelope[start:end]
+                segment_time = time[start:end] - time[start]  # Normalize time to start at 0
                 
-                # Mean frequency
-                mean_freqs[i] = np.sum(freqs[freq_mask] * power) / np.sum(power)
+                # Validate segments
+                if len(segment_filtered) == 0 or len(segment_time) == 0:
+                    logger.warning(f"Empty segment for throw {i}")
+                    continue
                 
-                # Bandwidth (frequency range containing 68% of power, ~1 std dev)
-                lower_band_idx = np.where(cumpower >= cumpower[-1]*0.16)[0][0]
-                upper_band_idx = np.where(cumpower >= cumpower[-1]*0.84)[0][0]
-                bandwidth[i] = freqs[freq_mask][upper_band_idx] - freqs[freq_mask][lower_band_idx]
+                # Duration
+                throw_durations[i] = segment_time[-1]
+                
+                # Amplitude domain metrics
+                peak_amplitudes[i] = np.max(segment_rectified)
+                rms_values[i] = np.sqrt(np.mean(segment_filtered**2))
+                
+                # Workload metrics - area under the curve (trapezoidal integration)
+                throw_integrals[i] = np.trapz(segment_rectified, segment_time)
+                work_rates[i] = throw_integrals[i] / throw_durations[i]
+                
+                # Temporal metrics
+                peak_idx = np.argmax(segment_envelope)
+                
+                # Rise time (time to reach 90% of max from 10% of max)
+                rise_threshold_low = 0.1 * segment_envelope[peak_idx]
+                rise_threshold_high = 0.9 * segment_envelope[peak_idx]
+                
+                try:
+                    rise_start_idx = np.where(segment_envelope >= rise_threshold_low)[0][0]
+                    rise_end_idx = np.where(segment_envelope >= rise_threshold_high)[0][0]
+                    rise_times[i] = segment_time[rise_end_idx] - segment_time[rise_start_idx]
+                except IndexError:
+                    rise_times[i] = np.nan
+                
+                # Contraction and relaxation times
+                contraction_times[i] = segment_time[peak_idx] if peak_idx < len(segment_time) else np.nan
+                relaxation_times[i] = segment_time[-1] - segment_time[peak_idx] if peak_idx < len(segment_time) else np.nan
+                
+                # Frequency domain metrics
+                # Apply Hanning window to reduce spectral leakage
+                windowed = segment_filtered * np.hanning(len(segment_filtered))
+                
+                # FFT
+                fft_result = np.abs(fft(windowed))
+                
+                # Only first half of FFT is meaningful (Nyquist)
+                n = len(segment_filtered)
+                fft_result = fft_result[:n//2]
+                
+                # Frequency array
+                freqs = fftfreq(n, 1/fs)[:n//2]
+                
+                # Only consider the physiologically relevant frequency range for EMG (20-450 Hz)
+                freq_mask = (freqs >= 20) & (freqs <= 450)
+                
+                # Calculate frequency metrics
+                if np.sum(fft_result[freq_mask]) > 0:  # Avoid division by zero
+                    power = fft_result[freq_mask]**2
+                    cumpower = np.cumsum(power)
+                    
+                    # Median frequency (point at which half the power is above and half below)
+                    median_idx = np.where(cumpower >= cumpower[-1]/2)[0][0]
+                    median_freqs[i] = freqs[freq_mask][median_idx]
+                    
+                    # Mean frequency
+                    mean_freqs[i] = np.sum(freqs[freq_mask] * power) / np.sum(power)
+                    
+                    # Bandwidth (frequency range containing 68% of power, ~1 std dev)
+                    lower_band_idx = np.where(cumpower >= cumpower[-1]*0.16)[0][0]
+                    upper_band_idx = np.where(cumpower >= cumpower[-1]*0.84)[0][0]
+                    bandwidth[i] = freqs[freq_mask][upper_band_idx] - freqs[freq_mask][lower_band_idx]
+                
+                # NEW: Calculate spectral entropy
+                spectral_entropies[i] = self.calculate_spectral_entropy(segment_filtered, fs)
+                
+                # NEW: Calculate wavelet features
+                try:
+                    wavelet_features = self.wavelet_analysis(segment_filtered, fs)
+                    
+                    # Low frequency band (detail levels 4-5)
+                    wavelet_energy_low[i] = (wavelet_features.get('detail_4_rel_energy', 0) + 
+                                            wavelet_features.get('detail_5_rel_energy', 0) + 
+                                            wavelet_features.get('approximation_rel_energy', 0))
+                    
+                    # Mid frequency band (detail levels 2-3)
+                    wavelet_energy_mid[i] = (wavelet_features.get('detail_2_rel_energy', 0) + 
+                                            wavelet_features.get('detail_3_rel_energy', 0))
+                    
+                    # High frequency band (detail level 1)
+                    wavelet_energy_high[i] = wavelet_features.get('detail_1_rel_energy', 0)
+                except Exception as e:
+                    logger.warning(f"Failed to calculate wavelet features for throw {i+1}: {e}")
+                    wavelet_energy_low[i] = np.nan
+                    wavelet_energy_mid[i] = np.nan
+                    wavelet_energy_high[i] = np.nan
             
-            # NEW: Calculate spectral entropy
-            spectral_entropies[i] = self.calculate_spectral_entropy(segment_filtered, fs)
-            
-            # NEW: Calculate wavelet features
-            try:
-                wavelet_features = self.wavelet_analysis(segment_filtered, fs)
-                
-                # Map wavelet levels to frequency bands
-                # Note: exact frequency bands depend on the sampling frequency and wavelet type
-                # detail_1: ~fs/4 to fs/2 Hz (high frequency)
-                # detail_2: ~fs/8 to fs/4 Hz (mid-high frequency)
-                # detail_3: ~fs/16 to fs/8 Hz (mid frequency)
-                # detail_4 & detail_5: lower frequencies
-                
-                # Low frequency band (detail levels 4-5)
-                wavelet_energy_low[i] = (wavelet_features.get('detail_4_rel_energy', 0) + 
-                                        wavelet_features.get('detail_5_rel_energy', 0) + 
-                                        wavelet_features.get('approximation_rel_energy', 0))
-                
-                # Mid frequency band (detail levels 2-3)
-                wavelet_energy_mid[i] = (wavelet_features.get('detail_2_rel_energy', 0) + 
-                                        wavelet_features.get('detail_3_rel_energy', 0))
-                
-                # High frequency band (detail level 1)
-                wavelet_energy_high[i] = wavelet_features.get('detail_1_rel_energy', 0)
             except Exception as e:
-                logger.warning(f"Failed to calculate wavelet features for throw {i+1}: {e}")
-                wavelet_energy_low[i] = 0
-                wavelet_energy_mid[i] = 0
-                wavelet_energy_high[i] = 0
+                logger.error(f"Error processing throw {i}: {e}")
+                continue
         
         # Calculate throw indices for plotting
         throw_indices = np.arange(1, throw_count + 1)

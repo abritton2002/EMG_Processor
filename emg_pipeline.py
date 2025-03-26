@@ -144,46 +144,84 @@ class EMGPipeline:
             muscle1_fs = metadata.get('muscle1_fs', 2000)
             muscle2_fs = metadata.get('muscle2_fs', 2000)
             
-            # Preprocess EMG data
-            muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope = self.processor.preprocess_emg(muscle1_emg, muscle1_fs)
-            muscle2_filtered, muscle2_rectified, muscle2_rms, muscle2_envelope = self.processor.preprocess_emg(muscle2_emg, muscle2_fs)
+            logger.info(f"Loaded muscles: {muscle1_name} and {muscle2_name}")
+            logger.info(f"Signal lengths: {len(muscle1_emg)} and {len(muscle2_emg)} samples")
+            logger.info(f"Sampling rates: {muscle1_fs} and {muscle2_fs} Hz")
+            
+            # Recalculate proper time arrays for both muscles regardless of what's in the file
+            # Since we know both recordings started and stopped simultaneously
+            muscle1_samples = len(muscle1_emg)
+            muscle2_samples = len(muscle2_emg)
 
-            # Align muscle2 data to muscle1 timeline if lengths are different
-            if len(muscle1_time) != len(muscle2_time):
-                # Use the muscle1 timeline as reference and interpolate muscle2 data to match
-                aligned_muscle2_rms = np.interp(muscle1_time, muscle2_time, muscle2_rms)
-                common_time = muscle1_time
-                common_fs = muscle1_fs
-            else:
-                aligned_muscle2_rms = muscle2_rms
-                common_time = muscle1_time
-                common_fs = muscle1_fs
+            # Calculate actual durations based on samples and rates
+            actual_duration_1 = muscle1_samples / muscle1_fs
+            actual_duration_2 = muscle2_samples / muscle2_fs
 
-            # Use integrated dual-muscle detection
+            # Use the longer duration for both signals
+            common_duration = max(actual_duration_1, actual_duration_2)
+            logger.info(f"Common duration: {common_duration:.2f} seconds")
+
+            # Generate consistent time arrays based on common duration
+            muscle1_time_fixed = np.linspace(0, common_duration, muscle1_samples)
+            muscle2_time_fixed = np.linspace(0, common_duration, muscle2_samples)
+
+            # Create a common time base with sufficient resolution
+            common_fs = max(muscle1_fs, muscle2_fs) 
+            common_time = np.linspace(0, common_duration, int(common_duration * common_fs))
+            logger.info(f"Common time base: {len(common_time)} samples at {common_fs} Hz")
+
+            # Interpolate raw EMG signals to the common timeline
+            muscle1_emg_aligned = np.interp(common_time, muscle1_time_fixed, muscle1_emg)
+            muscle2_emg_aligned = np.interp(common_time, muscle2_time_fixed, muscle2_emg)
+            
+            # Preprocess the interpolated EMG data
+            muscle1_filtered_aligned, muscle1_rectified_aligned, muscle1_rms_aligned, muscle1_envelope_aligned = self.processor.preprocess_emg(muscle1_emg_aligned, common_fs)
+            muscle2_filtered_aligned, muscle2_rectified_aligned, muscle2_rms_aligned, muscle2_envelope_aligned = self.processor.preprocess_emg(muscle2_emg_aligned, common_fs)
+            
+            logger.info(f"Preprocessed aligned signals: {len(muscle1_rms_aligned)} and {len(muscle2_rms_aligned)} samples")
+            logger.info(f"Signal maximums - Muscle1: {np.max(muscle1_rms_aligned):.2f}, Muscle2: {np.max(muscle2_rms_aligned):.2f}")
+
+            # Use the aligned signals for throw detection
             throws = self.processor.detect_throws_multi_muscle(
-                muscle1_rms, muscle2_rms, common_time, common_fs, 
-                threshold_factor_fcr=2.75, threshold_factor_fcu=1.25,
-                min_duration=0.2, min_separation=10, 
-                coincidence_window=0.2
+                muscle2_rms_aligned, muscle1_rms_aligned, common_time, common_fs, 
+                threshold_factor_fcr=2.75,    # Matches standalone script
+                threshold_factor_fcu=1.25,    # Matches standalone script
+                min_duration=0.2, 
+                min_separation=10,            # Matches standalone script
+                coincidence_window=0.1
             )
+            
+            logger.info(f"Detected {len(throws)} throws from aligned signals")
 
-            # Calculate metrics for both muscles using the same throw indices
+            # Convert throw indices to actual timestamps using common_time
+            throw_timestamps = []
+            for start_idx, end_idx in throws:
+                # Make sure indices are within bounds
+                if start_idx < len(common_time) and end_idx < len(common_time):
+                    throw_timestamps.append((common_time[start_idx], common_time[end_idx]))
+                else:
+                    logger.warning(f"Throw indices out of bounds: {start_idx}, {end_idx}, max: {len(common_time)-1}")
+                    # Use valid indices
+                    valid_start = min(start_idx, len(common_time)-1)
+                    valid_end = min(end_idx, len(common_time)-1)
+                    throw_timestamps.append((common_time[valid_start], common_time[valid_end]))
+
+            # Calculate metrics using aligned signals
             muscle1_metrics = self.processor.calculate_comprehensive_metrics(
-                muscle1_filtered, muscle1_rectified, muscle1_rms, muscle1_envelope, 
-                throws, common_time, muscle1_fs
+                muscle1_filtered_aligned, muscle1_rectified_aligned, muscle1_rms_aligned, muscle1_envelope_aligned, 
+                throws, common_time, common_fs
             )
 
             muscle2_metrics = self.processor.calculate_comprehensive_metrics(
-                muscle2_filtered, muscle2_rectified, muscle2_rms, muscle2_envelope, 
-                throws, common_time, muscle2_fs
+                muscle2_filtered_aligned, muscle2_rectified_aligned, muscle2_rms_aligned, muscle2_envelope_aligned, 
+                throws, common_time, common_fs
             )
-            
-            # Calculate coactivation metrics between muscles
+
             coactivation_metrics = self.processor.calculate_muscle_coactivation(
                 muscle1_metrics, muscle2_metrics,
-                throws, throws,  # Same throws for both muscles now
-                muscle1_filtered, muscle2_filtered,
-                common_time, common_time,  # Using the common timeline
+                throws, throws,  # Same throws for both muscles
+                muscle1_filtered_aligned, muscle2_filtered_aligned,
+                common_time, common_time,  # Using the same timeline
                 common_fs
             )
             
@@ -206,20 +244,28 @@ class EMGPipeline:
                 'file_path': file_path,
                 'processed_date': datetime.now()
             }
-            
-            # Prepare time series data with dynamic muscle names
+        
+            # Prepare time series data with common time base
+            # Use the same aligned signals that were used for throw detection
             timeseries_data = pd.DataFrame({
-                'session_id': [session_id] * len(muscle2_time),
-                'time_point': muscle2_time,
-                'muscle1_emg': np.interp(muscle2_time, muscle1_time, muscle1_emg),  # Align muscle1 data to muscle2 time points
-                'muscle2_emg': muscle2_emg
+                'session_id': [session_id] * len(common_time),
+                'time_point': common_time,
+                'muscle1_emg': muscle1_emg_aligned,
+                'muscle2_emg': muscle2_emg_aligned
             })
-            
+
             # Prepare throw data with new timestamp fields
             throw_data = []
             for i in range(len(throws)):
-                # Calculate relative start time
-                relative_start = muscle2_time[throws[i][0]]
+                # Get throw start and end indices
+                start_idx, end_idx = throws[i]
+                
+                # Ensure indices are within bounds
+                start_idx = min(start_idx, len(common_time)-1)
+                end_idx = min(end_idx, len(common_time)-1)
+                
+                # Calculate relative start time - use common_time for consistency
+                relative_start = common_time[start_idx]
                 
                 # Calculate absolute timestamp
                 absolute_timestamp = None
@@ -247,9 +293,9 @@ class EMGPipeline:
                 throw_row = {
                     'session_id': session_id,
                     'throw_number': i + 1,
-                    'start_time': muscle2_time[throws[i][0]],
-                    'end_time': muscle2_time[throws[i][1]],
-                    'duration': muscle2_metrics['throw_durations'][i],
+                    'start_time': throw_timestamps[i][0],  # Use the timestamp from common_time
+                    'end_time': throw_timestamps[i][1],    # Use the timestamp from common_time
+                    'duration': throw_timestamps[i][1] - throw_timestamps[i][0],
                     
                     # Muscle1 metrics - original metrics
                     'muscle1_median_freq': muscle1_metrics['median_freqs'][i],
