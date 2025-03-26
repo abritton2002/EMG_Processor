@@ -184,8 +184,8 @@ class EMGPipeline:
             # Use the aligned signals for throw detection
             throws = self.processor.detect_throws_multi_muscle(
                 muscle2_rms_aligned, muscle1_rms_aligned, common_time, common_fs, 
-                threshold_factor_fcr=2.75,    # Matches standalone script
-                threshold_factor_fcu=1.25,    # Matches standalone script
+                threshold_factor_fcr=4,    # Matches standalone script
+                threshold_factor_fcu=1.6,    # Matches standalone script
                 min_duration=0.2, 
                 min_separation=10,            # Matches standalone script
                 coincidence_window=0.1
@@ -365,17 +365,31 @@ class EMGPipeline:
             logger.error(traceback.format_exc())
             return None
     
-    def match_throws_to_velocity(self):
+    def match_throws_to_velocity(self, reprocess_all=False, excluded_sessions=None):
         """
         Match EMG throws to velocity data from trials and poi tables.
-        Uses trial numbers to provide more accurate matching between EMG throws and velocity data.
+        By default, only processes sessions that haven't been matched yet.
         
+        Parameters:
+        -----------
+        reprocess_all : bool, optional
+            If True, reprocess all sessions even if they have matches.
+            Default is False (only process unmatched sessions).
+        excluded_sessions : list, optional
+            List of session IDs to exclude from velocity matching
+            
         Returns:
         --------
         bool
             True if matching was successful, False otherwise
         """
         conn = None
+        
+        # Default excluded sessions list
+        if excluded_sessions is None:
+            # Maintain a list of permanently excluded sessions here
+            excluded_sessions = [55]  # Session 55 is excluded
+        
         try:
             # Connect to the database
             conn = self.db.connect()
@@ -385,15 +399,60 @@ class EMGPipeline:
             
             cursor = conn.cursor(pymysql.cursors.DictCursor)
             
-            # First, get all EMG sessions with dates
-            cursor.execute("""
-                SELECT numeric_id, athlete_name, date_recorded, filename 
-                FROM emg_sessions
-                WHERE date_recorded IS NOT NULL
-                ORDER BY date_recorded DESC
-            """)
+            # Clear velocity matching for excluded sessions if requested
+            if excluded_sessions:
+                excluded_ids_str = ','.join(map(str, excluded_sessions))
+                logger.info(f"Clearing velocity matching for excluded sessions: {excluded_ids_str}")
+                
+                cursor.execute(f"""
+                    UPDATE emg_throws 
+                    SET session_trial = NULL,
+                        pitch_speed_mph = NULL,
+                        velocity_match_quality = 'excluded_manual'
+                    WHERE session_numeric_id IN ({excluded_ids_str})
+                """)
+                conn.commit()
+            
+            # Build the exclusion part of the query
+            exclude_clause = ""
+            if excluded_sessions:
+                exclude_clause = f"AND es.numeric_id NOT IN ({','.join(map(str, excluded_sessions))})"
+            
+            # Identify sessions that need processing
+            if reprocess_all:
+                # Process all sessions except excluded ones
+                query = f"""
+                    SELECT numeric_id, athlete_name, date_recorded, filename 
+                    FROM emg_sessions es
+                    WHERE date_recorded IS NOT NULL
+                    {exclude_clause}
+                    ORDER BY date_recorded DESC
+                """
+                logger.info("Processing ALL sessions (including previously matched ones)")
+            else:
+                # Only process sessions with unmatched throws
+                query = f"""
+                    SELECT DISTINCT es.numeric_id, es.athlete_name, es.date_recorded, es.filename 
+                    FROM emg_sessions es
+                    JOIN emg_throws et ON es.numeric_id = et.session_numeric_id
+                    WHERE es.date_recorded IS NOT NULL
+                    AND (
+                        et.velocity_match_quality IS NULL 
+                        OR et.velocity_match_quality = 'no_match'
+                        OR et.pitch_speed_mph IS NULL
+                    )
+                    {exclude_clause}
+                    ORDER BY es.date_recorded DESC
+                """
+                logger.info("Processing only sessions with unmatched throws")
+            
+            cursor.execute(query)
             emg_sessions = cursor.fetchall()
             logger.info(f"Found {len(emg_sessions)} EMG sessions to process")
+            
+            if len(emg_sessions) == 0:
+                logger.info("No sessions need processing. All throws are already matched.")
+                return True
             
             # Process each EMG session
             for emg_session in emg_sessions:
@@ -436,6 +495,21 @@ class EMGPipeline:
                 session_date_in_db = pitching_session['date']
                 
                 logger.info(f"Found matching session {pitching_session_id} for {athlete_name_in_db} on {session_date_in_db}")
+                
+                # Check if session already has matched throws (optimization)
+                if not reprocess_all:
+                    cursor.execute(f"""
+                        SELECT COUNT(*) as matched_count
+                        FROM emg_throws
+                        WHERE session_numeric_id = {session_id}
+                        AND velocity_match_quality IS NOT NULL
+                        AND velocity_match_quality != 'no_match'
+                    """)
+                    
+                    matched_count = cursor.fetchone()['matched_count']
+                    if matched_count > 0:
+                        logger.info(f"Session {session_id} already has {matched_count} matched throws. Skipping.")
+                        continue
                 
                 # Get EMG throws for this session
                 cursor.execute(f"""
@@ -652,6 +726,17 @@ class EMGPipeline:
                     logger.info(f"Throw ID: {example['throw_id']}, Athlete: {example['athlete_name']}, " +
                             f"Trial: {example['trial_number']}, Session Trial: {example['session_trial']}, " +
                             f"Velocity: {example['pitch_speed_mph']} mph")
+            
+            # Report on excluded sessions
+            if excluded_sessions:
+                cursor.execute(f"""
+                    SELECT COUNT(*) as count
+                    FROM emg_throws
+                    WHERE session_numeric_id IN ({','.join(map(str, excluded_sessions))})
+                    AND velocity_match_quality = 'excluded_manual'
+                """)
+                excluded_count = cursor.fetchone()['count']
+                logger.info(f"{excluded_count} throws are marked as manually excluded from velocity matching")
             
             return True
         
