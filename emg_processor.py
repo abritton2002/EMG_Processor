@@ -96,149 +96,111 @@ class EMGProcessor:
     
     def load_delsys_emg_data(self, file_path):
         """
-        Load EMG data from Delsys Trigno format with dynamic muscle channels.
-        
-        Parameters:
-        -----------
-        file_path : str
-            Path to the EMG data file
-            
-        Returns:
-        --------
-        tuple
-            (muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata)
+        Load EMG data from Delsys Trigno format with header rows.
+        Handles the specific format of Delsys files with metadata.
         """
-        logger.info(f"Loading file: {file_path}")
-        
-        # Extract metadata
         metadata = {}
+        muscles = {}
+        muscle_count = 0
+        
+        logger.info(f"Loading file: {file_path}")
+        file_size = os.path.getsize(file_path)
+        logger.info(f"File size: {file_size} bytes")
+        
         with open(file_path, 'r') as f:
-            # Row 1: Application info
-            line = f.readline().strip().split(',')
-            if len(line) >= 2:
-                metadata['Application'] = line[1].strip()
+            # Read and process header lines
+            header_lines = []
+            for i in range(7):  # Read first 7 lines
+                line = f.readline().strip()
+                header_lines.append(line)
             
-            # Row 2: Date/Time (MM/DD/YY HH:MM:SS)
-            line = f.readline().strip().split(',')
-            if len(line) >= 2:
-                # Parse date and time
-                date_time_str = line[1].strip()
-                metadata['Collection_DateTime'] = date_time_str
-                
-                # Try to convert to datetime object for database
-                try:
-                    collection_date = datetime.datetime.strptime(date_time_str, '%m/%d/%Y %I:%M:%S %p')
-                    metadata['Collection_Date'] = collection_date.date()
-                    metadata['Start_Time'] = collection_date.time()
-                except ValueError:
+            logger.info("First 7 header lines:")
+            for i, line in enumerate(header_lines, 1):
+                logger.info(f"Line {i}: {line}")
+            
+            # Parse metadata from header
+            if header_lines[1].startswith('Date/Time:'):
+                metadata['Collection_Date'] = header_lines[1].split(',')[1].strip()
+            
+            # Parse muscle names from line 4
+            muscle_line = header_lines[3].split(',')
+            muscle_names = [name.strip() for name in muscle_line if name.strip()]
+            
+            # Parse sampling rates from line 7
+            sampling_rates = header_lines[6].split(',')
+            for i, rate in enumerate(sampling_rates):
+                if 'Hz' in rate:
                     try:
-                        # Try alternate format with 2-digit year
-                        collection_date = datetime.datetime.strptime(date_time_str, '%m/%d/%y %I:%M:%S %p')
-                        metadata['Collection_Date'] = collection_date.date()
-                        metadata['Start_Time'] = collection_date.time()
-                    except ValueError:
-                        logger.warning(f"Could not parse date/time: {date_time_str}")
-                        metadata['Collection_Date'] = None
-                        metadata['Start_Time'] = None
+                        # Extract numeric value before 'Hz'
+                        rate_value = float(rate.strip().split('Hz')[0].strip())
+                        if i == 1:  # First muscle
+                            metadata['muscle1_fs'] = rate_value
+                        elif i == 3:  # Second muscle
+                            metadata['muscle2_fs'] = rate_value
+                    except (ValueError, IndexError) as e:
+                        logger.warning(f"Could not parse sampling rate from '{rate}'. Using default: 2000 Hz")
+                        if i == 1:
+                            metadata['muscle1_fs'] = 2000.0
+                        elif i == 3:
+                            metadata['muscle2_fs'] = 2000.0
             
-            # Row 3: Collection length
-            line = f.readline().strip().split(',')
-            if len(line) >= 2:
-                metadata['Collection_Length'] = line[1].strip()
+            # Count data lines
+            data_lines = sum(1 for _ in f)
+            logger.info(f"Total data lines: {data_lines}")
             
-            # Row 4: Muscle names with IDs (extract up to 4 muscles)
-            line = f.readline().strip().split(',')
-            muscle_count = 0
+            # Reset file pointer to start of data
+            f.seek(0)
+            for _ in range(7):  # Skip header lines
+                next(f)
             
-            # Dictionary to store muscle info
-            muscles = {}
-            
-            # Process each column that might contain muscle info
-            for i in range(0, min(len(line), 8), 2):  # Check columns A, C, E, G (0, 2, 4, 6)
-                if i < len(line) and line[i].strip():
-                    muscle_info = line[i].strip()
-                    muscle_match = re.search(r'(\w+)\s*\((\d+)\)', muscle_info)
-                    
-                    if muscle_match:
-                        muscle_name = muscle_match.group(1)
-                        muscle_id = muscle_match.group(2)
-                        
-                        muscle_count += 1
-                        muscles[f'muscle{muscle_count}_name'] = muscle_name
-                        muscles[f'muscle{muscle_count}_id'] = muscle_id
-            
-            # Add muscle info to metadata
-            metadata.update(muscles)
-            metadata['muscle_count'] = muscle_count
-            
-            # Row 5: Sensor modes
-            line = f.readline().strip().split(',')
-            if len(line) >= 4:
-                metadata['muscle1_mode'] = line[1].strip().replace('sensor mode:', '').strip()
-                metadata['muscle2_mode'] = line[3].strip().replace('sensor mode:', '').strip()
-            
-            # Row 6: Column headers - just skip
-            f.readline()
-            
-            # Row 7: Sampling rates
-            line = f.readline().strip().split(',')
-            if len(line) >= 4:
-                muscle1_fs_str = line[1].strip()
-                muscle2_fs_str = line[3].strip()
-                
-                # Extract numeric rates
-                muscle1_fs_match = re.search(r'([\d\.]+)', muscle1_fs_str)
-                if muscle1_fs_match:
-                    metadata['muscle1_fs'] = float(muscle1_fs_match.group(1))
-                
-                muscle2_fs_match = re.search(r'([\d\.]+)', muscle2_fs_str)
-                if muscle2_fs_match:
-                    metadata['muscle2_fs'] = float(muscle2_fs_match.group(1))
-        
-        # Now read the actual data - using two separate arrays for muscle1 and muscle2
-        muscle1_data = {'time': [], 'emg': []}
-        muscle2_data = {'time': [], 'emg': []}
-        
-        with open(file_path, 'r') as f:
-            # Skip header lines (7 lines)
-            for _ in range(7):
-                f.readline()
-            
-            # Read data lines
+            # Read data into arrays
+            time1, emg1, time2, emg2 = [], [], [], []
             for line in f:
-                parts = line.strip().split(',')
-                if len(parts) >= 4:  # Ensure we have all 4 expected columns
+                values = line.strip().split(',')
+                if len(values) >= 4:
                     try:
-                        # Muscle1 data (first two columns)
-                        muscle1_time = float(parts[0])
-                        muscle1_emg = float(parts[1])
-                        muscle1_data['time'].append(muscle1_time)
-                        muscle1_data['emg'].append(muscle1_emg)
-                    except (ValueError, IndexError):
-                        pass  # Skip invalid muscle1 data
-                    
-                    try:
-                        # Muscle2 data (columns 3 and 4)
-                        muscle2_time = float(parts[2])
-                        muscle2_emg = float(parts[3])
-                        muscle2_data['time'].append(muscle2_time)
-                        muscle2_data['emg'].append(muscle2_emg)
-                    except (ValueError, IndexError):
-                        pass  # Skip invalid muscle2 data
-        
-        # Convert to numpy arrays
-        muscle1_time = np.array(muscle1_data['time'])
-        muscle1_emg = np.array(muscle1_data['emg'])
-        muscle2_time = np.array(muscle2_data['time'])
-        muscle2_emg = np.array(muscle2_data['emg'])
-        
-        # Log what we found
-        muscle1_name = metadata.get('muscle1_name', 'Muscle1')
-        muscle2_name = metadata.get('muscle2_name', 'Muscle2')
-        logger.info(f"Data loaded: {muscle1_name}: {len(muscle1_emg)} samples, {muscle2_name}: {len(muscle2_emg)} samples")
-        logger.info(f"Found {metadata.get('muscle_count', 0)} muscles in file")
-        
-        return muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata
+                        if values[0]:  # Time1
+                            time1.append(float(values[0]))
+                        if values[1]:  # EMG1
+                            emg1.append(float(values[1]))
+                        if values[2]:  # Time2
+                            time2.append(float(values[2]))
+                        if values[3]:  # EMG2
+                            emg2.append(float(values[3]))
+                    except ValueError as e:
+                        continue  # Skip invalid lines
+            
+            # Convert to numpy arrays
+            time1 = np.array(time1)
+            emg1 = np.array(emg1)
+            time2 = np.array(time2)
+            emg2 = np.array(emg2)
+            
+            # Log data statistics
+            logger.info(f"Muscle1 Time - Length: {len(time1)}, First: {time1[0] if len(time1) > 0 else None}, Last: {time1[-1] if len(time1) > 0 else None}")
+            logger.info(f"Muscle1 EMG - Length: {len(emg1)}, First: {emg1[0] if len(emg1) > 0 else None}, Last: {emg1[-1] if len(emg1) > 0 else None}")
+            logger.info(f"Muscle2 Time - Length: {len(time2)}, First: {time2[0] if len(time2) > 0 else None}, Last: {time2[-1] if len(time2) > 0 else None}")
+            logger.info(f"Muscle2 EMG - Length: {len(emg2)}, First: {emg2[0] if len(emg2) > 0 else None}, Last: {emg2[-1] if len(emg2) > 0 else None}")
+            
+            # Calculate actual sampling frequency from time data if available
+            if len(time1) > 1:
+                fs1 = round(1.0 / np.mean(np.diff(time1)), 1)
+                logger.info(f"Sampling Frequency: {fs1} Hz")
+                metadata['muscle1_fs'] = fs1
+            if len(time2) > 1:
+                fs2 = round(1.0 / np.mean(np.diff(time2)), 1)
+                metadata['muscle2_fs'] = fs2
+            
+            # Store muscle names in metadata
+            if len(muscle_names) >= 2:
+                metadata['muscle1_name'] = muscle_names[0].split('(')[0].strip()
+                metadata['muscle2_name'] = muscle_names[1].split('(')[0].strip()
+                metadata['muscle_count'] = len(muscle_names)
+            
+            logger.info(f"Data loaded: {metadata.get('muscle1_name', 'FCU')}: {len(emg1)} samples, {metadata.get('muscle2_name', 'FCR')}: {len(emg2)} samples")
+            logger.info(f"Found {metadata.get('muscle_count', 2)} muscles in file")
+            
+            return emg1, emg2, time1, time2, metadata
     
     def preprocess_emg(self, emg_signal, fs):
         # High-pass filter (20 Hz cutoff to remove motion artifacts)

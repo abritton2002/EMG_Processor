@@ -129,6 +129,9 @@ class EMGPipeline:
             file_metadata = self.processor.parse_filename(file_path)
             session_id = os.path.splitext(os.path.basename(file_path))[0]
             
+            # Check if this is an MVIC session
+            is_mvic = 'mvic' in session_id.lower()
+            
             # Load EMG data with dynamic muscle names
             muscle1_emg, muscle2_emg, muscle1_time, muscle2_time, metadata = self.processor.load_delsys_emg_data(file_path)
             
@@ -181,50 +184,6 @@ class EMGPipeline:
             logger.info(f"Preprocessed aligned signals: {len(muscle1_rms_aligned)} and {len(muscle2_rms_aligned)} samples")
             logger.info(f"Signal maximums - Muscle1: {np.max(muscle1_rms_aligned):.2f}, Muscle2: {np.max(muscle2_rms_aligned):.2f}")
 
-            # Use the aligned signals for throw detection
-            throws = self.processor.detect_throws_multi_muscle(
-                muscle2_rms_aligned, muscle1_rms_aligned, common_time, common_fs, 
-                threshold_factor_fcr=4,    # Matches standalone script
-                threshold_factor_fcu=1.6,    # Matches standalone script
-                min_duration=0.2, 
-                min_separation=10,            # Matches standalone script
-                coincidence_window=0.1
-            )
-            
-            logger.info(f"Detected {len(throws)} throws from aligned signals")
-
-            # Convert throw indices to actual timestamps using common_time
-            throw_timestamps = []
-            for start_idx, end_idx in throws:
-                # Make sure indices are within bounds
-                if start_idx < len(common_time) and end_idx < len(common_time):
-                    throw_timestamps.append((common_time[start_idx], common_time[end_idx]))
-                else:
-                    logger.warning(f"Throw indices out of bounds: {start_idx}, {end_idx}, max: {len(common_time)-1}")
-                    # Use valid indices
-                    valid_start = min(start_idx, len(common_time)-1)
-                    valid_end = min(end_idx, len(common_time)-1)
-                    throw_timestamps.append((common_time[valid_start], common_time[valid_end]))
-
-            # Calculate metrics using aligned signals
-            muscle1_metrics = self.processor.calculate_comprehensive_metrics(
-                muscle1_filtered_aligned, muscle1_rectified_aligned, muscle1_rms_aligned, muscle1_envelope_aligned, 
-                throws, common_time, common_fs
-            )
-
-            muscle2_metrics = self.processor.calculate_comprehensive_metrics(
-                muscle2_filtered_aligned, muscle2_rectified_aligned, muscle2_rms_aligned, muscle2_envelope_aligned, 
-                throws, common_time, common_fs
-            )
-
-            coactivation_metrics = self.processor.calculate_muscle_coactivation(
-                muscle1_metrics, muscle2_metrics,
-                throws, throws,  # Same throws for both muscles
-                muscle1_filtered_aligned, muscle2_filtered_aligned,
-                common_time, common_time,  # Using the same timeline
-                common_fs
-            )
-            
             # Prepare session data with additional metadata
             session_data = {
                 'session_id': session_id,
@@ -237,128 +196,227 @@ class EMGPipeline:
                 'muscle_count': metadata.get('muscle_count', 2),
                 'muscle1_name': metadata.get('muscle1_name'),
                 'muscle2_name': metadata.get('muscle2_name'),
-                'muscle3_name': metadata.get('muscle3_name'),
-                'muscle4_name': metadata.get('muscle4_name'),
                 'muscle1_fs': muscle1_fs,
                 'muscle2_fs': muscle2_fs,
                 'file_path': file_path,
-                'processed_date': datetime.now()
+                'processed_date': datetime.now(),
+                'is_mvic': is_mvic
             }
-        
-            # Prepare time series data with common time base
-            # Use the same aligned signals that were used for throw detection
-            timeseries_data = pd.DataFrame({
-                'session_id': [session_id] * len(common_time),
-                'time_point': common_time,
-                'muscle1_emg': muscle1_emg_aligned,
-                'muscle2_emg': muscle2_emg_aligned
-            })
+            
+            # Format collection_date and start_time properly
+            collection_date = None
+            start_time = None
+            if session_data.get('collection_date'):
+                try:
+                    # Parse the collection date string into a datetime object
+                    collection_datetime = datetime.strptime(session_data['collection_date'], '%m/%d/%Y %I:%M:%S %p')
+                    collection_date = collection_datetime.date()
+                    start_time = collection_datetime.time()
+                except Exception as e:
+                    logger.warning(f"Could not parse collection date {session_data.get('collection_date')}: {e}")
+                    collection_date = None
+                    start_time = None
+            
+            # Check if this is an MVIC session
+            is_mvic = session_data.get('is_mvic', False)
+            
+            if is_mvic:
+                # For MVIC sessions, calculate reference values
+                logger.info("Processing as MVIC session")
+                
+                # Calculate MVIC reference values
+                muscle1_mvic_peak = np.max(muscle1_rectified_aligned)
+                muscle1_mvic_rms = np.sqrt(np.mean(muscle1_filtered_aligned**2))
+                muscle2_mvic_peak = np.max(muscle2_rectified_aligned)
+                muscle2_mvic_rms = np.sqrt(np.mean(muscle2_filtered_aligned**2))
+                
+                # Add MVIC values to session data
+                session_data['muscle1_mvic_peak'] = muscle1_mvic_peak
+                session_data['muscle1_mvic_rms'] = muscle1_mvic_rms
+                session_data['muscle2_mvic_peak'] = muscle2_mvic_peak
+                session_data['muscle2_mvic_rms'] = muscle2_mvic_rms
+                
+                logger.info(f"MVIC Reference Values - Muscle1 Peak: {muscle1_mvic_peak:.2f}, RMS: {muscle1_mvic_rms:.2f}")
+                logger.info(f"MVIC Reference Values - Muscle2 Peak: {muscle2_mvic_peak:.2f}, RMS: {muscle2_mvic_rms:.2f}")
+                
+                # For MVIC sessions, we don't need time series or throw data
+                return {
+                    'session_data': session_data,
+                    'timeseries_data': None,
+                    'throw_data': None
+                }
+            else:
+                # For pitching sessions, continue with normal processing
+                logger.info("Processing as pitching session")
+                
+                # Use the aligned signals for throw detection
+                throws = self.processor.detect_throws_multi_muscle(
+                    muscle2_rms_aligned, muscle1_rms_aligned, common_time, common_fs, 
+                    threshold_factor_fcr=2.5,    # Reduced from 4.0 to be less strict
+                    threshold_factor_fcu=1.2,    # Reduced from 1.6 to be less strict
+                    min_duration=0.15,           # Reduced from 0.2 to catch shorter throws
+                    min_separation=8,            # Reduced from 10 to allow closer throws
+                    coincidence_window=0.15      # Increased from 0.1 to allow more timing variation
+                )
+                
+                logger.info(f"Detected {len(throws)} throws from aligned signals")
+                
+                # Log threshold values used for debugging
+                m1_mean = np.mean(muscle1_rms_aligned)
+                m2_mean = np.mean(muscle2_rms_aligned)
+                logger.info(f"Muscle1 (FCR) - Mean: {m1_mean:.4f}, Threshold: {m1_mean * 2.5:.4f}")
+                logger.info(f"Muscle2 (FCU) - Mean: {m2_mean:.4f}, Threshold: {m2_mean * 1.2:.4f}")
+                
+                if len(throws) == 0:
+                    logger.warning("No throws detected! This might indicate threshold values are still too strict")
+                elif len(throws) < 10:
+                    logger.warning(f"Only {len(throws)} throws detected. This seems low for a typical session.")
+                
+                # Convert throw indices to actual timestamps using common_time
+                throw_timestamps = []
+                for start_idx, end_idx in throws:
+                    # Make sure indices are within bounds
+                    if start_idx < len(common_time) and end_idx < len(common_time):
+                        throw_timestamps.append((common_time[start_idx], common_time[end_idx]))
+                    else:
+                        logger.warning(f"Throw indices out of bounds: {start_idx}, {end_idx}, max: {len(common_time)-1}")
+                        # Use valid indices
+                        valid_start = min(start_idx, len(common_time)-1)
+                        valid_end = min(end_idx, len(common_time)-1)
+                        throw_timestamps.append((common_time[valid_start], common_time[valid_end]))
 
-            # Prepare throw data with new timestamp fields
-            throw_data = []
-            for i in range(len(throws)):
-                # Get throw start and end indices
-                start_idx, end_idx = throws[i]
-                
-                # Ensure indices are within bounds
-                start_idx = min(start_idx, len(common_time)-1)
-                end_idx = min(end_idx, len(common_time)-1)
-                
-                # Calculate relative start time - use common_time for consistency
-                relative_start = common_time[start_idx]
-                
-                # Calculate absolute timestamp
-                absolute_timestamp = None
-                if collection_date and start_time:
-                    try:
-                        # start_time is now the finishing time
-                        recording_end_time = datetime.combine(collection_date, start_time)
+                # Calculate metrics using aligned signals
+                muscle1_metrics = self.processor.calculate_comprehensive_metrics(
+                    muscle1_filtered_aligned, muscle1_rectified_aligned, muscle1_rms_aligned, muscle1_envelope_aligned, 
+                    throws, common_time, common_fs
+                )
+
+                muscle2_metrics = self.processor.calculate_comprehensive_metrics(
+                    muscle2_filtered_aligned, muscle2_rectified_aligned, muscle2_rms_aligned, muscle2_envelope_aligned, 
+                    throws, common_time, common_fs
+                )
+
+                coactivation_metrics = self.processor.calculate_muscle_coactivation(
+                    muscle1_metrics, muscle2_metrics,
+                    throws, throws,  # Same throws for both muscles
+                    muscle1_filtered_aligned, muscle2_filtered_aligned,
+                    common_time, common_time,  # Using the same timeline
+                    common_fs
+                )
+            
+                # Prepare time series data for pitching session
+                timeseries_data = pd.DataFrame({
+                    'emg_session_id': [session_id] * len(common_time),
+                    'time_point': common_time,
+                    'muscle1_emg': muscle1_emg_aligned,
+                    'muscle2_emg': muscle2_emg_aligned
+                })
+
+                # Prepare throw data
+                throw_data = []
+                for i in range(len(throws)):
+                    # Get throw start and end indices
+                    start_idx, end_idx = throws[i]
+                    
+                    # Ensure indices are within bounds
+                    start_idx = min(start_idx, len(common_time)-1)
+                    end_idx = min(end_idx, len(common_time)-1)
+                    
+                    # Calculate relative start time
+                    relative_start = common_time[start_idx]
+                    
+                    # Calculate absolute timestamp
+                    absolute_timestamp = None
+                    if collection_date and start_time:
+                        try:
+                            # start_time is now the finishing time
+                            recording_end_time = datetime.combine(collection_date, start_time)
+                            
+                            # Extract total collection duration from metadata
+                            total_duration = metadata.get('Collection_Length')
+                            
+                            # Convert to float if it's a string
+                            if isinstance(total_duration, str):
+                                # Remove any non-numeric characters (like "s" for seconds)
+                                total_duration = float(''.join(c for c in total_duration if c.isdigit() or c == '.'))
+                            
+                            # Calculate recording start time by subtracting total duration
+                            recording_start_time = recording_end_time - timedelta(seconds=total_duration)
+                            
+                            # Calculate absolute timestamp for this throw by adding relative start time to recording start
+                            absolute_timestamp = recording_start_time + timedelta(seconds=relative_start)
+                        except Exception as e:
+                            logger.warning(f"Error calculating absolute timestamp: {e}")
+                    
+                    throw_row = {
+                        'emg_session_id': session_id,
+                        'trial_number': i + 1,
+                        'start_time': throw_timestamps[i][0],  # Use the timestamp from common_time
+                        'end_time': throw_timestamps[i][1],    # Use the timestamp from common_time
+                        'duration': throw_timestamps[i][1] - throw_timestamps[i][0],
                         
-                        # Extract total collection duration from metadata
-                        total_duration = metadata.get('Collection_Length')
+                        # Timestamp and velocity matching columns
+                        'relative_start_time': relative_start,
+                        'absolute_timestamp': absolute_timestamp,
+                        'session_trial': None,  # Will be populated during velocity matching
+                        'pitch_speed_mph': None,  # Will be populated during velocity matching
+                        'velocity_match_quality': 'no_match',  # Default match quality
                         
-                        # Convert to float if it's a string
-                        if isinstance(total_duration, str):
-                            # Remove any non-numeric characters (like "s" for seconds)
-                            total_duration = float(''.join(c for c in total_duration if c.isdigit() or c == '.'))
+                        # Muscle1 metrics - original metrics
+                        'muscle1_median_freq': muscle1_metrics['median_freqs'][i],
+                        'muscle1_mean_freq': muscle1_metrics['mean_freqs'][i],
+                        'muscle1_bandwidth': muscle1_metrics['bandwidth'][i],
+                        'muscle1_peak_amplitude': muscle1_metrics['peak_amplitudes'][i],
+                        'muscle1_rms_value': muscle1_metrics['rms_values'][i],
+                        'muscle1_rise_time': muscle1_metrics['rise_times'][i],
+                        'muscle1_throw_integral': muscle1_metrics['throw_integrals'][i],
+                        'muscle1_work_rate': muscle1_metrics['work_rates'][i],
                         
-                        # Calculate recording start time by subtracting total duration
-                        recording_start_time = recording_end_time - timedelta(seconds=total_duration)
+                        # Muscle2 metrics - original metrics
+                        'muscle2_median_freq': muscle2_metrics['median_freqs'][i],
+                        'muscle2_mean_freq': muscle2_metrics['mean_freqs'][i],
+                        'muscle2_bandwidth': muscle2_metrics['bandwidth'][i],
+                        'muscle2_peak_amplitude': muscle2_metrics['peak_amplitudes'][i],
+                        'muscle2_rms_value': muscle2_metrics['rms_values'][i],
+                        'muscle2_rise_time': muscle2_metrics['rise_times'][i],
+                        'muscle2_throw_integral': muscle2_metrics['throw_integrals'][i],
+                        'muscle2_work_rate': muscle2_metrics['work_rates'][i],
                         
-                        # Calculate absolute timestamp for this throw by adding relative start time to recording start
-                        absolute_timestamp = recording_start_time + timedelta(seconds=relative_start)
-                    except Exception as e:
-                        logger.warning(f"Error calculating absolute timestamp: {e}")
+                        # Spectral entropy metrics
+                        'muscle1_spectral_entropy': muscle1_metrics['spectral_entropies'][i],
+                        'muscle2_spectral_entropy': muscle2_metrics['spectral_entropies'][i],
+                        
+                        # Wavelet energy metrics
+                        'muscle1_wavelet_energy_low': muscle1_metrics['wavelet_energy_low'][i],
+                        'muscle1_wavelet_energy_mid': muscle1_metrics['wavelet_energy_mid'][i],
+                        'muscle1_wavelet_energy_high': muscle1_metrics['wavelet_energy_high'][i],
+                        'muscle2_wavelet_energy_low': muscle2_metrics['wavelet_energy_low'][i],
+                        'muscle2_wavelet_energy_mid': muscle2_metrics['wavelet_energy_mid'][i],
+                        'muscle2_wavelet_energy_high': muscle2_metrics['wavelet_energy_high'][i],
+                    }
+                    
+                    # Add coactivation metrics if available
+                    if coactivation_metrics:
+                        throw_row.update({
+                            'coactivation_index': coactivation_metrics['ci_falconer'][i],
+                            'coactivation_correlation': coactivation_metrics['correlation'][i],
+                            'coactivation_temporal_overlap': coactivation_metrics['temporal_overlap'][i],
+                            'coactivation_waveform_similarity': coactivation_metrics['waveform_similarity'][i],
+                        })
+                    
+                    # Replace NaN values with None for database insertion
+                    for key, value in throw_row.items():
+                        if isinstance(value, float) and np.isnan(value):
+                            throw_row[key] = None
+                    
+                    throw_data.append(throw_row)
                 
-                throw_row = {
-                    'session_id': session_id,
-                    'throw_number': i + 1,
-                    'start_time': throw_timestamps[i][0],  # Use the timestamp from common_time
-                    'end_time': throw_timestamps[i][1],    # Use the timestamp from common_time
-                    'duration': throw_timestamps[i][1] - throw_timestamps[i][0],
-                    
-                    # Muscle1 metrics - original metrics
-                    'muscle1_median_freq': muscle1_metrics['median_freqs'][i],
-                    'muscle1_mean_freq': muscle1_metrics['mean_freqs'][i],
-                    'muscle1_bandwidth': muscle1_metrics['bandwidth'][i],
-                    'muscle1_peak_amplitude': muscle1_metrics['peak_amplitudes'][i],
-                    'muscle1_rms_value': muscle1_metrics['rms_values'][i],
-                    'muscle1_rise_time': muscle1_metrics['rise_times'][i],
-                    'muscle1_throw_integral': muscle1_metrics['throw_integrals'][i],
-                    'muscle1_work_rate': muscle1_metrics['work_rates'][i],
-                    
-                    # Muscle2 metrics - original metrics
-                    'muscle2_median_freq': muscle2_metrics['median_freqs'][i],
-                    'muscle2_mean_freq': muscle2_metrics['mean_freqs'][i],
-                    'muscle2_bandwidth': muscle2_metrics['bandwidth'][i],
-                    'muscle2_peak_amplitude': muscle2_metrics['peak_amplitudes'][i],
-                    'muscle2_rms_value': muscle2_metrics['rms_values'][i],
-                    'muscle2_rise_time': muscle2_metrics['rise_times'][i],
-                    'muscle2_throw_integral': muscle2_metrics['throw_integrals'][i],
-                    'muscle2_work_rate': muscle2_metrics['work_rates'][i],
-                    
-                    # NEW: Spectral entropy metrics
-                    'muscle1_spectral_entropy': muscle1_metrics['spectral_entropies'][i],
-                    'muscle2_spectral_entropy': muscle2_metrics['spectral_entropies'][i],
-                    
-                    # NEW: Wavelet energy metrics
-                    'muscle1_wavelet_energy_low': muscle1_metrics['wavelet_energy_low'][i],
-                    'muscle1_wavelet_energy_mid': muscle1_metrics['wavelet_energy_mid'][i],
-                    'muscle1_wavelet_energy_high': muscle1_metrics['wavelet_energy_high'][i],
-                    'muscle2_wavelet_energy_low': muscle2_metrics['wavelet_energy_low'][i],
-                    'muscle2_wavelet_energy_mid': muscle2_metrics['wavelet_energy_mid'][i],
-                    'muscle2_wavelet_energy_high': muscle2_metrics['wavelet_energy_high'][i],
-                    
-                    # New timestamp-related fields
-                    'relative_start_time': relative_start,
-                    'absolute_timestamp': absolute_timestamp,
-                    'session_trial': None,  # Will be populated during velocity matching
-                    'pitch_speed_mph': None,  # Will be populated during velocity matching
-                    'velocity_match_quality': 'no_match'  # Default match quality
+                return {
+                    'session_data': session_data,
+                    'timeseries_data': timeseries_data,
+                    'throw_data': throw_data
                 }
                 
-                # Add coactivation metrics if available
-                if coactivation_metrics:
-                    throw_row.update({
-                        'coactivation_index': coactivation_metrics['ci_falconer'][i],
-                        'coactivation_correlation': coactivation_metrics['correlation'][i],
-                        'coactivation_temporal_overlap': coactivation_metrics['temporal_overlap'][i],
-                        'coactivation_waveform_similarity': coactivation_metrics['waveform_similarity'][i],
-                    })
-                
-                # Replace NaN values with None for database insertion
-                for key, value in throw_row.items():
-                    if isinstance(value, float) and np.isnan(value):
-                        throw_row[key] = None
-                
-                throw_data.append(throw_row)
-            
-            return {
-                'session_data': session_data,
-                'timeseries_data': timeseries_data,
-                'throw_data': throw_data
-            }
-            
         except Exception as e:
             logger.error(f"Error processing file {file_path}: {e}")
             import traceback
@@ -409,20 +467,20 @@ class EMGPipeline:
                     SET session_trial = NULL,
                         pitch_speed_mph = NULL,
                         velocity_match_quality = 'excluded_manual'
-                    WHERE session_numeric_id IN ({excluded_ids_str})
+                    WHERE emg_session_id IN ({excluded_ids_str})
                 """)
                 conn.commit()
             
             # Build the exclusion part of the query
             exclude_clause = ""
             if excluded_sessions:
-                exclude_clause = f"AND es.numeric_id NOT IN ({','.join(map(str, excluded_sessions))})"
+                exclude_clause = f"AND es.emg_session_id NOT IN ({','.join(map(str, excluded_sessions))})"
             
             # Identify sessions that need processing
             if reprocess_all:
                 # Process all sessions except excluded ones
                 query = f"""
-                    SELECT numeric_id, athlete_name, date_recorded, filename 
+                    SELECT emg_session_id, athlete_name, date_recorded, filename 
                     FROM emg_sessions es
                     WHERE date_recorded IS NOT NULL
                     {exclude_clause}
@@ -432,9 +490,9 @@ class EMGPipeline:
             else:
                 # Only process sessions with unmatched throws
                 query = f"""
-                    SELECT DISTINCT es.numeric_id, es.athlete_name, es.date_recorded, es.filename 
+                    SELECT DISTINCT es.emg_session_id, es.athlete_name, es.date_recorded, es.filename 
                     FROM emg_sessions es
-                    JOIN emg_throws et ON es.numeric_id = et.session_numeric_id
+                    JOIN emg_throws et ON es.emg_session_id = et.emg_session_id
                     WHERE es.date_recorded IS NOT NULL
                     AND (
                         et.velocity_match_quality IS NULL 
@@ -456,7 +514,7 @@ class EMGPipeline:
             
             # Process each EMG session
             for emg_session in emg_sessions:
-                session_id = emg_session['numeric_id']
+                session_id = emg_session['emg_session_id']
                 athlete_name = emg_session['athlete_name']
                 session_date = emg_session['date_recorded']
                 
@@ -501,7 +559,7 @@ class EMGPipeline:
                     cursor.execute(f"""
                         SELECT COUNT(*) as matched_count
                         FROM emg_throws
-                        WHERE session_numeric_id = {session_id}
+                        WHERE emg_session_id = {session_id}
                         AND velocity_match_quality IS NOT NULL
                         AND velocity_match_quality != 'no_match'
                     """)
@@ -517,7 +575,7 @@ class EMGPipeline:
                         (end_time - start_time) as duration,
                         muscle1_peak_amplitude, muscle2_peak_amplitude
                     FROM emg_throws
-                    WHERE session_numeric_id = {session_id}
+                    WHERE emg_session_id = {session_id}
                     ORDER BY trial_number
                 """)
                 
@@ -589,7 +647,7 @@ class EMGPipeline:
                 cursor.execute(f"""
                     UPDATE emg_throws 
                     SET session_trial = NULL, pitch_speed_mph = NULL, velocity_match_quality = 'no_match'
-                    WHERE session_numeric_id = {session_id}
+                    WHERE emg_session_id = {session_id}
                 """)
                 conn.commit()
                 
@@ -713,7 +771,7 @@ class EMGPipeline:
                 SELECT et.throw_id, es.athlete_name, et.trial_number, 
                     et.session_trial, et.pitch_speed_mph, et.velocity_match_quality
                 FROM emg_throws et
-                JOIN emg_sessions es ON et.session_numeric_id = es.numeric_id
+                JOIN emg_sessions es ON et.emg_session_id = es.emg_session_id
                 WHERE et.velocity_match_quality IS NOT NULL AND et.velocity_match_quality != 'no_match'
                 ORDER BY et.throw_id
                 LIMIT 10
@@ -732,7 +790,7 @@ class EMGPipeline:
                 cursor.execute(f"""
                     SELECT COUNT(*) as count
                     FROM emg_throws
-                    WHERE session_numeric_id IN ({','.join(map(str, excluded_sessions))})
+                    WHERE emg_session_id IN ({','.join(map(str, excluded_sessions))})
                     AND velocity_match_quality = 'excluded_manual'
                 """)
                 excluded_count = cursor.fetchone()['count']
@@ -804,7 +862,7 @@ class EMGPipeline:
                 SUM(CASE WHEN et.velocity_match_quality = 'exact' THEN 1 ELSE 0 END) as exact_matches,
                 ROUND(SUM(CASE WHEN et.velocity_match_quality = 'exact' THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) as match_percentage
             FROM emg_throws et
-            JOIN emg_sessions es ON et.session_numeric_id = es.numeric_id
+            JOIN emg_sessions es ON et.emg_session_id = es.emg_session_id
             GROUP BY es.athlete_name
             ORDER BY match_percentage DESC
             """)
@@ -841,8 +899,8 @@ class EMGPipeline:
             
             # Extract data components
             session_data = processed_data['session_data']
-            timeseries_data = processed_data['timeseries_data']
-            throw_data = processed_data['throw_data']
+            timeseries_data = processed_data.get('timeseries_data')  # May be None for MVIC
+            throw_data = processed_data.get('throw_data')  # May be None for MVIC
             
             # Start transaction
             conn.begin()
@@ -852,99 +910,245 @@ class EMGPipeline:
             
             # Check if session already exists
             cursor.execute(
-                "SELECT numeric_id FROM emg_sessions WHERE filename = %s",
+                "SELECT emg_session_id FROM emg_sessions WHERE filename = %s",
                 (filename,)
             )
             
             session_result = cursor.fetchone()
             if session_result:
-                numeric_id = session_result[0]
+                emg_session_id = session_result[0]
                 logger.info(f"Session {filename} already exists. Removing old data...")
-                cursor.execute("DELETE FROM emg_throws WHERE session_numeric_id = %s", (numeric_id,))
-                cursor.execute("DELETE FROM emg_timeseries WHERE session_numeric_id = %s", (numeric_id,))
-                cursor.execute("DELETE FROM emg_sessions WHERE numeric_id = %s", (numeric_id,))
+                
+                # Delete existing data
+                cursor.execute("DELETE FROM emg_throws WHERE emg_session_id = %s", (emg_session_id,))
+                cursor.execute("DELETE FROM emg_timeseries WHERE emg_session_id = %s", (emg_session_id,))
+                cursor.execute("DELETE FROM emg_sessions WHERE emg_session_id = %s", (emg_session_id,))
             
-            # Insert session data with new fields
-            date_recorded = session_data['date_recorded']
-            if date_recorded is None:
-                logger.warning(f"No date parsed from filename. Using current date for session {filename}")
-                date_recorded = datetime.now().date()
+            # Parse date_recorded if present
+            date_recorded = None
+            if session_data.get('date_recorded'):
+                try:
+                    # Assuming date_recorded is already in a valid format or is a date object
+                    date_recorded = session_data['date_recorded']
+                except Exception as e:
+                    logger.warning(f"Could not parse date_recorded {session_data.get('date_recorded')}: {e}")
+                    date_recorded = None
             
-            cursor.execute("""
-            INSERT INTO emg_sessions (
-                filename, date_recorded, collection_date, start_time,
-                traq_id, athlete_name, session_type,
-                muscle_count, muscle1_name, muscle2_name, muscle3_name, muscle4_name,
-                muscle1_fs, muscle2_fs, file_path, processed_date
-            ) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                filename,
-                date_recorded,
-                session_data.get('collection_date'),
-                session_data.get('start_time'),
-                session_data['traq_id'],
-                session_data['athlete_name'],
-                session_data['session_type'],
-                session_data.get('muscle_count', 2),
-                session_data.get('muscle1_name'),
-                session_data.get('muscle2_name'),
-                session_data.get('muscle3_name'),
-                session_data.get('muscle4_name'),
-                session_data.get('muscle1_fs'),
-                session_data.get('muscle2_fs'),
-                session_data['file_path'],
-                session_data['processed_date']
-            ))
+            # Parse collection_date and start_time
+            collection_date = None
+            start_time = None
+            if session_data.get('collection_date'):
+                try:
+                    # Parse the collection date string into a datetime object
+                    collection_datetime = datetime.strptime(session_data['collection_date'], '%m/%d/%Y %I:%M:%S %p')
+                    # Extract just the date part for the collection_date column
+                    collection_date = collection_datetime.date()
+                    # Extract just the time part for the start_time column
+                    start_time = collection_datetime.time()
+                except Exception as e:
+                    logger.warning(f"Could not parse collection date {session_data.get('collection_date')}: {e}")
+                    collection_date = None
+                    start_time = None
             
-            # Get the auto-generated numeric_id
+            # Check if this is an MVIC session
+            is_mvic = session_data.get('is_mvic', False)
+            
+            if is_mvic:
+                # For MVIC sessions, include MVIC reference values
+                cursor.execute("""
+                INSERT INTO emg_sessions (
+                    filename, date_recorded, collection_date, start_time,
+                    traq_id, athlete_name, session_type,
+                    muscle_count, muscle1_name, muscle2_name,
+                    muscle1_fs, muscle2_fs, file_path, processed_date,
+                    is_mvic, muscle1_mvic_peak, muscle1_mvic_rms, 
+                    muscle2_mvic_peak, muscle2_mvic_rms
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    filename,
+                    date_recorded,
+                    collection_date,  # Now just the date part
+                    start_time,       # Now just the time part
+                    session_data['traq_id'],
+                    session_data['athlete_name'],
+                    session_data['session_type'],
+                    session_data.get('muscle_count', 2),
+                    session_data.get('muscle1_name'),
+                    session_data.get('muscle2_name'),
+                    session_data.get('muscle1_fs'),
+                    session_data.get('muscle2_fs'),
+                    session_data['file_path'],
+                    session_data['processed_date'],
+                    True,  # is_mvic
+                    session_data.get('muscle1_mvic_peak'),
+                    session_data.get('muscle1_mvic_rms'),
+                    session_data.get('muscle2_mvic_peak'),
+                    session_data.get('muscle2_mvic_rms')
+                ))
+            else:
+                # For pitching sessions, use standard fields
+                cursor.execute("""
+                INSERT INTO emg_sessions (
+                    filename, date_recorded, collection_date, start_time,
+                    traq_id, athlete_name, session_type,
+                    muscle_count, muscle1_name, muscle2_name,
+                    muscle1_fs, muscle2_fs, file_path, processed_date,
+                    is_mvic
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    filename,
+                    date_recorded,
+                    collection_date,  # Now just the date part
+                    start_time,       # Now just the time part
+                    session_data['traq_id'],
+                    session_data['athlete_name'],
+                    session_data['session_type'],
+                    session_data.get('muscle_count', 2),
+                    session_data.get('muscle1_name'),
+                    session_data.get('muscle2_name'),
+                    session_data.get('muscle1_fs'),
+                    session_data.get('muscle2_fs'),
+                    session_data['file_path'],
+                    session_data['processed_date'],
+                    False  # is_mvic
+                ))
+            
+            # Get the auto-generated emg_session_id
             cursor.execute("SELECT LAST_INSERT_ID()")
-            numeric_id = cursor.fetchone()[0]
+            emg_session_id = cursor.fetchone()[0]
             
-            # Insert throw data with all metrics
-            if throw_data:
-                # Construct dynamic SQL query based on the first throw's keys
-                first_throw = throw_data[0]
-                throw_columns = []
-                placeholders = []
+            # For pitching sessions, look for a matching MVIC session
+            if not is_mvic:
+                # Find matching MVIC session
+                cursor.execute("""
+                SELECT emg_session_id, muscle1_mvic_peak, muscle1_mvic_rms, muscle2_mvic_peak, muscle2_mvic_rms 
+                FROM emg_sessions 
+                WHERE athlete_name = %s 
+                AND date_recorded = %s 
+                AND is_mvic = TRUE
+                ORDER BY processed_date DESC
+                LIMIT 1
+                """, (session_data['athlete_name'], date_recorded))
                 
-                # Start with required columns
-                throw_columns.append("session_numeric_id")
-                throw_columns.append("trial_number")
-                throw_columns.append("start_time")
-                throw_columns.append("end_time")
-                throw_columns.append("duration")
+                mvic_session = cursor.fetchone()
                 
-                # Add all metric columns dynamically
-                for key in first_throw.keys():
-                    if key not in ['session_id', 'throw_number', 'start_time', 'end_time', 'duration']:
+                if mvic_session:
+                    # Associate this pitching session with the MVIC session
+                    related_mvic_id = mvic_session[0]
+                    logger.info(f"Found matching MVIC session: {related_mvic_id}")
+                    
+                    # Store MVIC reference values for normalization
+                    muscle1_mvic_peak = mvic_session[1]
+                    muscle1_mvic_rms = mvic_session[2]
+                    muscle2_mvic_peak = mvic_session[3]
+                    muscle2_mvic_rms = mvic_session[4]
+                    
+                    # Update the session with the MVIC reference
+                    cursor.execute("""
+                    UPDATE emg_sessions 
+                    SET related_mvic_id = %s,
+                        muscle1_mvic_peak = %s,
+                        muscle1_mvic_rms = %s,
+                        muscle2_mvic_peak = %s,
+                        muscle2_mvic_rms = %s
+                    WHERE emg_session_id = %s
+                    """, (
+                        related_mvic_id,
+                        muscle1_mvic_peak,
+                        muscle1_mvic_rms,
+                        muscle2_mvic_peak,
+                        muscle2_mvic_rms,
+                        emg_session_id
+                    ))
+                    
+                    # Calculate %MVIC for throws if we have throw data
+                    if throw_data:
+                        logger.info("Calculating %MVIC values for throws")
+                        for throw in throw_data:
+                            # Calculate %MVIC for Muscle 1
+                            if muscle1_mvic_peak and muscle1_mvic_peak > 0:
+                                throw['muscle1_peak_amplitude_pct_mvic'] = (throw['muscle1_peak_amplitude'] / muscle1_mvic_peak) * 100
+                            if muscle1_mvic_rms and muscle1_mvic_rms > 0:
+                                throw['muscle1_rms_value_pct_mvic'] = (throw['muscle1_rms_value'] / muscle1_mvic_rms) * 100
+                                if 'muscle1_throw_integral' in throw:
+                                    throw['muscle1_throw_integral_pct_mvic'] = (throw['muscle1_throw_integral'] / muscle1_mvic_rms) * 100
+                            
+                            # Calculate %MVIC for Muscle 2
+                            if muscle2_mvic_peak and muscle2_mvic_peak > 0:
+                                throw['muscle2_peak_amplitude_pct_mvic'] = (throw['muscle2_peak_amplitude'] / muscle2_mvic_peak) * 100
+                            if muscle2_mvic_rms and muscle2_mvic_rms > 0:
+                                throw['muscle2_rms_value_pct_mvic'] = (throw['muscle2_rms_value'] / muscle2_mvic_rms) * 100
+                                if 'muscle2_throw_integral' in throw:
+                                    throw['muscle2_throw_integral_pct_mvic'] = (throw['muscle2_throw_integral'] / muscle2_mvic_rms) * 100
+                            
+                            # Log some sample values for verification
+                            if throw['trial_number'] == 1:  # Log first throw as example
+                                logger.info(f"Sample %MVIC values for first throw:")
+                                logger.info(f"Muscle1 Peak: {throw.get('muscle1_peak_amplitude_pct_mvic', 'N/A')}%")
+                                logger.info(f"Muscle1 RMS: {throw.get('muscle1_rms_value_pct_mvic', 'N/A')}%")
+                                logger.info(f"Muscle2 Peak: {throw.get('muscle2_peak_amplitude_pct_mvic', 'N/A')}%")
+                                logger.info(f"Muscle2 RMS: {throw.get('muscle2_rms_value_pct_mvic', 'N/A')}%")
+                else:
+                    logger.warning(f"No matching MVIC session found for {session_data['athlete_name']} on {date_recorded}")
+            
+            # For pitching sessions, insert throw data
+            if not is_mvic and throw_data:
+                # Get all column names from the first throw, excluding emg_session_id since it's handled separately
+                throw_columns = ['trial_number', 'start_time', 'end_time', 'duration']
+                
+                # Add all metric columns
+                for key in throw_data[0].keys():
+                    if key not in ['emg_session_id', 'trial_number', 'start_time', 'end_time', 'duration']:
                         throw_columns.append(key)
                 
-                # Create placeholders for all columns
-                placeholders = ["%s"] * len(throw_columns)
+                # Add normalized columns for MVIC percentages
+                normalized_columns = [
+                    'muscle1_peak_amplitude_pct_mvic',
+                    'muscle1_rms_value_pct_mvic',
+                    'muscle1_throw_integral_pct_mvic',
+                    'muscle2_peak_amplitude_pct_mvic',
+                    'muscle2_rms_value_pct_mvic',
+                    'muscle2_throw_integral_pct_mvic'
+                ]
                 
-                # Construct SQL query
+                for col in normalized_columns:
+                    if col not in throw_columns:
+                        throw_columns.append(col)
+                
+                # Create placeholders for all columns (including emg_session_id)
+                placeholders = ["%s"] * (len(throw_columns) + 1)  # +1 for emg_session_id
+                
+                # Construct SQL query with emg_session_id first
                 insert_query = f"""
                 INSERT INTO emg_throws (
-                    {', '.join(throw_columns)}
+                    emg_session_id, {', '.join(throw_columns)}
                 ) VALUES ({', '.join(placeholders)})
                 """
                 
                 # Prepare values for each throw
                 throw_values = []
                 for throw in throw_data:
-                    values = [numeric_id, throw['throw_number'], throw['start_time'], throw['end_time'], throw['duration']]
+                    # Start with emg_session_id
+                    values = [emg_session_id]
                     
-                    # Add all metric values in the same order as columns
-                    for key in throw_columns[5:]:  # Skip the first 5 required columns
-                        values.append(throw.get(key))
+                    # Add values in the same order as columns
+                    for col in throw_columns:
+                        value = throw.get(col)
+                        # Replace NaN values with None (NULL in MySQL)
+                        if pd.isna(value):
+                            value = None
+                        values.append(value)
                     
                     throw_values.append(tuple(values))
                 
                 # Execute insert
                 cursor.executemany(insert_query, throw_values)
             
-            # Insert time series data in batches with numeric_id
-            if not timeseries_data.empty:
+            # Insert time series data in batches if this is a pitching session
+            if not is_mvic and timeseries_data is not None and not timeseries_data.empty:
+                # Replace NaN values with None in the DataFrame
+                timeseries_data = timeseries_data.replace({np.nan: None})
+                
                 # Convert DataFrame to list of tuples for executemany
                 total_rows = len(timeseries_data)
                 for start_idx in range(0, total_rows, self.batch_size):
@@ -953,7 +1157,7 @@ class EMGPipeline:
                     
                     # Create list of value tuples
                     timeseries_values = list(zip(
-                        [numeric_id] * len(batch),  # Use numeric_id instead of session_id
+                        [emg_session_id] * len(batch),  # Use emg_session_id
                         batch['time_point'],
                         batch['muscle1_emg'],
                         batch['muscle2_emg']
@@ -961,25 +1165,24 @@ class EMGPipeline:
                     
                     # Insert batch
                     cursor.executemany("""
-                    INSERT INTO emg_timeseries (session_numeric_id, time_point, muscle1_emg, muscle2_emg)
+                    INSERT INTO emg_timeseries (emg_session_id, time_point, muscle1_emg, muscle2_emg)
                     VALUES (%s, %s, %s, %s)
                     """, timeseries_values)
-                    
-                    logger.debug(f"Inserted batch of {len(batch)} time series rows")
             
-            # Commit the transaction
+            # Commit transaction
             conn.commit()
-            logger.info(f"Successfully saved data for session {filename} to database")
-            
+            logger.info(f"Successfully saved {filename} to database")
             return True
             
         except Exception as e:
-            logger.error(f"Error saving to database: {e}")
+            logger.error(f"Error saving to database: {str(e)}")
             conn.rollback()
             return False
+            
         finally:
-            self.db.disconnect()
-    
+            if conn:
+                conn.close()
+            
     def process_directory(self, directory=None, recursive=False):
         """
         Process all EMG data files in a directory.

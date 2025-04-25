@@ -128,10 +128,10 @@ class DBConnector:
         Create the necessary tables for the EMG pipeline with updated columns
         """
         try:
-            # Create EMG Sessions table with additional columns
+            # Create EMG Sessions table with renamed ID field and without muscle3/muscle4
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_sessions (
-                numeric_id INT AUTO_INCREMENT PRIMARY KEY,
+                emg_session_id INT AUTO_INCREMENT PRIMARY KEY,
                 filename VARCHAR(100) UNIQUE,
                 date_recorded DATE,
                 collection_date DATE,
@@ -142,33 +142,45 @@ class DBConnector:
                 muscle_count INT,
                 muscle1_name VARCHAR(50),
                 muscle2_name VARCHAR(50),
-                muscle3_name VARCHAR(50),
-                muscle4_name VARCHAR(50),
                 muscle1_fs FLOAT,
                 muscle2_fs FLOAT,
                 file_path VARCHAR(255),
-                processed_date DATETIME
+                processed_date DATETIME,
+                is_mvic BOOLEAN DEFAULT FALSE,
+                
+                # MVIC reference values (if this is an MVIC session)
+                muscle1_mvic_peak FLOAT,
+                muscle1_mvic_rms FLOAT,
+                muscle2_mvic_peak FLOAT,
+                muscle2_mvic_rms FLOAT,
+                
+                # Related MVIC session (if this is a pitching session)
+                related_mvic_id INT,
+                
+                INDEX idx_athlete_name (athlete_name),
+                INDEX idx_date_recorded (date_recorded)
             )
             """)
             
-            # Create raw time series data table
+            # Create raw time series data table with updated field names
+            # Note: Time series data will only be stored for pitching sessions, not for MVIC
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_timeseries (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                session_numeric_id INT,
+                emg_session_id INT,
                 time_point FLOAT,
                 muscle1_emg FLOAT,
                 muscle2_emg FLOAT,
-                INDEX idx_session_id (session_numeric_id),
-                FOREIGN KEY (session_numeric_id) REFERENCES emg_sessions(numeric_id) ON DELETE CASCADE
+                INDEX idx_session_id (emg_session_id),
+                FOREIGN KEY (emg_session_id) REFERENCES emg_sessions(emg_session_id) ON DELETE CASCADE
             )
             """)
             
-            # Create throw details table with new columns for timestamping and velocity
+            # Create throw details table with renamed fields and without muscle3/muscle4
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_throws (
                 throw_id INT AUTO_INCREMENT PRIMARY KEY,
-                session_numeric_id INT,
+                emg_session_id INT,
                 trial_number INT,
                 start_time FLOAT,
                 end_time FLOAT,
@@ -186,9 +198,12 @@ class DBConnector:
                 muscle1_mean_freq FLOAT,
                 muscle1_bandwidth FLOAT,
                 muscle1_peak_amplitude FLOAT,
+                muscle1_peak_amplitude_pct_mvic FLOAT,
                 muscle1_rms_value FLOAT,
+                muscle1_rms_value_pct_mvic FLOAT,
                 muscle1_rise_time FLOAT,
                 muscle1_throw_integral FLOAT,
+                muscle1_throw_integral_pct_mvic FLOAT,
                 muscle1_work_rate FLOAT,
                 
                 # Muscle2 metrics
@@ -196,9 +211,12 @@ class DBConnector:
                 muscle2_mean_freq FLOAT,
                 muscle2_bandwidth FLOAT,
                 muscle2_peak_amplitude FLOAT,
+                muscle2_peak_amplitude_pct_mvic FLOAT,
                 muscle2_rms_value FLOAT,
+                muscle2_rms_value_pct_mvic FLOAT,
                 muscle2_rise_time FLOAT,
                 muscle2_throw_integral FLOAT,
+                muscle2_throw_integral_pct_mvic FLOAT,
                 muscle2_work_rate FLOAT,
                 
                 # Spectral entropy metrics
@@ -219,8 +237,8 @@ class DBConnector:
                 coactivation_temporal_overlap FLOAT,
                 coactivation_waveform_similarity FLOAT,
                 
-                INDEX idx_session_id (session_numeric_id),
-                FOREIGN KEY (session_numeric_id) REFERENCES emg_sessions(numeric_id) ON DELETE CASCADE
+                INDEX idx_session_id (emg_session_id),
+                FOREIGN KEY (emg_session_id) REFERENCES emg_sessions(emg_session_id) ON DELETE CASCADE
             )
             """)
             
