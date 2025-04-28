@@ -10,6 +10,7 @@ import logging
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
+import datetime
 
 from emg_pipeline import EMGPipeline
 from db_connector import DBConnector
@@ -148,8 +149,45 @@ def main():
             logger.warning(f"Failed to process {summary['failed']} files.")
         
         return 0 if summary['success'] else 1
-    
-    return 0
+
+    # If neither --file nor --directory is provided, process all files from yesterday
+    # in the default data directory (using MMDDYYYY in filename)
+    default_data_dir = os.getenv('DEFAULT_DATA_DIR', os.getcwd())
+    yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%m%d%Y')
+    logger.info(f"No --file or --directory specified. Looking for files from yesterday ({yesterday}) in {default_data_dir}")
+    files = [
+        os.path.join(default_data_dir, f)
+        for f in os.listdir(default_data_dir)
+        if yesterday in f and (f.endswith('.csv') or f.endswith('.txt'))
+    ]
+    if not files:
+        logger.info(f"No files found for {yesterday} in {default_data_dir}")
+        return 0
+    processed = 0
+    failed = 0
+    for file_path in files:
+        logger.info(f"Processing file: {file_path}")
+        try:
+            processed_data = pipeline.process_file(file_path)
+            if processed_data:
+                if args.dry_run:
+                    logger.info(f"Dry run: processed {file_path} successfully")
+                    processed += 1
+                else:
+                    if pipeline.save_to_database(processed_data):
+                        logger.info(f"Successfully processed and saved {file_path}")
+                        processed += 1
+                    else:
+                        logger.error(f"Failed to save {file_path} to database")
+                        failed += 1
+            else:
+                logger.error(f"Failed to process {file_path}")
+                failed += 1
+        except Exception as e:
+            logger.error(f"Error processing {file_path}: {e}")
+            failed += 1
+    logger.info(f"Finished processing yesterday's files. Success: {processed}, Failed: {failed}, Total: {len(files)}")
+    return 0 if failed == 0 else 1
 
 if __name__ == "__main__":
     sys.exit(main())
