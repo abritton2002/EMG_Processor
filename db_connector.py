@@ -125,19 +125,18 @@ class DBConnector:
     
     def create_tables(self):
         """
-        Create the necessary tables for the EMG pipeline with updated columns
+        Create the necessary tables for the EMG pipeline with updated structure
         """
         try:
-            # Create EMG Sessions table with renamed ID field and without muscle3/muscle4
+            # Create EMG Metadata table for basic session information
             self.execute_query("""
-            CREATE TABLE IF NOT EXISTS emg_sessions (
+            CREATE TABLE IF NOT EXISTS emg_metadata (
                 emg_session_id INT AUTO_INCREMENT PRIMARY KEY,
                 filename VARCHAR(100) UNIQUE,
                 date_recorded DATE,
                 collection_date DATE,
                 start_time TIME,
                 traq_id VARCHAR(50),
-                athlete_name VARCHAR(100),
                 session_type VARCHAR(50),
                 muscle_count INT,
                 muscle1_name VARCHAR(50),
@@ -148,22 +147,37 @@ class DBConnector:
                 processed_date DATETIME,
                 is_mvic BOOLEAN DEFAULT FALSE,
                 
-                # MVIC reference values (if this is an MVIC session)
+                INDEX idx_date_recorded (date_recorded)
+            )
+            """)
+            
+            # Create EMG Sessions table for athlete-specific data and MVIC values
+            self.execute_query("""
+            CREATE TABLE IF NOT EXISTS emg_sessions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                emg_session_id INT,
+                athlete_name VARCHAR(100),
+                
+                # MVIC reference values
                 muscle1_mvic_peak FLOAT,
                 muscle1_mvic_rms FLOAT,
                 muscle2_mvic_peak FLOAT,
                 muscle2_mvic_rms FLOAT,
                 
+                # %MVIC calculations
+                muscle1_pct_mvic FLOAT,
+                muscle2_pct_mvic FLOAT,
+                
                 # Related MVIC session (if this is a pitching session)
                 related_mvic_id INT,
                 
                 INDEX idx_athlete_name (athlete_name),
-                INDEX idx_date_recorded (date_recorded)
+                INDEX idx_session_id (emg_session_id),
+                FOREIGN KEY (emg_session_id) REFERENCES emg_metadata(emg_session_id) ON DELETE CASCADE
             )
             """)
             
-            # Create raw time series data table with updated field names
-            # Note: Time series data will only be stored for pitching sessions, not for MVIC
+            # Create raw time series data table with partitioning
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_timeseries (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -171,12 +185,20 @@ class DBConnector:
                 time_point FLOAT,
                 muscle1_emg FLOAT,
                 muscle2_emg FLOAT,
+                
                 INDEX idx_session_id (emg_session_id),
-                FOREIGN KEY (emg_session_id) REFERENCES emg_sessions(emg_session_id) ON DELETE CASCADE
+                FOREIGN KEY (emg_session_id) REFERENCES emg_metadata(emg_session_id) ON DELETE CASCADE
+            )
+            PARTITION BY RANGE (emg_session_id) (
+                PARTITION p0 VALUES LESS THAN (1000),
+                PARTITION p1 VALUES LESS THAN (2000),
+                PARTITION p2 VALUES LESS THAN (3000),
+                PARTITION p3 VALUES LESS THAN (4000),
+                PARTITION p4 VALUES LESS THAN MAXVALUE
             )
             """)
             
-            # Create throw details table with renamed fields and without muscle3/muscle4
+            # Create throw details table with all muscle-specific metrics
             self.execute_query("""
             CREATE TABLE IF NOT EXISTS emg_throws (
                 throw_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -238,7 +260,7 @@ class DBConnector:
                 coactivation_waveform_similarity FLOAT,
                 
                 INDEX idx_session_id (emg_session_id),
-                FOREIGN KEY (emg_session_id) REFERENCES emg_sessions(emg_session_id) ON DELETE CASCADE
+                FOREIGN KEY (emg_session_id) REFERENCES emg_metadata(emg_session_id) ON DELETE CASCADE
             )
             """)
             
