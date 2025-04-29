@@ -3,8 +3,6 @@ setlocal EnableDelayedExpansion
 
 REM Set error codes
 set ERROR_PYTHON_NOT_FOUND=1
-set ERROR_VENV_CREATION=2
-set ERROR_VENV_ACTIVATION=3
 set ERROR_REQUIREMENTS=4
 set ERROR_DATA_DIR=5
 set ERROR_PIPELINE=6
@@ -43,19 +41,74 @@ if not exist ".env" (
     exit /b %ERROR_ENV_FILE%
 )
 
-REM Check Python version
-echo Checking Python installation... >> "%LOG_FILE%"
-python --version > nul 2>&1
-if errorlevel 1 (
-    echo Error: Python is not installed or not in PATH >> "%LOG_FILE%"
-    echo Error: Python is not installed or not in PATH
-    echo Please install Python and add it to your system PATH
-    pause
-    exit /b %ERROR_PYTHON_NOT_FOUND%
+REM Find Python - first try system path
+echo Searching for Python installation... >> "%LOG_FILE%"
+set PYTHON_CMD=python
+set PYTHON_PATH_ADDED=0
+
+REM Check if Python is in PATH already
+where python > nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo Found Python in system PATH >> "%LOG_FILE%"
+    goto :PYTHON_FOUND
 )
 
-REM Check Python version is 3.x
-for /f "tokens=2" %%I in ('python -c "import sys; print(sys.version_info[0])"') do set PYTHON_VERSION=%%I
+REM If not in PATH, search for it and add it temporarily
+echo Python not in PATH, searching common locations... >> "%LOG_FILE%"
+
+REM Check common installation locations
+if exist "C:\Python312\python.exe" (
+    set PYTHON_PATH=C:\Python312
+    set PYTHON_CMD=!PYTHON_PATH!\python.exe
+    goto :ADD_PYTHON_PATH
+)
+
+if exist "C:\Python311\python.exe" (
+    set PYTHON_PATH=C:\Python311
+    set PYTHON_CMD=!PYTHON_PATH!\python.exe
+    goto :ADD_PYTHON_PATH
+)
+
+if exist "C:\Python310\python.exe" (
+    set PYTHON_PATH=C:\Python310
+    set PYTHON_CMD=!PYTHON_PATH!\python.exe
+    goto :ADD_PYTHON_PATH
+)
+
+if exist "C:\Python39\python.exe" (
+    set PYTHON_PATH=C:\Python39
+    set PYTHON_CMD=!PYTHON_PATH!\python.exe
+    goto :ADD_PYTHON_PATH
+)
+
+REM No Python found anywhere
+echo Error: Python is not installed or not found in common locations >> "%LOG_FILE%"
+echo Error: Python is not installed or not found in common locations
+echo Please install Python 3.x from https://www.python.org/downloads/
+pause
+exit /b %ERROR_PYTHON_NOT_FOUND%
+
+:ADD_PYTHON_PATH
+REM Temporarily add Python to PATH for this session
+echo Found Python at !PYTHON_PATH! >> "%LOG_FILE%"
+echo Temporarily adding Python to PATH >> "%LOG_FILE%"
+set PATH=!PYTHON_PATH!;!PYTHON_PATH!\Scripts;%PATH%
+set PYTHON_PATH_ADDED=1
+set PYTHON_CMD=python
+
+:PYTHON_FOUND
+echo Using Python: %PYTHON_CMD% >> "%LOG_FILE%"
+%PYTHON_CMD% --version >> "%LOG_FILE%" 2>&1
+%PYTHON_CMD% --version 2>&1
+
+REM Check Python version is 3.x - more reliable method
+%PYTHON_CMD% -c "import sys; print('PYTHON_VERSION=' + str(sys.version_info[0]))" > version.txt
+set /p PYTHON_VER_LINE=<version.txt
+del version.txt
+
+echo Python version line: %PYTHON_VER_LINE% >> "%LOG_FILE%"
+set PYTHON_VERSION=%PYTHON_VER_LINE:~15%
+
 if not "%PYTHON_VERSION%"=="3" (
     echo Error: Python 3.x is required, found Python %PYTHON_VERSION%.x >> "%LOG_FILE%"
     echo Error: Python 3.x is required, found Python %PYTHON_VERSION%.x
@@ -63,51 +116,14 @@ if not "%PYTHON_VERSION%"=="3" (
     exit /b %ERROR_PYTHON_NOT_FOUND%
 )
 
-REM Check if virtual environment exists, if not create it
-if not exist ".venv" (
-    echo Creating virtual environment... >> "%LOG_FILE%"
-    echo Creating virtual environment...
-    python -m venv .venv
-    if errorlevel 1 (
-        echo Error: Failed to create virtual environment >> "%LOG_FILE%"
-        echo Error: Failed to create virtual environment
-        echo Please check Python installation and permissions
-        pause
-        exit /b %ERROR_VENV_CREATION%
-    )
-)
-
-REM Activate virtual environment with error handling
-echo Activating virtual environment... >> "%LOG_FILE%"
-if exist ".venv\Scripts\activate.bat" (
-    call .venv\Scripts\activate
-) else (
-    echo Error: Virtual environment activation script not found >> "%LOG_FILE%"
-    echo Error: Virtual environment activation script not found
-    echo Try deleting the .venv directory and running the script again
-    pause
-    exit /b %ERROR_VENV_ACTIVATION%
-)
-
-REM Verify virtual environment activation
-python -c "import sys; print(sys.prefix)" | findstr /i ".venv" > nul
-if errorlevel 1 (
-    echo Error: Failed to activate virtual environment >> "%LOG_FILE%"
-    echo Error: Failed to activate virtual environment
-    pause
-    exit /b %ERROR_VENV_ACTIVATION%
-)
-
-REM Install/update requirements with error handling
-echo Checking/updating requirements... >> "%LOG_FILE%"
+REM Install required packages directly (skip virtual environment)
+echo Installing required packages with --user flag... >> "%LOG_FILE%"
 echo This may take a few minutes...
-pip install -r requirements.txt >> "%LOG_FILE%" 2>&1
+%PYTHON_CMD% -m pip install --user -r requirements.txt >> "%LOG_FILE%" 2>&1
 if errorlevel 1 (
-    echo Error: Failed to install requirements >> "%LOG_FILE%"
-    echo Error: Failed to install requirements
-    echo Check the log file for details: %LOG_FILE%
-    pause
-    exit /b %ERROR_REQUIREMENTS%
+    echo Warning: Failed to install packages with --user flag >> "%LOG_FILE%"
+    echo Warning: Failed to install packages with --user flag
+    echo Continuing anyway...
 )
 
 REM Set and validate the data directory
@@ -116,28 +132,18 @@ echo Validating data directory: %DATA_DIR% >> "%LOG_FILE%"
 
 REM Check if data directory exists and is accessible
 if not exist "%DATA_DIR%" (
-    echo Error: Data directory not found: %DATA_DIR% >> "%LOG_FILE%"
-    echo Error: Data directory not found: %DATA_DIR%
-    pause
-    exit /b %ERROR_DATA_DIR%
+    echo Warning: Data directory not found: %DATA_DIR% >> "%LOG_FILE%"
+    echo Warning: Data directory not found: %DATA_DIR%
+    echo The pipeline will try to use the current directory instead.
+    set DATA_DIR=.
 )
-
-REM Try to create a test file to verify write permissions
-echo Testing write permissions... >> "%LOG_FILE%"
-echo test > "%DATA_DIR%\test_permissions.tmp" 2>nul
-if errorlevel 1 (
-    echo Warning: No write permissions in data directory >> "%LOG_FILE%"
-    echo Warning: No write permissions in data directory
-    echo The pipeline will continue but may fail if writing is required
-)
-if exist "%DATA_DIR%\test_permissions.tmp" del "%DATA_DIR%\test_permissions.tmp"
 
 REM Run the pipeline with enhanced error handling
-echo Running pipeline for directory: %DATA_DIR% >> "%LOG_FILE%"
-echo Running pipeline for directory: %DATA_DIR%
+echo Running pipeline... >> "%LOG_FILE%"
+echo Running pipeline...
 echo This may take several minutes depending on the number of files...
 
-python main.py >> "%LOG_FILE%" 2>&1
+%PYTHON_CMD% main.py >> "%LOG_FILE%" 2>&1
 set PIPELINE_EXIT_CODE=%errorlevel%
 
 REM Check pipeline exit code and provide specific error messages
@@ -159,4 +165,4 @@ echo =============================================== >> "%LOG_FILE%"
 REM Keep the window open to see any errors
 echo.
 echo Press any key to close this window...
-pause > nul 
+pause > nul
