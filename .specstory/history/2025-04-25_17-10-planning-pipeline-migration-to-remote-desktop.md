@@ -1064,3 +1064,17 @@ If you want, I can generate a sample `.gitignore` and/or `README.md` for you—j
 
 ---
 
+_**User**_
+
+SO WHEN I RUN THE BAT FILE WHAT HAPPENS AND HOW DO I FILL OUT BAT FILE. THIS IS WHERE I WANT TO GET THE DATA FROM. IN THERE ARE FOLDERS WITH DATES. also, how do i make sure the environment is set up and ready to go 
+
+"M:\EMG_DATA_new"
+
+---
+
+_**Assistant**_
+
+
+
+---
+

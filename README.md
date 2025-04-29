@@ -15,18 +15,41 @@ A comprehensive pipeline for processing EMG (Electromyography) data from Delsys 
 - Intuitive GUI for processing files and monitoring results
 - Batch processing support for multiple files
 
-## Installation
+## Setup
 
-1. Clone this repository:
-```bash
-git clone https://github.com/yourusername/emg-pipeline.git
-cd emg-pipeline
-```
+1. Clone the repo:
+   ```
+   git clone https://github.com/yourusername/your-repo-name.git
+   cd your-repo-name
+   ```
 
-2. Install required packages:
-```bash
-pip install -r requirements.txt
-```
+2. Create and activate a virtual environment (recommended):
+   ```
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Create a `.env` file with your database credentials:
+   ```
+   DB_HOST=your_host
+   DB_USER=your_user
+   DB_PASSWORD=your_password
+   DB_NAME=your_db
+   ```
+
+5. Run the pipeline:
+   ```
+   python main.py
+   ```
+
+## Automation
+
+- Use `run_pipeline.bat` and Windows Task Scheduler for daily automation.
 
 ## Database Setup
 
