@@ -11,24 +11,44 @@ import argparse
 from pathlib import Path
 from dotenv import load_dotenv
 import datetime
+import traceback
 
 from emg_pipeline import EMGPipeline
 from db_connector import DBConnector
 
+class PipelineError(Exception):
+    """Custom exception for pipeline-specific errors."""
+    pass
+
 # Load environment variables
 load_dotenv()
 
-# Configure logging
+# Create logs directory if it doesn't exist
+try:
+    os.makedirs('logs', exist_ok=True)
+except PermissionError:
+    print("ERROR: Cannot create logs directory - permission denied")
+    sys.exit(1)
+except Exception as e:
+    print(f"ERROR: Cannot create logs directory - {str(e)}")
+    sys.exit(1)
+
+# Get current timestamp for log filename
+timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+log_file = os.path.join('logs', f'emg_pipeline_{timestamp}.log')
+
+# Configure logging with more detailed formatting
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('emg_pipeline.log')
+        logging.FileHandler(log_file)
     ]
 )
 
 logger = logging.getLogger(__name__)
+logger.info(f"Starting pipeline run at {datetime.datetime.now()}")
 
 def parse_args():
     """Parse command line arguments."""
@@ -57,137 +77,170 @@ def get_db_config():
         'database': os.getenv('DB_NAME')
     }
 
-def main():
-    """Main entry point for the EMG data processing pipeline."""
-    args = parse_args()
+def check_environment():
+    """Check if all required environment variables and paths are set up correctly."""
+    required_vars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
     
-    # Check if environment variables are loaded
-    if not all([os.getenv('DB_HOST'), os.getenv('DB_USER'), os.getenv('DB_PASSWORD'), os.getenv('DB_NAME')]):
-        logger.warning("Some database environment variables are missing.")
-        logger.warning("Please make sure you have a .env file with the required configuration.")
+    if missing_vars:
+        raise PipelineError(f"Missing required environment variables: {', '.join(missing_vars)}")
     
-    # Database configuration from environment
-    db_config = get_db_config()
-    
-    # Initialize pipeline
-    pipeline = EMGPipeline(
-        data_dir=args.directory if args.directory else os.getenv('DEFAULT_DATA_DIR', os.getcwd()),
-        db_config=db_config,
-        batch_size=args.batch_size
-    )
-    
-    # Test database connection
-    if args.test_db:
-        db = DBConnector(db_config)
-        if db.test_connection():
-            logger.info("Database connection test successful!")
-            return 0
-        else:
-            logger.error("Database connection test failed!")
-            return 1
-    
-    # Process single file
-    if args.file:
-        file_path = os.path.abspath(args.file)
-        logger.info(f"Processing single file: {file_path}")
-        
+    data_dir = os.getenv('DEFAULT_DATA_DIR')
+    if data_dir and not os.path.exists(data_dir):
+        raise PipelineError(f"Default data directory does not exist: {data_dir}")
+
+def process_single_file(pipeline, file_path, dry_run=False):
+    """Process a single file with error handling."""
+    try:
         if not os.path.exists(file_path):
-            logger.error(f"File not found: {file_path}")
+            raise FileNotFoundError(f"File not found: {file_path}")
+            
+        logger.info(f"Processing file: {file_path}")
+        processed_data = pipeline.process_file(file_path)
+        
+        if not processed_data:
+            raise PipelineError(f"Failed to process file: {file_path}")
+            
+        if dry_run:
+            session_id = processed_data['session_data']['session_id']
+            throws_count = len(processed_data['throw_data'])
+            timeseries_rows = len(processed_data['timeseries_data'])
+            logger.info(f"Dry run successful for {session_id}: {throws_count} throws, {timeseries_rows} time points")
+            return True
+        else:
+            if not pipeline.save_to_database(processed_data):
+                raise PipelineError(f"Failed to save {file_path} to database")
+            logger.info(f"Successfully processed and saved {file_path}")
+            return True
+            
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        return False
+    except PipelineError as e:
+        logger.error(str(e))
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error processing {file_path}: {str(e)}")
+        logger.error(traceback.format_exc())
+        return False
+
+def main():
+    """Main entry point with enhanced error handling."""
+    try:
+        # Check environment setup
+        check_environment()
+        
+        args = parse_args()
+        db_config = get_db_config()
+        
+        # Initialize pipeline with error handling
+        try:
+            pipeline = EMGPipeline(
+                data_dir=args.directory if args.directory else os.getenv('DEFAULT_DATA_DIR', os.getcwd()),
+                db_config=db_config,
+                batch_size=args.batch_size
+            )
+        except Exception as e:
+            logger.error(f"Failed to initialize pipeline: {str(e)}")
             return 1
         
-        if args.dry_run:
-            # Just process without saving to database
-            processed_data = pipeline.process_file(file_path)
-            if processed_data:
-                session_id = processed_data['session_data']['session_id']
-                throws_count = len(processed_data['throw_data'])
-                timeseries_rows = len(processed_data['timeseries_data'])
-                logger.info(f"Dry run successful for {session_id}: {throws_count} throws, {timeseries_rows} time points")
+        # Test database connection
+        if args.test_db:
+            db = DBConnector(db_config)
+            if db.test_connection():
+                logger.info("Database connection test successful!")
                 return 0
             else:
-                logger.error(f"Failed to process {file_path}")
+                logger.error("Database connection test failed!")
                 return 1
-        else:
-            # Process and save to database
-            success = pipeline.run_single_file(file_path)
+        
+        # Process single file
+        if args.file:
+            success = process_single_file(pipeline, os.path.abspath(args.file), args.dry_run)
             return 0 if success else 1
-    
-    # Process directory
-    if args.directory:
-        dir_path = os.path.abspath(args.directory)
-        logger.info(f"Processing directory: {dir_path} (recursive={args.recursive})")
-        
-        if not os.path.exists(dir_path) or not os.path.isdir(dir_path):
-            logger.error(f"Directory not found: {dir_path}")
-            return 1
-        
-        # Count files before processing
-        file_count = 0
-        if args.recursive:
-            for root, _, files in os.walk(dir_path):
-                file_count += sum(1 for f in files if f.endswith(('.csv', '.txt')))
-        else:
-            file_count = sum(1 for f in os.listdir(dir_path) 
-                          if os.path.isfile(os.path.join(dir_path, f)) and 
-                          f.endswith(('.csv', '.txt')))
-        
-        logger.info(f"Found {file_count} files to process")
-        
-        if file_count == 0:
-            logger.warning(f"No EMG data files found in {dir_path}")
-            return 0
-        
-        if args.dry_run:
-            logger.info("Dry run mode: files will be processed but not saved to database")
         
         # Process directory
-        summary = pipeline.process_directory(dir_path, args.recursive)
+        if args.directory:
+            dir_path = os.path.abspath(args.directory)
+            
+            if not os.path.exists(dir_path) or not os.path.isdir(dir_path):
+                logger.error(f"Directory not found: {dir_path}")
+                return 1
+            
+            try:
+                summary = pipeline.process_directory(dir_path, args.recursive)
+                
+                logger.info(f"Directory processing complete.")
+                logger.info(f"Successfully processed {summary['processed']} of {summary['total']} files.")
+                if summary['failed'] > 0:
+                    logger.warning(f"Failed to process {summary['failed']} files.")
+                
+                return 0 if summary['success'] else 1
+                
+            except Exception as e:
+                logger.error(f"Error processing directory {dir_path}: {str(e)}")
+                logger.error(traceback.format_exc())
+                return 1
         
-        logger.info(f"Directory processing complete.")
-        logger.info(f"Successfully processed {summary['processed']} of {summary['total']} files.")
-        if summary['failed'] > 0:
-            logger.warning(f"Failed to process {summary['failed']} files.")
-        
-        return 0 if summary['success'] else 1
-
-    # If neither --file nor --directory is provided, process all files from yesterday
-    # in the default data directory (using MMDDYYYY in filename)
-    default_data_dir = os.getenv('DEFAULT_DATA_DIR', os.getcwd())
-    yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%m%d%Y')
-    logger.info(f"No --file or --directory specified. Looking for files from yesterday ({yesterday}) in {default_data_dir}")
-    files = [
-        os.path.join(default_data_dir, f)
-        for f in os.listdir(default_data_dir)
-        if yesterday in f and (f.endswith('.csv') or f.endswith('.txt'))
-    ]
-    if not files:
-        logger.info(f"No files found for {yesterday} in {default_data_dir}")
-        return 0
-    processed = 0
-    failed = 0
-    for file_path in files:
-        logger.info(f"Processing file: {file_path}")
+        # Process yesterday's files
         try:
-            processed_data = pipeline.process_file(file_path)
-            if processed_data:
-                if args.dry_run:
-                    logger.info(f"Dry run: processed {file_path} successfully")
-                    processed += 1
-                else:
-                    if pipeline.save_to_database(processed_data):
-                        logger.info(f"Successfully processed and saved {file_path}")
+            default_data_dir = os.getenv('DEFAULT_DATA_DIR', os.getcwd())
+            yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%m%d%Y')
+            
+            logger.info(f"Looking for files from yesterday ({yesterday}) in {default_data_dir}")
+            
+            if not os.path.exists(default_data_dir):
+                raise PipelineError(f"Default data directory not found: {default_data_dir}")
+            
+            files = [
+                os.path.join(default_data_dir, f)
+                for f in os.listdir(default_data_dir)
+                if yesterday in f and (f.endswith('.csv') or f.endswith('.txt'))
+            ]
+            
+            if not files:
+                logger.info(f"No files found for {yesterday} in {default_data_dir}")
+                return 0
+                
+            processed = 0
+            failed = 0
+            
+            for file_path in files:
+                try:
+                    if process_single_file(pipeline, file_path, args.dry_run):
                         processed += 1
                     else:
-                        logger.error(f"Failed to save {file_path} to database")
                         failed += 1
-            else:
-                logger.error(f"Failed to process {file_path}")
-                failed += 1
+                except Exception as e:
+                    logger.error(f"Error processing {file_path}: {str(e)}")
+                    logger.error(traceback.format_exc())
+                    failed += 1
+            
+            logger.info(f"Finished processing yesterday's files. Success: {processed}, Failed: {failed}, Total: {len(files)}")
+            return 0 if failed == 0 else 1
+            
         except Exception as e:
-            logger.error(f"Error processing {file_path}: {e}")
-            failed += 1
-    logger.info(f"Finished processing yesterday's files. Success: {processed}, Failed: {failed}, Total: {len(files)}")
-    return 0 if failed == 0 else 1
+            logger.error(f"Error processing yesterday's files: {str(e)}")
+            logger.error(traceback.format_exc())
+            return 1
+            
+    except PipelineError as e:
+        logger.error(f"Pipeline Error: {str(e)}")
+        return 1
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return 1
+    finally:
+        logger.info("Pipeline run completed at %s", datetime.datetime.now())
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        logger.error("Pipeline interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Critical error: {str(e)}")
+        logger.error(traceback.format_exc())
+        sys.exit(1)

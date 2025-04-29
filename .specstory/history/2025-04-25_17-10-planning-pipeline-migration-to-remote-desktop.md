@@ -1074,6 +1074,869 @@ SO WHEN I RUN THE BAT FILE WHAT HAPPENS AND HOW DO I FILL OUT BAT FILE. THIS IS 
 
 _**Assistant**_
 
+I'll help you set up the batch file correctly for your specific case and ensure the environment is properly configured.
+
+1. First, let's modify your `run_pipeline.bat` to use your specific data directory:
+
+---
+
+```diff
+  @echo off
++ echo Starting EMG Pipeline...
++ 
+  REM Change to the project directory
+  cd /d "%~dp0"
+  
+- REM OPTIONAL: Activate virtual environment if you use one
+- REM call .venv\Scripts\activate
++ REM Check if Python is installed
++ python --version > nul 2>&1
++ if errorlevel 1 (
++     echo Error: Python is not installed or not in PATH
++     pause
++     exit /b 1
++ )
++ 
++ REM Check if virtual environment exists, if not create it
++ if not exist ".venv" (
++     echo Creating virtual environment...
++     python -m venv .venv
++ )
++ 
++ REM Activate virtual environment
++ call .venv\Scripts\activate
++ if errorlevel 1 (
++     echo Error: Failed to activate virtual environment
++     pause
++     exit /b 1
++ )
++ 
++ REM Install/update requirements if needed
++ pip install -r requirements.txt
++ if errorlevel 1 (
++     echo Error: Failed to install requirements
++     pause
++     exit /b 1
++ )
+  
+- REM Set the data directory you want to process
+- set DATA_DIR=C:\Path\To\Your\Data
+- 
+- REM Run the pipeline (edit arguments as needed)
+- python main.py --directory "%DATA_DIR%" --recursive > pipeline_output.log 2>&1
++ REM Set the data directory
++ set DATA_DIR=M:\EMG_DATA_new
++ 
++ REM Check if data directory exists
++ if not exist "%DATA_DIR%" (
++     echo Error: Data directory not found: %DATA_DIR%
++     pause
++     exit /b 1
++ )
++ 
++ REM Run the pipeline and log output
++ echo Running pipeline for directory: %DATA_DIR%
++ python main.py > pipeline_output.log 2>&1
+  
+- REM Optional: Pause so you can see any error messages if running manually
+- REM pause 
++ REM Check if pipeline ran successfully
++ if errorlevel 1 (
++     echo Error: Pipeline failed. Check pipeline_output.log for details
++ ) else (
++     echo Pipeline completed successfully
++ )
++ 
++ REM Keep the window open to see any errors
++ pause 
+```
+
+---
+
+2. Now, let's create a `.env` file for your database credentials:
+
+---
+
+Cannot edit files blocked by globalIgnore
+
+---
+
+I see the `.env` file is blocked (which is good for security). You'll need to create it manually.
+
+3. **Here's what happens when you run the batch file:**
+
+1. **Environment Setup:**
+   - Checks if Python is installed
+   - Creates a virtual environment if it doesn't exist
+   - Activates the virtual environment
+   - Installs/updates required packages
+
+2. **Data Directory:**
+   - Sets the data directory to `M:\EMG_DATA_new`
+   - Verifies the directory exists
+
+3. **Pipeline Execution:**
+   - Runs `main.py` with no arguments
+   - This triggers the "process yesterday's files" functionality
+   - Output is logged to `pipeline_output.log`
+
+4. **Error Handling:**
+   - Shows errors if anything fails
+   - Keeps the window open so you can see any messages
+
+---
+
+## Setup Instructions
+
+1. **Create the `.env` file:**
+   Create a new file named `.env` in your project directory and add:
+   ```
+   DB_HOST=your_host_here
+   DB_USER=your_user_here
+   DB_PASSWORD=your_password_here
+   DB_NAME=your_db_name_here
+   DEFAULT_DATA_DIR=M:\EMG_DATA_new
+   BATCH_SIZE=1000
+   ```
+   Replace the placeholder values with your actual database credentials.
+
+2. **First Run:**
+   - Double-click `run_pipeline.bat`
+   - It will:
+     - Set up the Python environment
+     - Install dependencies
+     - Run the pipeline
+   - Watch for any error messages
+
+3. **Task Scheduler Setup:**
+   - Open Windows Task Scheduler
+   - Create a new task
+   - Set the action to run `run_pipeline.bat`
+   - Set the schedule (e.g., daily at a specific time)
+   - Make sure the task runs with appropriate permissions to access `M:\EMG_DATA_new`
+
+---
+
+The batch file is now configured to:
+- Automatically set up and maintain your Python environment
+- Use your specified data directory (`M:\EMG_DATA_new`)
+- Process files from the previous day
+- Log all output for troubleshooting
+
+Would you like me to help you test it or make any adjustments?
+
+---
+
+_**User**_
+
+are we writing processing logs right now??
+
+---
+
+_**Assistant**_
+
+Yes, we are writing logs in two places:
+
+1. **`emg_pipeline.log`** (from your main pipeline):
+```python
+# From main.py
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('emg_pipeline.log')
+    ]
+)
+```
+
+2. **`pipeline_output.log`** (from the batch file):
+```batch
+python main.py > pipeline_output.log 2>&1
+```
+
+Let's make this better by:
+1. Creating a dedicated `logs` directory
+2. Adding timestamps to log files
+3. Keeping a history of logs instead of overwriting them
+
+Here's how to update it:
+
+---
+
+```diff
+  # Load environment variables
+  load_dotenv()
++ 
++ # Create logs directory if it doesn't exist
++ os.makedirs('logs', exist_ok=True)
++ 
++ # Get current timestamp for log filename
++ timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
++ log_file = os.path.join('logs', f'emg_pipeline_{timestamp}.log')
+  
+  # Configure logging
+```
+
+```diff
+      handlers=[
+          logging.StreamHandler(),
+-         logging.FileHandler('emg_pipeline.log')
++         logging.FileHandler(log_file)
+      ]
+  )
+  
+  logger = logging.getLogger(__name__)
++ logger.info(f"Starting pipeline run at {datetime.datetime.now()}")
+  
+  def parse_args():
+```
+
+---
+
+```diff
+  REM Change to the project directory
+  cd /d "%~dp0"
++ 
++ REM Create logs directory if it doesn't exist
++ if not exist "logs" mkdir logs
++ 
++ REM Get current timestamp for log filename
++ for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I
++ set TIMESTAMP=%datetime:~0,8%_%datetime:~8,6%
++ set LOG_FILE=logs\pipeline_run_%TIMESTAMP%.log
++ 
++ echo Starting pipeline run at %date% %time% > "%LOG_FILE%"
+  
+  REM Check if Python is installed
+  python --version > nul 2>&1
+  if errorlevel 1 (
++     echo Error: Python is not installed or not in PATH >> "%LOG_FILE%"
+      echo Error: Python is not installed or not in PATH
+      pause
+```
+
+```diff
+  REM Check if virtual environment exists, if not create it
+  if not exist ".venv" (
++     echo Creating virtual environment... >> "%LOG_FILE%"
+      echo Creating virtual environment...
+      python -m venv .venv
+```
+
+```diff
+  call .venv\Scripts\activate
+  if errorlevel 1 (
++     echo Error: Failed to activate virtual environment >> "%LOG_FILE%"
+      echo Error: Failed to activate virtual environment
+      pause
+```
+
+```diff
+  
+  REM Install/update requirements if needed
+- pip install -r requirements.txt
++ echo Checking/updating requirements... >> "%LOG_FILE%"
++ pip install -r requirements.txt >> "%LOG_FILE%" 2>&1
+  if errorlevel 1 (
++     echo Error: Failed to install requirements >> "%LOG_FILE%"
+      echo Error: Failed to install requirements
+      pause
+```
+
+```diff
+  REM Check if data directory exists
+  if not exist "%DATA_DIR%" (
++     echo Error: Data directory not found: %DATA_DIR% >> "%LOG_FILE%"
+      echo Error: Data directory not found: %DATA_DIR%
+      pause
+```
+
+```diff
+  
+  REM Run the pipeline and log output
++ echo Running pipeline for directory: %DATA_DIR% >> "%LOG_FILE%"
+  echo Running pipeline for directory: %DATA_DIR%
+- python main.py > pipeline_output.log 2>&1
++ python main.py >> "%LOG_FILE%" 2>&1
+  
+  REM Check if pipeline ran successfully
+  if errorlevel 1 (
+-     echo Error: Pipeline failed. Check pipeline_output.log for details
++     echo Error: Pipeline failed. Check %LOG_FILE% for details >> "%LOG_FILE%"
++     echo Error: Pipeline failed. Check %LOG_FILE% for details
+  ) else (
++     echo Pipeline completed successfully >> "%LOG_FILE%"
+      echo Pipeline completed successfully
+  )
++ 
++ echo Pipeline run completed at %date% %time% >> "%LOG_FILE%"
+  
+  REM Keep the window open to see any errors
+```
+
+---
+
+Now your logging is much better organized:
+
+1. **All logs are stored in a `logs` directory**
+2. **Each run creates two log files:**
+   - `logs/emg_pipeline_YYYYMMDD_HHMMSS.log` (detailed pipeline logs)
+   - `logs/pipeline_run_YYYYMMDD_HHMMSS.log` (batch file and overall execution logs)
+3. **Logs are never overwritten** (each run creates new files with timestamps)
+4. **Both console and file output** are maintained
+
+To check your logs:
+1. Look in the `logs` directory
+2. Files are named with timestamps (e.g., `emg_pipeline_20240220_143000.log`)
+3. Most recent runs will have the latest timestamps
+
+This will help you:
+- Track all pipeline runs
+- Debug issues
+- Maintain a history of processing
+- See which files were processed and when
+
+Would you like me to add any additional logging features or make any adjustments?
+
+---
+
+_**User**_
+
+make sure we have robust error handling 
+
+---
+
+_**Assistant**_
+
+I'll enhance the error handling in both the batch file and main Python script to make it more robust. We'll add:
+1. More specific error checks
+2. Better error messages
+3. Error recovery where possible
+4. Detailed error logging
+
+First, let's update `main.py`:
+
+---
+
+```diff
+  from dotenv import load_dotenv
+  import datetime
++ import traceback
+  
+  from emg_pipeline import EMGPipeline
+  from db_connector import DBConnector
+  
++ class PipelineError(Exception):
++     """Custom exception for pipeline-specific errors."""
++     pass
++ 
+  # Load environment variables
+  load_dotenv()
+  
+  # Create logs directory if it doesn't exist
++ try:
+      os.makedirs('logs', exist_ok=True)
++ except PermissionError:
++     print("ERROR: Cannot create logs directory - permission denied")
++     sys.exit(1)
++ except Exception as e:
++     print(f"ERROR: Cannot create logs directory - {str(e)}")
++     sys.exit(1)
+  
+  # Get current timestamp for log filename
+  timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+  log_file = os.path.join('logs', f'emg_pipeline_{timestamp}.log')
+  
+- # Configure logging
++ # Configure logging with more detailed formatting
+  logging.basicConfig(
+      level=logging.INFO,
+```
+
+```diff
+      }
+  
+- def main():
+-     """Main entry point for the EMG data processing pipeline."""
+-     args = parse_args()
+-     
+-     # Check if environment variables are loaded
+-     if not all([os.getenv('DB_HOST'), os.getenv('DB_USER'), os.getenv('DB_PASSWORD'), os.getenv('DB_NAME')]):
+-         logger.warning("Some database environment variables are missing.")
+-         logger.warning("Please make sure you have a .env file with the required configuration.")
+-     
+-     # Database configuration from environment
++ def check_environment():
++     """Check if all required environment variables and paths are set up correctly."""
++     required_vars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME']
++     missing_vars = [var for var in required_vars if not os.getenv(var)]
++     
++     if missing_vars:
++         raise PipelineError(f"Missing required environment variables: {', '.join(missing_vars)}")
++     
++     data_dir = os.getenv('DEFAULT_DATA_DIR')
++     if data_dir and not os.path.exists(data_dir):
++         raise PipelineError(f"Default data directory does not exist: {data_dir}")
++ 
++ def process_single_file(pipeline, file_path, dry_run=False):
++     """Process a single file with error handling."""
++     try:
++         if not os.path.exists(file_path):
++             raise FileNotFoundError(f"File not found: {file_path}")
++             
++         logger.info(f"Processing file: {file_path}")
++         processed_data = pipeline.process_file(file_path)
++         
++         if not processed_data:
++             raise PipelineError(f"Failed to process file: {file_path}")
++             
++         if dry_run:
++             session_id = processed_data['session_data']['session_id']
++             throws_count = len(processed_data['throw_data'])
++             timeseries_rows = len(processed_data['timeseries_data'])
++             logger.info(f"Dry run successful for {session_id}: {throws_count} throws, {timeseries_rows} time points")
++             return True
++         else:
++             if not pipeline.save_to_database(processed_data):
++                 raise PipelineError(f"Failed to save {file_path} to database")
++             logger.info(f"Successfully processed and saved {file_path}")
++             return True
++             
++     except FileNotFoundError as e:
++         logger.error(str(e))
++         return False
++     except PipelineError as e:
++         logger.error(str(e))
++         return False
++     except Exception as e:
++         logger.error(f"Unexpected error processing {file_path}: {str(e)}")
++         logger.error(traceback.format_exc())
++         return False
++ 
++ def main():
++     """Main entry point with enhanced error handling."""
++     try:
++         # Check environment setup
++         check_environment()
++         
++         args = parse_args()
+          db_config = get_db_config()
+          
+-     # Initialize pipeline
++         # Initialize pipeline with error handling
++         try:
+              pipeline = EMGPipeline(
+                  data_dir=args.directory if args.directory else os.getenv('DEFAULT_DATA_DIR', os.getcwd()),
+                  db_config=db_config,
+                  batch_size=args.batch_size
+              )
++         except Exception as e:
++             logger.error(f"Failed to initialize pipeline: {str(e)}")
++             return 1
+          
+          # Test database connection
+```
+
+```diff
+          # Process single file
+          if args.file:
+-         file_path = os.path.abspath(args.file)
+-         logger.info(f"Processing single file: {file_path}")
+-         
+-         if not os.path.exists(file_path):
+-             logger.error(f"File not found: {file_path}")
+-             return 1
+-         
+-         if args.dry_run:
+-             # Just process without saving to database
+-             processed_data = pipeline.process_file(file_path)
+-             if processed_data:
+-                 session_id = processed_data['session_data']['session_id']
+-                 throws_count = len(processed_data['throw_data'])
+-                 timeseries_rows = len(processed_data['timeseries_data'])
+-                 logger.info(f"Dry run successful for {session_id}: {throws_count} throws, {timeseries_rows} time points")
+-                 return 0
+-             else:
+-                 logger.error(f"Failed to process {file_path}")
+-                 return 1
+-         else:
+-             # Process and save to database
+-             success = pipeline.run_single_file(file_path)
++             success = process_single_file(pipeline, os.path.abspath(args.file), args.dry_run)
+              return 0 if success else 1
+          
+          # Process directory
+          if args.directory:
+              dir_path = os.path.abspath(args.directory)
+-         logger.info(f"Processing directory: {dir_path} (recursive={args.recursive})")
+              
+              if not os.path.exists(dir_path) or not os.path.isdir(dir_path):
+                  logger.error(f"Directory not found: {dir_path}")
+                  return 1
+              
+-         # Count files before processing
+-         file_count = 0
+-         if args.recursive:
+-             for root, _, files in os.walk(dir_path):
+-                 file_count += sum(1 for f in files if f.endswith(('.csv', '.txt')))
+-         else:
+-             file_count = sum(1 for f in os.listdir(dir_path) 
+-                           if os.path.isfile(os.path.join(dir_path, f)) and 
+-                           f.endswith(('.csv', '.txt')))
+-         
+-         logger.info(f"Found {file_count} files to process")
+-         
+-         if file_count == 0:
+-             logger.warning(f"No EMG data files found in {dir_path}")
+-             return 0
+-         
+-         if args.dry_run:
+-             logger.info("Dry run mode: files will be processed but not saved to database")
+-         
+-         # Process directory
++             try:
+                  summary = pipeline.process_directory(dir_path, args.recursive)
+                  
+```
+
+```diff
+                  return 0 if summary['success'] else 1
+                  
+-     # If neither --file nor --directory is provided, process all files from yesterday
+-     # in the default data directory (using MMDDYYYY in filename)
++             except Exception as e:
++                 logger.error(f"Error processing directory {dir_path}: {str(e)}")
++                 logger.error(traceback.format_exc())
++                 return 1
++         
++         # Process yesterday's files
++         try:
+              default_data_dir = os.getenv('DEFAULT_DATA_DIR', os.getcwd())
+              yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%m%d%Y')
+-     logger.info(f"No --file or --directory specified. Looking for files from yesterday ({yesterday}) in {default_data_dir}")
++             
++             logger.info(f"Looking for files from yesterday ({yesterday}) in {default_data_dir}")
++             
++             if not os.path.exists(default_data_dir):
++                 raise PipelineError(f"Default data directory not found: {default_data_dir}")
++             
+              files = [
+                  os.path.join(default_data_dir, f)
+                  for f in os.listdir(default_data_dir)
+                  if yesterday in f and (f.endswith('.csv') or f.endswith('.txt'))
+              ]
++             
+              if not files:
+                  logger.info(f"No files found for {yesterday} in {default_data_dir}")
+                  return 0
++                 
+              processed = 0
+              failed = 0
++             
+              for file_path in files:
+-         logger.info(f"Processing file: {file_path}")
+-         try:
+-             processed_data = pipeline.process_file(file_path)
+-             if processed_data:
+-                 if args.dry_run:
+-                     logger.info(f"Dry run: processed {file_path} successfully")
+-                     processed += 1
+-                 else:
+-                     if pipeline.save_to_database(processed_data):
+-                         logger.info(f"Successfully processed and saved {file_path}")
++                 try:
++                     if process_single_file(pipeline, file_path, args.dry_run):
+                          processed += 1
+                      else:
+-                         logger.error(f"Failed to save {file_path} to database")
+-                         failed += 1
+-             else:
+-                 logger.error(f"Failed to process {file_path}")
+                          failed += 1
+                  except Exception as e:
+-             logger.error(f"Error processing {file_path}: {e}")
++                     logger.error(f"Error processing {file_path}: {str(e)}")
++                     logger.error(traceback.format_exc())
+                      failed += 1
++             
+              logger.info(f"Finished processing yesterday's files. Success: {processed}, Failed: {failed}, Total: {len(files)}")
+              return 0 if failed == 0 else 1
++             
++         except Exception as e:
++             logger.error(f"Error processing yesterday's files: {str(e)}")
++             logger.error(traceback.format_exc())
++             return 1
++             
++     except PipelineError as e:
++         logger.error(f"Pipeline Error: {str(e)}")
++         return 1
++     except Exception as e:
++         logger.error(f"Unexpected error: {str(e)}")
++         logger.error(traceback.format_exc())
++         return 1
++     finally:
++         logger.info("Pipeline run completed at %s", datetime.datetime.now())
+  
+  if __name__ == "__main__":
++     try:
+          sys.exit(main())
++     except KeyboardInterrupt:
++         logger.error("Pipeline interrupted by user")
++         sys.exit(1)
++     except Exception as e:
++         logger.error(f"Critical error: {str(e)}")
++         logger.error(traceback.format_exc())
++         sys.exit(1)
+```
+
+---
+
+Now let's update the batch file with better error handling:
+
+---
+
+```diff
+  @echo off
++ setlocal EnableDelayedExpansion
++ 
++ REM Set error codes
++ set ERROR_PYTHON_NOT_FOUND=1
++ set ERROR_VENV_CREATION=2
++ set ERROR_VENV_ACTIVATION=3
++ set ERROR_REQUIREMENTS=4
++ set ERROR_DATA_DIR=5
++ set ERROR_PIPELINE=6
++ set ERROR_ENV_FILE=7
++ 
+  echo Starting EMG Pipeline...
+  
+```
+
+```diff
+  
+  REM Create logs directory if it doesn't exist
+- if not exist "logs" mkdir logs
++ if not exist "logs" (
++     mkdir "logs" 2>nul
++     if errorlevel 1 (
++         echo Error: Failed to create logs directory - permission denied
++         pause
++         exit /b 1
++     )
++ )
+  
+  REM Get current timestamp for log filename
+```
+
+```diff
+  set LOG_FILE=logs\pipeline_run_%TIMESTAMP%.log
+  
+- echo Starting pipeline run at %date% %time% > "%LOG_FILE%"
++ echo =============================================== > "%LOG_FILE%"
++ echo EMG Pipeline Run - %date% %time% >> "%LOG_FILE%"
++ echo =============================================== >> "%LOG_FILE%"
+  
+- REM Check if Python is installed
++ REM Check for .env file
++ if not exist ".env" (
++     echo Error: .env file not found >> "%LOG_FILE%"
++     echo Error: .env file not found. Please create a .env file with required database configuration.
++     echo Required variables: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
++     pause
++     exit /b %ERROR_ENV_FILE%
++ )
++ 
++ REM Check Python version
++ echo Checking Python installation... >> "%LOG_FILE%"
+  python --version > nul 2>&1
+  if errorlevel 1 (
+      echo Error: Python is not installed or not in PATH >> "%LOG_FILE%"
+      echo Error: Python is not installed or not in PATH
++     echo Please install Python and add it to your system PATH
++     pause
++     exit /b %ERROR_PYTHON_NOT_FOUND%
++ )
++ 
++ REM Check Python version is 3.x
++ for /f "tokens=2" %%I in ('python -c "import sys; print(sys.version_info[0])"') do set PYTHON_VERSION=%%I
++ if not "%PYTHON_VERSION%"=="3" (
++     echo Error: Python 3.x is required, found Python %PYTHON_VERSION%.x >> "%LOG_FILE%"
++     echo Error: Python 3.x is required, found Python %PYTHON_VERSION%.x
+      pause
+-     exit /b 1
++     exit /b %ERROR_PYTHON_NOT_FOUND%
+  )
+  
+```
+
+```diff
+      echo Creating virtual environment...
+      python -m venv .venv
++     if errorlevel 1 (
++         echo Error: Failed to create virtual environment >> "%LOG_FILE%"
++         echo Error: Failed to create virtual environment
++         echo Please check Python installation and permissions
++         pause
++         exit /b %ERROR_VENV_CREATION%
++     )
+  )
+  
+- REM Activate virtual environment
++ REM Activate virtual environment with error handling
++ echo Activating virtual environment... >> "%LOG_FILE%"
++ if exist ".venv\Scripts\activate.bat" (
+      call .venv\Scripts\activate
++ ) else (
++     echo Error: Virtual environment activation script not found >> "%LOG_FILE%"
++     echo Error: Virtual environment activation script not found
++     echo Try deleting the .venv directory and running the script again
++     pause
++     exit /b %ERROR_VENV_ACTIVATION%
++ )
++ 
++ REM Verify virtual environment activation
++ python -c "import sys; print(sys.prefix)" | findstr /i ".venv" > nul
+  if errorlevel 1 (
+      echo Error: Failed to activate virtual environment >> "%LOG_FILE%"
+      echo Error: Failed to activate virtual environment
+      pause
+-     exit /b 1
++     exit /b %ERROR_VENV_ACTIVATION%
+  )
+  
+- REM Install/update requirements if needed
++ REM Install/update requirements with error handling
+  echo Checking/updating requirements... >> "%LOG_FILE%"
++ echo This may take a few minutes...
+  pip install -r requirements.txt >> "%LOG_FILE%" 2>&1
+  if errorlevel 1 (
+      echo Error: Failed to install requirements >> "%LOG_FILE%"
+      echo Error: Failed to install requirements
++     echo Check the log file for details: %LOG_FILE%
+      pause
+-     exit /b 1
++     exit /b %ERROR_REQUIREMENTS%
+  )
+  
+- REM Set the data directory
++ REM Set and validate the data directory
+  set DATA_DIR=M:\EMG_DATA_new
++ echo Validating data directory: %DATA_DIR% >> "%LOG_FILE%"
+  
+- REM Check if data directory exists
++ REM Check if data directory exists and is accessible
+  if not exist "%DATA_DIR%" (
+      echo Error: Data directory not found: %DATA_DIR% >> "%LOG_FILE%"
+      echo Error: Data directory not found: %DATA_DIR%
+      pause
+-     exit /b 1
++     exit /b %ERROR_DATA_DIR%
+  )
+  
+- REM Run the pipeline and log output
++ REM Try to create a test file to verify write permissions
++ echo Testing write permissions... >> "%LOG_FILE%"
++ echo test > "%DATA_DIR%\test_permissions.tmp" 2>nul
++ if errorlevel 1 (
++     echo Warning: No write permissions in data directory >> "%LOG_FILE%"
++     echo Warning: No write permissions in data directory
++     echo The pipeline will continue but may fail if writing is required
++ )
++ if exist "%DATA_DIR%\test_permissions.tmp" del "%DATA_DIR%\test_permissions.tmp"
++ 
++ REM Run the pipeline with enhanced error handling
+  echo Running pipeline for directory: %DATA_DIR% >> "%LOG_FILE%"
+  echo Running pipeline for directory: %DATA_DIR%
++ echo This may take several minutes depending on the number of files...
++ 
+  python main.py >> "%LOG_FILE%" 2>&1
+- 
+- REM Check if pipeline ran successfully
+- if errorlevel 1 (
+-     echo Error: Pipeline failed. Check %LOG_FILE% for details >> "%LOG_FILE%"
+-     echo Error: Pipeline failed. Check %LOG_FILE% for details
++ set PIPELINE_EXIT_CODE=%errorlevel%
++ 
++ REM Check pipeline exit code and provide specific error messages
++ if %PIPELINE_EXIT_CODE% neq 0 (
++     echo Error: Pipeline failed with exit code %PIPELINE_EXIT_CODE% >> "%LOG_FILE%"
++     echo Error: Pipeline failed with exit code %PIPELINE_EXIT_CODE%
++     echo Check the log file for details: %LOG_FILE%
++     pause
++     exit /b %ERROR_PIPELINE%
+  ) else (
+      echo Pipeline completed successfully >> "%LOG_FILE%"
+      echo Pipeline completed successfully
+  )
+  
++ echo =============================================== >> "%LOG_FILE%"
+  echo Pipeline run completed at %date% %time% >> "%LOG_FILE%"
++ echo =============================================== >> "%LOG_FILE%"
+  
+  REM Keep the window open to see any errors
+- pause 
++ echo.
++ echo Press any key to close this window...
++ pause > nul 
+```
+
+---
+
+I've enhanced the batch file with comprehensive error handling and improved logging. Here are the key improvements:
+
+1. **Defined Error Codes**: Added specific error codes for different types of failures, making it easier to identify where things went wrong.
+
+2. **Enhanced Logging**:
+   - Added timestamps and better formatting to log files
+   - Created a unique log file for each run using timestamps
+   - Added more detailed status messages
+   - Improved visual separation in logs with separator lines
+
+3. **Environment Validation**:
+   - Added `.env` file check
+   - Added Python version check (ensures Python 3.x)
+   - Added write permission test for the data directory
+
+4. **Better Error Messages**:
+   - More specific error messages for each type of failure
+   - Added helpful suggestions for fixing common issues
+   - Included references to log files for detailed debugging
+
+5. **Improved Virtual Environment Handling**:
+   - Added verification of virtual environment activation
+   - Better error handling for venv creation and activation
+   - Added checks for activation script existence
+
+6. **Data Directory Validation**:
+   - Added write permission testing
+   - Better error messages for directory access issues
+   - Warning if write permissions are missing but continuing execution
+
+7. **Pipeline Execution**:
+   - Added progress messages with time estimates
+   - Better exit code handling
+   - More informative completion messages
+
+8. **User Experience**:
+   - Added more informative progress messages
+   - Improved pause messages
+   - Better visual formatting of console output
+
+These changes make the batch file more robust and user-friendly, with clear error messages and proper logging of all operations. The script now provides better guidance when things go wrong and maintains a detailed log of all operations for debugging purposes.
+
+Let me know if you'd like me to explain any of these changes in more detail or if you'd like to make any adjustments to the implementation.
+
+---
+
+_**User**_
+
+okay i want to test this now 
+
+---
+
+_**Assistant**_
+
 
 
 ---
