@@ -1,0 +1,233 @@
+=============================================== 
+EMG Pipeline Run - Thu 05/01/2025  9:58:51.03 
+=============================================== 
+M: drive is already correctly mapped 
+Using data directory: M:\EMG_DATA_new 
+Using Python: C:\Python312\python.exe 
+Python 3.12.4
+Installing required packages... 
+Could not find platform independent libraries <prefix>
+Requirement already satisfied: numpy==1.26.4 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 1)) (1.26.4)
+Requirement already satisfied: pandas==2.1.4 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 2)) (2.1.4)
+Requirement already satisfied: matplotlib==3.8.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 3)) (3.8.0)
+Requirement already satisfied: python-utils>=3.4.5 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 4)) (3.9.1)
+Requirement already satisfied: xarray in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 5)) (2025.3.1)
+Requirement already satisfied: contourpy in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 6)) (1.3.2)
+Requirement already satisfied: python-dotenv==1.1.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 7)) (1.1.0)
+Requirement already satisfied: tkcalendar==1.6.1 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 8)) (1.6.1)
+Requirement already satisfied: mysql-connector-python in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 9)) (9.3.0)
+Requirement already satisfied: scipy in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 10)) (1.15.2)
+Requirement already satisfied: scikit-learn in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 11)) (1.6.1)
+Requirement already satisfied: pymysql in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 12)) (1.1.1)
+Requirement already satisfied: PyWavelets in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 13)) (1.8.0)
+Requirement already satisfied: babel==2.17.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 14)) (2.17.0)
+Requirement already satisfied: seaborn>=0.12.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 15)) (0.13.2)
+Requirement already satisfied: sqlalchemy>=2.0.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from -r requirements.txt (line 16)) (2.0.40)
+Requirement already satisfied: python-dateutil>=2.8.2 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from pandas==2.1.4->-r requirements.txt (line 2)) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from pandas==2.1.4->-r requirements.txt (line 2)) (2025.2)
+Requirement already satisfied: tzdata>=2022.1 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from pandas==2.1.4->-r requirements.txt (line 2)) (2025.2)
+Requirement already satisfied: cycler>=0.10 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from matplotlib==3.8.0->-r requirements.txt (line 3)) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from matplotlib==3.8.0->-r requirements.txt (line 3)) (4.57.0)
+Requirement already satisfied: kiwisolver>=1.0.1 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from matplotlib==3.8.0->-r requirements.txt (line 3)) (1.4.8)
+Requirement already satisfied: packaging>=20.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from matplotlib==3.8.0->-r requirements.txt (line 3)) (25.0)
+Requirement already satisfied: pillow>=6.2.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from matplotlib==3.8.0->-r requirements.txt (line 3)) (11.2.1)
+Requirement already satisfied: pyparsing>=2.3.1 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from matplotlib==3.8.0->-r requirements.txt (line 3)) (3.2.3)
+Requirement already satisfied: typing_extensions>3.10.0.2 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from python-utils>=3.4.5->-r requirements.txt (line 4)) (4.13.2)
+Requirement already satisfied: joblib>=1.2.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from scikit-learn->-r requirements.txt (line 11)) (1.4.2)
+Requirement already satisfied: threadpoolctl>=3.1.0 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from scikit-learn->-r requirements.txt (line 11)) (3.6.0)
+Requirement already satisfied: greenlet>=1 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from sqlalchemy>=2.0.0->-r requirements.txt (line 16)) (3.2.1)
+Requirement already satisfied: six>=1.5 in c:\users\alex.britton\documents\delsystesting\v2_repo\lib\site-packages (from python-dateutil>=2.8.2->pandas==2.1.4->-r requirements.txt (line 2)) (1.17.0)
+Running EMG pipeline... 
+Could not find platform independent libraries <prefix>
+2025-05-01 09:59:00,807 - __main__ - INFO - Starting pipeline run at 2025-05-01 09:59:00.807068
+2025-05-01 09:59:00,807 - emg_processor - INFO - EMG Processor initialized
+2025-05-01 09:59:00,807 - db_connector - INFO - Database connector initialized
+2025-05-01 09:59:00,807 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-01 09:59:00,807 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-01 09:59:00,807 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-01 09:59:01,212 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-01 09:59:01,292 - emg_pipeline - ERROR - Error adding new columns: (1146, "Table 'theia_pitching_db.emg_throws' doesn't exist")
+2025-05-01 09:59:01,452 - db_connector - ERROR - Error executing query: (1142, "CREATE command denied to user 'readonlyuser'@'172.16.70.71' for table `theia_pitching_db`.`emg_metadata`")
+2025-05-01 09:59:01,611 - db_connector - ERROR - Error executing query: (1142, "CREATE command denied to user 'readonlyuser'@'172.16.70.71' for table `theia_pitching_db`.`emg_sessions`")
+2025-05-01 09:59:01,761 - db_connector - ERROR - Error executing query: (1142, "CREATE command denied to user 'readonlyuser'@'172.16.70.71' for table `theia_pitching_db`.`emg_timeseries`")
+2025-05-01 09:59:02,519 - db_connector - ERROR - Error executing query: (1142, "CREATE command denied to user 'readonlyuser'@'172.16.70.71' for table `theia_pitching_db`.`emg_throws`")
+2025-05-01 09:59:02,598 - db_connector - INFO - Database tables created/verified successfully
+2025-05-01 09:59:02,598 - db_connector - INFO - Database connection closed
+2025-05-01 09:59:02,627 - emg_pipeline - INFO - Found 4 files to process
+Processing EMG files:   0%|          | 0/4 [00:00<?, ?it/s]2025-05-01 09:59:02,708 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-01 09:59:02,708 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-01 09:59:02,708 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-01 09:59:02,708 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-01 09:59:02,776 - emg_processor - INFO - First 7 header lines:
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-01 09:59:02,776 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-01 09:59:03,025 - emg_processor - INFO - Total data lines: 240932
+2025-05-01 09:59:03,465 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-01 09:59:03,465 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-01 09:59:03,465 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-01 09:59:03,465 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-01 09:59:03,465 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-01 09:59:03,465 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-01 09:59:03,465 - emg_processor - INFO - Found 2 muscles in file
+2025-05-01 09:59:03,465 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-01 09:59:03,465 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-01 09:59:03,465 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-01 09:59:03,465 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-01 09:59:03,465 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-01 09:59:03,514 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-01 09:59:03,515 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-01 09:59:03,515 - emg_pipeline - INFO - Processing as pitching session
+2025-05-01 09:59:03,518 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-01 09:59:03,519 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-01 09:59:03,521 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-01 09:59:03,521 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-01 09:59:03,522 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-01 09:59:03,522 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-01 09:59:03,548 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-01 09:59:03,548 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-01 09:59:03,548 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-01 09:59:03,548 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:03,975 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-01 09:59:04,136 - emg_pipeline - ERROR - Error saving to database: (1146, "Table 'theia_pitching_db.emg_sessions' doesn't exist")
+2025-05-01 09:59:04,216 - emg_pipeline - ERROR - Failed to save M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv to database
+Processing EMG files:  25%|##5       | 1/4 [00:01<00:04,  1.51s/it]2025-05-01 09:59:04,216 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-01 09:59:04,216 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-01 09:59:04,216 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-01 09:59:04,219 - emg_processor - INFO - File size: 855148 bytes
+2025-05-01 09:59:04,242 - emg_processor - INFO - First 7 header lines:
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-01 09:59:04,242 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-01 09:59:04,257 - emg_processor - INFO - Total data lines: 13515
+2025-05-01 09:59:04,277 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-01 09:59:04,277 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-01 09:59:04,277 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-01 09:59:04,277 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-01 09:59:04,277 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-01 09:59:04,277 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-01 09:59:04,277 - emg_processor - INFO - Found 2 muscles in file
+2025-05-01 09:59:04,277 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-01 09:59:04,277 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-01 09:59:04,277 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-01 09:59:04,277 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-01 09:59:04,277 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-01 09:59:04,287 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-01 09:59:04,287 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-01 09:59:04,287 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-01 09:59:04,287 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-01 09:59:04,287 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-01 09:59:04,681 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-01 09:59:04,837 - emg_pipeline - ERROR - Error saving to database: (1146, "Table 'theia_pitching_db.emg_sessions' doesn't exist")
+2025-05-01 09:59:04,919 - emg_pipeline - ERROR - Failed to save M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv to database
+Processing EMG files:  50%|#####     | 2/4 [00:02<00:02,  1.03s/it]2025-05-01 09:59:04,919 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-01 09:59:04,919 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-01 09:59:04,919 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-01 09:59:04,919 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-01 09:59:04,979 - emg_processor - INFO - First 7 header lines:
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-01 09:59:04,979 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-01 09:59:05,446 - emg_processor - INFO - Total data lines: 539226
+2025-05-01 09:59:06,425 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-01 09:59:06,425 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-01 09:59:06,425 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-01 09:59:06,425 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-01 09:59:06,426 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-01 09:59:06,426 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-01 09:59:06,426 - emg_processor - INFO - Found 2 muscles in file
+2025-05-01 09:59:06,426 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-01 09:59:06,426 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-01 09:59:06,426 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-01 09:59:06,426 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-01 09:59:06,426 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-01 09:59:06,509 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-01 09:59:06,509 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-01 09:59:06,509 - emg_pipeline - INFO - Processing as pitching session
+2025-05-01 09:59:06,509 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-01 09:59:06,515 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-01 09:59:06,519 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-01 09:59:06,519 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-01 09:59:06,519 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-01 09:59:06,519 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-01 09:59:06,579 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-01 09:59:06,579 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-01 09:59:06,579 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-01 09:59:06,579 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+C:\Users\alex.britton\Documents\DelsysTesting\V2_REPO\Lib\site-packages\scipy\signal\_spectral_py.py:790: UserWarning: nperseg = 256 is greater than input length  = 245, using nperseg = 245
+  freqs, _, Pxy = _spectral_helper(x, y, fs, window, nperseg, noverlap,
+2025-05-01 09:59:06,706 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:06,707 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-01 09:59:07,108 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-01 09:59:07,268 - emg_pipeline - ERROR - Error saving to database: (1146, "Table 'theia_pitching_db.emg_sessions' doesn't exist")
+2025-05-01 09:59:07,346 - emg_pipeline - ERROR - Failed to save M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv to database
+Processing EMG files:  75%|#######5  | 3/4 [00:04<00:01,  1.67s/it]2025-05-01 09:59:07,346 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-01 09:59:07,346 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-01 09:59:07,351 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-01 09:59:07,355 - emg_processor - INFO - File size: 865102 bytes
+2025-05-01 09:59:07,396 - emg_processor - INFO - First 7 header lines:
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-01 09:59:07,396 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-01 09:59:07,405 - emg_processor - INFO - Total data lines: 14269
+2025-05-01 09:59:07,434 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-01 09:59:07,434 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-01 09:59:07,434 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-01 09:59:07,434 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-01 09:59:07,434 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-01 09:59:07,434 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-01 09:59:07,434 - emg_processor - INFO - Found 2 muscles in file
+2025-05-01 09:59:07,434 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-01 09:59:07,434 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-01 09:59:07,434 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-01 09:59:07,434 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-01 09:59:07,434 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-01 09:59:07,435 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-01 09:59:07,435 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-01 09:59:07,435 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-01 09:59:07,435 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-01 09:59:07,435 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-01 09:59:07,836 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-01 09:59:07,998 - emg_pipeline - ERROR - Error saving to database: (1146, "Table 'theia_pitching_db.emg_sessions' doesn't exist")
+2025-05-01 09:59:08,077 - emg_pipeline - ERROR - Failed to save M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv to database
+Processing EMG files: 100%|##########| 4/4 [00:05<00:00,  1.30s/it]Processing EMG files: 100%|##########| 4/4 [00:05<00:00,  1.34s/it]
+2025-05-01 09:59:08,077 - emg_pipeline - INFO - Directory processing complete. Successfully processed 0 of 4 files.
+2025-05-01 09:59:08,077 - __main__ - INFO - Directory processing complete.
+2025-05-01 09:59:08,077 - __main__ - INFO - Successfully processed 0 of 4 files.
+2025-05-01 09:59:08,077 - __main__ - WARNING - Failed to process 4 files.
+2025-05-01 09:59:08,077 - __main__ - INFO - Pipeline run completed at 2025-05-01 09:59:08.077597
+Pipeline completed successfully 
+=============================================== 
+Pipeline run completed at Thu 05/01/2025  9:59:08.18 
+=============================================== 

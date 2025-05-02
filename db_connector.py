@@ -78,10 +78,14 @@ class DBConnector:
     def disconnect(self):
         """Close the database connection if it exists."""
         if self.conn:
-            self.conn.close()
-            self.conn = None
-            logger.info("Database connection closed")
-    
+            try:
+                self.conn.close()
+            except Exception as e:
+                logger.warning(f"Error closing connection: {e}")
+            finally:
+                self.conn = None
+                logger.info("Database connection closed")
+
     def execute_query(self, query, params=None, fetch=False):
         """
         Execute a SQL query on the database.
@@ -123,13 +127,23 @@ class DBConnector:
             self.conn.rollback()
             return None
     
+    # Modifications needed for db_connector.py
+
     def create_tables(self):
         """
-        Create the necessary tables for the EMG pipeline with updated structure
+        Create the necessary tables for the EMG pipeline with complete structure.
         """
         try:
+            # Connect to the database
+            conn = self.connect()
+            if not conn:
+                logger.error("Failed to connect to database")
+                return False
+                
+            cursor = conn.cursor()
+            
             # Create EMG Metadata table for basic session information
-            self.execute_query("""
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS emg_metadata (
                 emg_session_id INT AUTO_INCREMENT PRIMARY KEY,
                 filename VARCHAR(100) UNIQUE,
@@ -152,70 +166,54 @@ class DBConnector:
             """)
             
             # Create EMG Sessions table for athlete-specific data and MVIC values
-            self.execute_query("""
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS emg_sessions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                emg_session_id INT,
+                numeric_id INT AUTO_INCREMENT PRIMARY KEY,
+                emg_session_id VARCHAR(100),
+                filename VARCHAR(100),
+                date_recorded DATE,
+                collection_date DATE,
+                start_time TIME,
+                traq_id VARCHAR(50),
                 athlete_name VARCHAR(100),
-                
-                # MVIC reference values
+                session_type VARCHAR(50),
+                muscle_count INT,
+                muscle1_name VARCHAR(50),
+                muscle2_name VARCHAR(50),
+                muscle1_fs FLOAT,
+                muscle2_fs FLOAT,
+                file_path VARCHAR(255),
+                processed_date DATETIME,
+                is_mvic BOOLEAN DEFAULT FALSE,
                 muscle1_mvic_peak FLOAT,
                 muscle1_mvic_rms FLOAT,
                 muscle2_mvic_peak FLOAT,
                 muscle2_mvic_rms FLOAT,
-                
-                # %MVIC calculations
-                muscle1_pct_mvic FLOAT,
-                muscle2_pct_mvic FLOAT,
-                
-                # Related MVIC session (if this is a pitching session)
                 related_mvic_id INT,
                 
                 INDEX idx_athlete_name (athlete_name),
-                INDEX idx_session_id (emg_session_id),
-                FOREIGN KEY (emg_session_id) REFERENCES emg_metadata(emg_session_id) ON DELETE CASCADE
+                INDEX idx_date_recorded (date_recorded),
+                INDEX idx_filename (filename)
             )
             """)
             
-            # Create raw time series data table with partitioning
-            self.execute_query("""
-            CREATE TABLE IF NOT EXISTS emg_timeseries (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                emg_session_id INT,
-                time_point FLOAT,
-                muscle1_emg FLOAT,
-                muscle2_emg FLOAT,
-                
-                INDEX idx_session_id (emg_session_id),
-                FOREIGN KEY (emg_session_id) REFERENCES emg_metadata(emg_session_id) ON DELETE CASCADE
-            )
-            PARTITION BY RANGE (emg_session_id) (
-                PARTITION p0 VALUES LESS THAN (1000),
-                PARTITION p1 VALUES LESS THAN (2000),
-                PARTITION p2 VALUES LESS THAN (3000),
-                PARTITION p3 VALUES LESS THAN (4000),
-                PARTITION p4 VALUES LESS THAN MAXVALUE
-            )
-            """)
-            
-            # Create throw details table with all muscle-specific metrics
-            self.execute_query("""
+            # Create EMG throws table
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS emg_throws (
                 throw_id INT AUTO_INCREMENT PRIMARY KEY,
-                emg_session_id INT,
+                session_numeric_id INT,
+                emg_session_id VARCHAR(100),
                 trial_number INT,
                 start_time FLOAT,
                 end_time FLOAT,
                 duration FLOAT,
                 
-                # Timestamp and velocity matching columns
                 relative_start_time FLOAT,
                 absolute_timestamp DATETIME,
                 session_trial VARCHAR(100),
                 pitch_speed_mph FLOAT,
                 velocity_match_quality VARCHAR(20),
                 
-                # Muscle1 metrics
                 muscle1_median_freq FLOAT,
                 muscle1_mean_freq FLOAT,
                 muscle1_bandwidth FLOAT,
@@ -228,7 +226,6 @@ class DBConnector:
                 muscle1_throw_integral_pct_mvic FLOAT,
                 muscle1_work_rate FLOAT,
                 
-                # Muscle2 metrics
                 muscle2_median_freq FLOAT,
                 muscle2_mean_freq FLOAT,
                 muscle2_bandwidth FLOAT,
@@ -241,11 +238,9 @@ class DBConnector:
                 muscle2_throw_integral_pct_mvic FLOAT,
                 muscle2_work_rate FLOAT,
                 
-                # Spectral entropy metrics
                 muscle1_spectral_entropy FLOAT,
                 muscle2_spectral_entropy FLOAT,
                 
-                # Wavelet energy metrics
                 muscle1_wavelet_energy_low FLOAT,
                 muscle1_wavelet_energy_mid FLOAT,
                 muscle1_wavelet_energy_high FLOAT,
@@ -253,23 +248,42 @@ class DBConnector:
                 muscle2_wavelet_energy_mid FLOAT,
                 muscle2_wavelet_energy_high FLOAT,
                 
-                # Coactivation metrics
                 coactivation_index FLOAT,
                 coactivation_correlation FLOAT,
                 coactivation_temporal_overlap FLOAT,
                 coactivation_waveform_similarity FLOAT,
                 
-                INDEX idx_session_id (emg_session_id),
-                FOREIGN KEY (emg_session_id) REFERENCES emg_metadata(emg_session_id) ON DELETE CASCADE
+                INDEX idx_session_id (session_numeric_id),
+                INDEX idx_emg_session_id (emg_session_id)
+            )
+            """)
+            
+            # Create EMG timeseries table
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS emg_timeseries (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                session_numeric_id INT,
+                emg_session_id VARCHAR(100),
+                time_point FLOAT,
+                muscle1_emg FLOAT,
+                muscle2_emg FLOAT,
+                
+                INDEX idx_session_id (session_numeric_id),
+                INDEX idx_emg_session_id (emg_session_id)
             )
             """)
             
             logger.info("Database tables created/verified successfully")
             return True
-            
+                
         except Exception as e:
             logger.error(f"Error creating database tables: {e}")
+            if conn:
+                conn.rollback()
             return False
+        finally:
+            if conn:
+                conn.close()
             
     def test_connection(self):
         """

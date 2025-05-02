@@ -1,0 +1,23 @@
+=============================================== 
+EMG Pipeline Run - Tue 04/29/2025 16:25:32.69 
+=============================================== 
+Searching for Python installation... 
+Python not in PATH, searching common locations... 
+Found Python at C:\Python312 
+Temporarily adding Python to PATH 
+Using Python: python 
+Python 3.12.4
+Python version line: PYTHON_VERSION=3 
+Installing required packages with --user flag... 
+Could not find platform independent libraries <prefix>
+C:\Python312\python.exe: No module named pip
+Warning: Failed to install packages with --user flag 
+Validating data directory: M:\EMG_DATA_new 
+Warning: Data directory not found: M:\EMG_DATA_new 
+Running pipeline... 
+Could not find platform independent libraries <prefix>
+Traceback (most recent call last):
+  File "C:\Users\alex.britton\Documents\DelsysTesting\V2_REPO\main.py", line 12, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+Error: Pipeline failed with exit code 1 

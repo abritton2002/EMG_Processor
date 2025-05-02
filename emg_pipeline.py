@@ -49,64 +49,9 @@ class EMGPipeline:
         logger.info(f"Using batch size of {self.batch_size} for DB operations")
     
     def setup_database(self):
-        """
-        Set up database tables.
-        
-        Returns:
-        --------
-        bool
-            True if successful, False otherwise
-        """
-        conn = self.db.connect()
-        if not conn:
-            logger.error("Failed to connect to database")
-            return False
-            
-        try:
-            cursor = conn.cursor()
-            
-            # Create or update EMG throws table with new columns for spectral entropy, wavelet, and coactivation metrics
-            try:
-                # Check if the new columns exist already
-                cursor.execute("SHOW COLUMNS FROM emg_throws LIKE 'muscle1_spectral_entropy'")
-                column_exists = cursor.fetchone()
-                
-                # Add new columns if they don't exist
-                if not column_exists:
-                    logger.info("Adding new metric columns to emg_throws table")
-                    
-                    # Add spectral entropy columns
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_spectral_entropy FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_spectral_entropy FLOAT")
-                    
-                    # Add wavelet energy columns
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_wavelet_energy_low FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_wavelet_energy_mid FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle1_wavelet_energy_high FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_wavelet_energy_low FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_wavelet_energy_mid FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN muscle2_wavelet_energy_high FLOAT")
-                    
-                    # Add coactivation columns
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_index FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_correlation FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_temporal_overlap FLOAT")
-                    cursor.execute("ALTER TABLE emg_throws ADD COLUMN coactivation_waveform_similarity FLOAT")
-                    
-                    conn.commit()
-                    logger.info("Successfully added new metric columns")
-            except Exception as e:
-                logger.error(f"Error adding new columns: {e}")
-                conn.rollback()
-                
-            # Continue with regular table creation
-            return self.db.create_tables()
-                
-        except Exception as e:
-            logger.error(f"Error setting up database: {e}")
-            return False
-        finally:
-            self.db.disconnect()
+        """Set up database tables."""
+        # Simply use the db_connector's create_tables method
+        return self.db.create_tables()
     
     def process_file(self, file_path):
         """
@@ -882,9 +827,7 @@ class EMGPipeline:
                 conn.close()
 
     def save_to_database(self, processed_data):
-        """
-        Save processed data to the database.
-        """
+        """Save processed data to the database with metadata."""
         if not processed_data:
             logger.error("No data to save to database")
             return False
@@ -910,7 +853,7 @@ class EMGPipeline:
             
             # Check if session already exists
             cursor.execute(
-                "SELECT emg_session_id FROM emg_sessions WHERE filename = %s",
+                "SELECT numeric_id FROM emg_sessions WHERE filename = %s",
                 (filename,)
             )
             
@@ -920,55 +863,69 @@ class EMGPipeline:
                 logger.info(f"Session {filename} already exists. Removing old data...")
                 
                 # Delete existing data
-                cursor.execute("DELETE FROM emg_throws WHERE emg_session_id = %s", (emg_session_id,))
-                cursor.execute("DELETE FROM emg_timeseries WHERE emg_session_id = %s", (emg_session_id,))
-                cursor.execute("DELETE FROM emg_sessions WHERE emg_session_id = %s", (emg_session_id,))
+                cursor.execute("DELETE FROM emg_throws WHERE session_numeric_id = %s", (emg_session_id,))
+                cursor.execute("DELETE FROM emg_timeseries WHERE session_numeric_id = %s", (emg_session_id,))
+                cursor.execute("DELETE FROM emg_sessions WHERE numeric_id = %s", (emg_session_id,))
+                cursor.execute("DELETE FROM emg_metadata WHERE filename = %s", (filename,))
             
-            # Parse date_recorded if present
-            date_recorded = None
-            if session_data.get('date_recorded'):
-                try:
-                    # Assuming date_recorded is already in a valid format or is a date object
-                    date_recorded = session_data['date_recorded']
-                except Exception as e:
-                    logger.warning(f"Could not parse date_recorded {session_data.get('date_recorded')}: {e}")
-                    date_recorded = None
-            
-            # Parse collection_date and start_time
+            # Parse date fields
+            date_recorded = session_data.get('date_recorded')
             collection_date = None
             start_time = None
             if session_data.get('collection_date'):
                 try:
-                    # Parse the collection date string into a datetime object
                     collection_datetime = datetime.strptime(session_data['collection_date'], '%m/%d/%Y %I:%M:%S %p')
-                    # Extract just the date part for the collection_date column
                     collection_date = collection_datetime.date()
-                    # Extract just the time part for the start_time column
                     start_time = collection_datetime.time()
                 except Exception as e:
                     logger.warning(f"Could not parse collection date {session_data.get('collection_date')}: {e}")
-                    collection_date = None
-                    start_time = None
+                    
+            # First, insert into metadata table
+            cursor.execute("""
+            INSERT INTO emg_metadata (
+                filename, date_recorded, collection_date, start_time,
+                traq_id, session_type, muscle_count, muscle1_name, muscle2_name,
+                muscle1_fs, muscle2_fs, file_path, processed_date, is_mvic
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                filename,
+                date_recorded,
+                collection_date,
+                start_time,
+                session_data['traq_id'],
+                session_data['session_type'],
+                session_data.get('muscle_count', 2),
+                session_data.get('muscle1_name'),
+                session_data.get('muscle2_name'),
+                session_data.get('muscle1_fs'),
+                session_data.get('muscle2_fs'),
+                session_data['file_path'],
+                session_data['processed_date'],
+                session_data.get('is_mvic', False)
+            ))
+            
+            # Get the auto-generated metadata ID
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            metadata_id = cursor.fetchone()[0]
             
             # Check if this is an MVIC session
             is_mvic = session_data.get('is_mvic', False)
             
+            # Insert into sessions table with appropriate MVIC values
             if is_mvic:
-                # For MVIC sessions, include MVIC reference values
                 cursor.execute("""
                 INSERT INTO emg_sessions (
-                    filename, date_recorded, collection_date, start_time,
-                    traq_id, athlete_name, session_type,
-                    muscle_count, muscle1_name, muscle2_name,
-                    muscle1_fs, muscle2_fs, file_path, processed_date,
-                    is_mvic, muscle1_mvic_peak, muscle1_mvic_rms, 
-                    muscle2_mvic_peak, muscle2_mvic_rms
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    emg_session_id, filename, date_recorded, collection_date, start_time,
+                    traq_id, athlete_name, session_type, muscle_count, muscle1_name, muscle2_name,
+                    muscle1_fs, muscle2_fs, file_path, processed_date, is_mvic,
+                    muscle1_mvic_peak, muscle1_mvic_rms, muscle2_mvic_peak, muscle2_mvic_rms
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
+                    str(metadata_id),  # Use metadata ID as the emg_session_id
                     filename,
                     date_recorded,
-                    collection_date,  # Now just the date part
-                    start_time,       # Now just the time part
+                    collection_date,
+                    start_time,
                     session_data['traq_id'],
                     session_data['athlete_name'],
                     session_data['session_type'],
@@ -986,20 +943,18 @@ class EMGPipeline:
                     session_data.get('muscle2_mvic_rms')
                 ))
             else:
-                # For pitching sessions, use standard fields
                 cursor.execute("""
                 INSERT INTO emg_sessions (
-                    filename, date_recorded, collection_date, start_time,
-                    traq_id, athlete_name, session_type,
-                    muscle_count, muscle1_name, muscle2_name,
-                    muscle1_fs, muscle2_fs, file_path, processed_date,
-                    is_mvic
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    emg_session_id, filename, date_recorded, collection_date, start_time,
+                    traq_id, athlete_name, session_type, muscle_count, muscle1_name, muscle2_name,
+                    muscle1_fs, muscle2_fs, file_path, processed_date, is_mvic
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
+                    str(metadata_id),  # Use metadata ID as the emg_session_id
                     filename,
                     date_recorded,
-                    collection_date,  # Now just the date part
-                    start_time,       # Now just the time part
+                    collection_date,
+                    start_time,
                     session_data['traq_id'],
                     session_data['athlete_name'],
                     session_data['session_type'],
@@ -1013,20 +968,21 @@ class EMGPipeline:
                     False  # is_mvic
                 ))
             
-            # Get the auto-generated emg_session_id
+            # Get the auto-generated session numeric ID
             cursor.execute("SELECT LAST_INSERT_ID()")
-            emg_session_id = cursor.fetchone()[0]
+            session_numeric_id = cursor.fetchone()[0]
             
             # For pitching sessions, look for a matching MVIC session
             if not is_mvic:
                 # Find matching MVIC session
                 cursor.execute("""
-                SELECT emg_session_id, muscle1_mvic_peak, muscle1_mvic_rms, muscle2_mvic_peak, muscle2_mvic_rms 
-                FROM emg_sessions 
-                WHERE athlete_name = %s 
-                AND date_recorded = %s 
-                AND is_mvic = TRUE
-                ORDER BY processed_date DESC
+                SELECT es.numeric_id, es.muscle1_mvic_peak, es.muscle1_mvic_rms, es.muscle2_mvic_peak, es.muscle2_mvic_rms 
+                FROM emg_sessions es
+                JOIN emg_metadata em ON es.emg_session_id = em.emg_session_id
+                WHERE es.athlete_name = %s 
+                AND em.date_recorded = %s 
+                AND es.is_mvic = TRUE
+                ORDER BY em.processed_date DESC
                 LIMIT 1
                 """, (session_data['athlete_name'], date_recorded))
                 
@@ -1051,14 +1007,14 @@ class EMGPipeline:
                         muscle1_mvic_rms = %s,
                         muscle2_mvic_peak = %s,
                         muscle2_mvic_rms = %s
-                    WHERE emg_session_id = %s
+                    WHERE numeric_id = %s
                     """, (
                         related_mvic_id,
                         muscle1_mvic_peak,
                         muscle1_mvic_rms,
                         muscle2_mvic_peak,
                         muscle2_mvic_rms,
-                        emg_session_id
+                        session_numeric_id
                     ))
                     
                     # Calculate %MVIC for throws if we have throw data
@@ -1081,8 +1037,8 @@ class EMGPipeline:
                                 if 'muscle2_throw_integral' in throw:
                                     throw['muscle2_throw_integral_pct_mvic'] = (throw['muscle2_throw_integral'] / muscle2_mvic_rms) * 100
                             
-                            # Log some sample values for verification
-                            if throw['trial_number'] == 1:  # Log first throw as example
+                            # Log sample values for verification
+                            if throw['trial_number'] == 1:
                                 logger.info(f"Sample %MVIC values for first throw:")
                                 logger.info(f"Muscle1 Peak: {throw.get('muscle1_peak_amplitude_pct_mvic', 'N/A')}%")
                                 logger.info(f"Muscle1 RMS: {throw.get('muscle1_rms_value_pct_mvic', 'N/A')}%")
@@ -1091,73 +1047,49 @@ class EMGPipeline:
                 else:
                     logger.warning(f"No matching MVIC session found for {session_data['athlete_name']} on {date_recorded}")
             
-            # For pitching sessions, insert throw data
+            # Insert throw data for pitching sessions
             if not is_mvic and throw_data:
-                # Get all column names from the first throw, excluding emg_session_id since it's handled separately
-                throw_columns = ['trial_number', 'start_time', 'end_time', 'duration']
-                
-                # Add all metric columns
-                for key in throw_data[0].keys():
-                    if key not in ['emg_session_id', 'trial_number', 'start_time', 'end_time', 'duration']:
-                        throw_columns.append(key)
-                
-                # Add normalized columns for MVIC percentages
-                normalized_columns = [
-                    'muscle1_peak_amplitude_pct_mvic',
-                    'muscle1_rms_value_pct_mvic',
-                    'muscle1_throw_integral_pct_mvic',
-                    'muscle2_peak_amplitude_pct_mvic',
-                    'muscle2_rms_value_pct_mvic',
-                    'muscle2_throw_integral_pct_mvic'
-                ]
-                
-                for col in normalized_columns:
-                    if col not in throw_columns:
-                        throw_columns.append(col)
-                
-                # Create placeholders for all columns (including emg_session_id)
-                placeholders = ["%s"] * (len(throw_columns) + 1)  # +1 for emg_session_id
-                
-                # Construct SQL query with emg_session_id first
-                insert_query = f"""
-                INSERT INTO emg_throws (
-                    emg_session_id, {', '.join(throw_columns)}
-                ) VALUES ({', '.join(placeholders)})
-                """
-                
-                # Prepare values for each throw
-                throw_values = []
+                # Process throw data...
                 for throw in throw_data:
-                    # Start with emg_session_id
-                    values = [emg_session_id]
+                    column_names = []
+                    placeholders = []
+                    values = [session_numeric_id, str(metadata_id)]  # Add both IDs
                     
-                    # Add values in the same order as columns
-                    for col in throw_columns:
-                        value = throw.get(col)
-                        # Replace NaN values with None (NULL in MySQL)
-                        if pd.isna(value):
-                            value = None
-                        values.append(value)
+                    # Base columns
+                    column_names.extend(['session_numeric_id', 'emg_session_id'])
+                    placeholders.extend(['%s', '%s'])
                     
-                    throw_values.append(tuple(values))
-                
-                # Execute insert
-                cursor.executemany(insert_query, throw_values)
+                    # Add all other throw data
+                    for key, value in throw.items():
+                        if key != 'emg_session_id':  # Skip this as we're using metadata_id
+                            column_names.append(key)
+                            placeholders.append('%s')
+                            values.append(value if not pd.isna(value) else None)
+                    
+                    # Construct query
+                    query = f"""
+                    INSERT INTO emg_throws (
+                        {', '.join(column_names)}
+                    ) VALUES ({', '.join(placeholders)})
+                    """
+                    
+                    # Execute insert
+                    cursor.execute(query, values)
             
-            # Insert time series data in batches if this is a pitching session
+            # Insert time series data for pitching sessions
             if not is_mvic and timeseries_data is not None and not timeseries_data.empty:
-                # Replace NaN values with None in the DataFrame
+                # Process time series data in batches...
                 timeseries_data = timeseries_data.replace({np.nan: None})
                 
-                # Convert DataFrame to list of tuples for executemany
                 total_rows = len(timeseries_data)
                 for start_idx in range(0, total_rows, self.batch_size):
                     end_idx = min(start_idx + self.batch_size, total_rows)
                     batch = timeseries_data.iloc[start_idx:end_idx]
                     
-                    # Create list of value tuples
+                    # Create list of value tuples with both IDs
                     timeseries_values = list(zip(
-                        [emg_session_id] * len(batch),  # Use emg_session_id
+                        [session_numeric_id] * len(batch),  # numeric_id
+                        [str(metadata_id)] * len(batch),    # emg_session_id
                         batch['time_point'],
                         batch['muscle1_emg'],
                         batch['muscle2_emg']
@@ -1165,8 +1097,9 @@ class EMGPipeline:
                     
                     # Insert batch
                     cursor.executemany("""
-                    INSERT INTO emg_timeseries (emg_session_id, time_point, muscle1_emg, muscle2_emg)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO emg_timeseries (
+                        session_numeric_id, emg_session_id, time_point, muscle1_emg, muscle2_emg
+                    ) VALUES (%s, %s, %s, %s, %s)
                     """, timeseries_values)
             
             # Commit transaction
@@ -1184,21 +1117,7 @@ class EMGPipeline:
                 conn.close()
             
     def process_directory(self, directory=None, recursive=False):
-        """
-        Process all EMG data files in a directory.
-        
-        Parameters:
-        -----------
-        directory : str, optional
-            Directory to process. If None, uses self.data_dir
-        recursive : bool, optional
-            Whether to recursively process files in subdirectories
-            
-        Returns:
-        --------
-        dict
-            Summary of processed files
-        """
+        """Process all EMG data files in a directory."""
         directory = directory or self.data_dir
         logger.info(f"Processing directory: {directory} (recursive={recursive})")
         
@@ -1223,7 +1142,22 @@ class EMGPipeline:
             logger.warning(f"No EMG data files found in {directory}")
             return {'success': True, 'processed': 0, 'failed': 0, 'total': 0}
         
+        # Sort files so that MVIC files are processed first
+        def file_sort_key(file_path):
+            # Extract the base filename
+            file_name = os.path.basename(file_path)
+            # Check if it's an MVIC file
+            is_mvic = 'mvic' in file_name.lower()
+            # If it's an MVIC file, sort it first (0), otherwise sort it later (1)
+            sort_order = 0 if is_mvic else 1
+            # Return a tuple with sort order and filename for stable sorting
+            return (sort_order, file_name)
+        
+        # Sort the files
+        files_to_process.sort(key=file_sort_key)
+        
         logger.info(f"Found {len(files_to_process)} files to process")
+        logger.info(f"Files will be processed in this order: {[os.path.basename(f) for f in files_to_process]}")
         
         # Process each file
         processed_count = 0
