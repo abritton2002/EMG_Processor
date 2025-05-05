@@ -37,15 +37,34 @@ except Exception as e:
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 log_file = os.path.join('logs', f'emg_pipeline_{timestamp}.log')
 
-# Configure logging with more detailed formatting
+# Configure logging with immediate output to console
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(),
+        # StreamHandler with explicit flush after each log
+        logging.StreamHandler(stream=sys.stdout),
         logging.FileHandler(log_file)
     ]
 )
+
+# Force stdout to flush immediately
+sys.stdout.reconfigure(line_buffering=True) if hasattr(sys.stdout, 'reconfigure') else None
+
+# Set unbuffered output for Python
+os.environ['PYTHONUNBUFFERED'] = '1'
+
+# Create a custom handler that flushes after each emission
+class FlushingStreamHandler(logging.StreamHandler):
+    def emit(self, record):
+        super().emit(record)
+        self.flush()
+
+# Replace the default StreamHandler with our flushing version
+for handler in logging.root.handlers:
+    if isinstance(handler, logging.StreamHandler) and not isinstance(handler, logging.FileHandler):
+        logging.root.removeHandler(handler)
+        logging.root.addHandler(FlushingStreamHandler(sys.stdout))
 
 logger = logging.getLogger(__name__)
 logger.info(f"Starting pipeline run at {datetime.datetime.now()}")

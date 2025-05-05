@@ -1681,3 +1681,1624 @@ pymysql.err.Error: Already closed
 2025-05-01 11:27:03,268 - __main__ - INFO - Directory processing complete.
 2025-05-01 11:27:03,268 - __main__ - INFO - Successfully processed 4 of 4 files.
 2025-05-01 11:27:03,268 - __main__ - INFO - Pipeline run completed at 2025-05-01 11:27:03.268537
+2025-05-05 09:31:39,561 - __main__ - INFO - Starting pipeline run at 2025-05-05 09:31:39.561239
+2025-05-05 09:31:39,564 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 09:31:39,564 - db_connector - INFO - Database connector initialized
+2025-05-05 09:31:39,564 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 09:31:39,565 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 09:31:39,565 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 09:31:39,964 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 09:31:40,572 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 09:31:40,588 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 09:31:40,589 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 09:31:40,609 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 09:31:40,609 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 09:31:40,609 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 09:31:40,611 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 09:31:40,729 - emg_processor - INFO - First 7 header lines:
+2025-05-05 09:31:40,729 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 09:31:40,729 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 09:31:40,730 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 09:31:40,730 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 09:31:40,730 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 09:31:40,730 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 09:31:40,730 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 09:31:40,757 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 09:31:40,780 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 09:31:40,781 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 09:31:40,781 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 09:31:40,781 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 09:31:40,781 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 09:31:40,781 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 09:31:40,781 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 09:31:40,781 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 09:31:40,781 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 09:31:40,781 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 09:31:40,781 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 09:31:40,781 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 09:31:40,786 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 09:31:40,786 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 09:31:40,787 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 09:31:40,787 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 09:31:40,787 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 09:31:41,181 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 09:31:41,341 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 09:31:42,063 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 09:31:42,063 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 09:31:42,063 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 09:31:42,063 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 09:31:42,065 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 09:31:42,364 - emg_processor - INFO - First 7 header lines:
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 09:31:42,364 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 09:31:42,387 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 09:31:42,452 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 09:31:42,452 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 09:31:42,452 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 09:31:42,453 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 09:31:42,453 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 09:31:42,453 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 09:31:42,453 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 09:31:42,453 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 09:31:42,453 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 09:31:42,454 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 09:31:42,454 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 09:31:42,454 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 09:31:42,463 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 09:31:42,464 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 09:31:42,464 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 09:31:42,464 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 09:31:42,464 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 09:31:42,874 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 09:31:43,032 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 09:31:44,047 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 09:31:44,048 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 09:31:44,048 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 09:31:44,048 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 09:31:44,050 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 09:31:44,125 - emg_processor - INFO - First 7 header lines:
+2025-05-05 09:31:44,125 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 09:31:44,125 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 09:31:44,125 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 09:31:44,125 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 09:31:44,126 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 09:31:44,126 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 09:31:44,126 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 09:31:44,615 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 09:31:45,335 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 09:31:45,335 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 09:31:45,335 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 09:31:45,335 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 09:31:45,336 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 09:31:45,338 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 09:31:45,338 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 09:31:45,338 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 09:31:45,338 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 09:31:45,338 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 09:31:45,338 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 09:31:45,341 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 09:31:45,392 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 09:31:45,393 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 09:31:45,393 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 09:31:45,396 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 09:31:45,400 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 09:31:45,405 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 09:31:45,405 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 09:31:45,406 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 09:31:45,406 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 09:31:45,441 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 09:31:45,442 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 09:31:45,442 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 09:31:45,442 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 09:31:45,465 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,466 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:31:45,869 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 09:31:46,028 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 09:31:53,121 - emg_pipeline - INFO - Found matching MVIC session: 9
+2025-05-05 09:31:53,202 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 09:31:53,202 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 09:31:53,203 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 09:31:53,203 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 09:31:53,203 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 09:31:53,204 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 09:32:26,358 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 09:32:26,363 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 09:32:26,364 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 09:32:26,364 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 09:32:26,371 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 09:32:26,417 - emg_processor - INFO - First 7 header lines:
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 09:32:26,417 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 09:32:26,866 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 09:32:27,850 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 09:32:27,850 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 09:32:27,850 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 09:32:27,850 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 09:32:27,852 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 09:32:27,854 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 09:32:27,854 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 09:32:27,854 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 09:32:27,854 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 09:32:27,854 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 09:32:27,854 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 09:32:27,857 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 09:32:27,934 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 09:32:27,934 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 09:32:27,935 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 09:32:27,937 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 09:32:27,940 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 09:32:27,945 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 09:32:27,945 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 09:32:27,946 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 09:32:27,946 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 09:32:28,012 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 09:32:28,013 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 09:32:28,013 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 09:32:28,013 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 09:32:28,061 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,061 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,061 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,061 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,061 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,062 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,062 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,062 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,062 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 09:32:28,465 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 09:32:28,925 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 09:32:41,721 - emg_pipeline - INFO - Found matching MVIC session: 10
+2025-05-05 09:32:41,801 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 09:32:41,801 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 09:32:41,802 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 09:32:41,802 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 09:32:41,802 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 09:32:41,802 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 09:33:54,237 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 09:33:54,244 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 09:33:54,245 - __main__ - INFO - Directory processing complete.
+2025-05-05 09:33:54,245 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 09:33:54,245 - __main__ - INFO - Pipeline run completed at 2025-05-05 09:33:54.245878
+2025-05-05 10:04:35,226 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:04:35.226097
+2025-05-05 10:04:35,229 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:04:35,229 - db_connector - INFO - Database connector initialized
+2025-05-05 10:04:35,230 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:04:35,230 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:04:35,230 - db_connector - INFO - Database connector initialized
+2025-05-05 10:04:35,627 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:04:35,787 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:04:35,788 - db_connector - INFO - Database connection closed
+2025-05-05 10:04:35,788 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:04:35,788 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:04:35.788260
+2025-05-05 10:04:36,959 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:04:36.959579
+2025-05-05 10:04:36,961 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:04:36,961 - db_connector - INFO - Database connector initialized
+2025-05-05 10:04:36,961 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:04:36,961 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:04:36,962 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:04:37,360 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:04:37,782 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:04:37,788 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:04:37,789 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:04:37,796 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:04:37,797 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:04:37,797 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:04:37,800 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:04:37,814 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:04:37,814 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:04:37,814 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:04:37,815 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:04:37,816 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:04:37,816 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:04:37,816 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:04:37,816 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:04:37,827 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:04:37,851 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:04:37,852 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:04:37,852 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:04:37,852 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:04:37,852 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:04:37,852 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:04:37,852 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:04:37,854 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:04:37,854 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:04:37,854 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:04:37,854 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:04:37,855 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:04:37,860 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:04:37,860 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:04:37,860 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:04:37,860 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:04:37,860 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:04:38,257 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:04:38,417 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:04:39,137 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:04:39,139 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:04:39,141 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:04:39,142 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:04:39,146 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:04:39,184 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:04:39,184 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:04:39,184 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:04:39,185 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:04:39,185 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:04:39,185 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:04:39,186 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:04:39,186 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:04:39,198 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:04:39,223 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:04:39,223 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:04:39,223 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:04:39,225 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:04:39,225 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:04:39,225 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:04:39,225 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:04:39,225 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:04:39,225 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:04:39,225 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:04:39,225 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:04:39,226 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:04:39,230 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:04:39,230 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:04:39,230 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:04:39,231 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:04:39,231 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:04:39,628 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:04:39,787 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:04:40,504 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:04:40,506 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:04:40,507 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:04:40,508 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:04:40,513 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:04:40,545 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:04:40,545 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:04:40,545 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:04:40,545 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:04:40,545 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:04:40,546 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:04:40,546 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:04:40,546 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:04:40,702 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:04:41,154 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:04:41,154 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:04:41,155 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:04:41,155 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:04:41,156 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:04:41,157 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:04:41,157 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:04:41,158 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:04:41,158 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:04:41,158 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:04:41,158 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:04:41,160 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:04:41,204 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:04:41,205 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:04:41,205 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:04:41,207 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:04:41,209 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:04:41,212 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:04:41,213 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:04:41,213 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:04:41,213 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:04:41,245 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:04:41,246 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:04:41,246 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:04:41,246 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:04:41,270 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,270 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,270 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,271 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,271 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,271 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,271 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,272 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:04:41,671 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:04:41,831 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:04:50,256 - emg_pipeline - INFO - Found matching MVIC session: 13
+2025-05-05 10:04:50,931 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:04:50,932 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:04:50,932 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:04:50,932 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:04:50,934 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:04:50,935 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:05:23,985 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:05:23,987 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:05:23,987 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:05:23,987 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:05:23,990 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:05:24,009 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:05:24,010 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:05:24,372 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:05:25,422 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:05:25,422 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:05:25,422 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:05:25,422 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:05:25,425 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:05:25,428 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:05:25,428 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:05:25,428 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:05:25,428 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:05:25,428 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:05:25,429 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:05:25,433 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:05:25,521 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:05:25,522 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:05:25,522 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:05:25,526 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:05:25,529 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:05:25,537 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:05:25,537 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:05:25,538 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:05:25,539 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:05:25,606 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:05:25,608 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:05:25,608 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:05:25,608 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:05:25,667 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,668 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,668 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,668 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,668 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,669 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,669 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,669 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:25,669 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:05:26,073 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:05:26,233 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:05:39,512 - emg_pipeline - INFO - Found matching MVIC session: 14
+2025-05-05 10:05:39,592 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:05:39,594 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:05:39,594 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:05:39,594 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:05:39,595 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:05:39,595 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:06:52,175 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:06:52,177 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:06:52,179 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:06:52,180 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:06:52,180 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:06:52.180776
+2025-05-05 10:10:33,118 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:10:33.118782
+2025-05-05 10:10:33,121 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:10:33,121 - db_connector - INFO - Database connector initialized
+2025-05-05 10:10:33,121 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:10:33,121 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:10:33,121 - db_connector - INFO - Database connector initialized
+2025-05-05 10:10:33,520 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:10:33,681 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:10:33,682 - db_connector - INFO - Database connection closed
+2025-05-05 10:10:33,683 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:10:33,683 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:10:33.683179
+2025-05-05 10:10:34,823 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:10:34.823363
+2025-05-05 10:10:34,824 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:10:34,824 - db_connector - INFO - Database connector initialized
+2025-05-05 10:10:34,824 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:10:34,825 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:10:34,825 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:10:35,224 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:10:35,545 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:10:35,554 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:10:35,555 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:10:35,566 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:10:35,566 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:10:35,567 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:10:35,569 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:10:35,586 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:10:35,587 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:10:35,599 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:10:35,623 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:10:35,624 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:10:35,624 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:10:35,624 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:10:35,625 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:10:35,625 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:10:35,625 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:10:35,626 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:10:35,626 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:10:35,626 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:10:35,626 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:10:35,626 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:10:35,630 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:10:35,631 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:10:35,631 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:10:35,632 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:10:35,632 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:10:36,029 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:10:36,186 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:10:36,902 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:10:36,904 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:10:36,904 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:10:36,905 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:10:36,911 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:10:36,932 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:10:36,932 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:10:36,933 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:10:36,933 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:10:36,933 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:10:36,933 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:10:36,933 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:10:36,933 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:10:36,946 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:10:36,971 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:10:36,972 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:10:36,972 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:10:36,972 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:10:36,972 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:10:36,973 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:10:36,973 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:10:36,973 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:10:36,973 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:10:36,973 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:10:36,974 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:10:36,974 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:10:36,980 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:10:36,980 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:10:36,980 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:10:36,980 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:10:36,981 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:10:37,378 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:10:37,537 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:10:38,263 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:10:38,264 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:10:38,265 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:10:38,266 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:10:38,271 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:10:38,309 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:10:38,309 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:10:38,310 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:10:38,311 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:10:38,311 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:10:38,311 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:10:38,311 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:10:38,311 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:10:38,468 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:10:38,906 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:10:38,906 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:10:38,906 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:10:38,906 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:10:38,908 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:10:38,909 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:10:38,909 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:10:38,909 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:10:38,910 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:10:38,910 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:10:38,910 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:10:38,912 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:10:38,949 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:10:38,950 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:10:38,950 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:10:38,951 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:10:38,953 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:10:38,957 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:10:38,957 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:10:38,958 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:10:38,958 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:10:38,987 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:10:38,988 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:10:38,989 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:10:38,989 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:10:39,010 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,011 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,011 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,011 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,011 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,012 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,012 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,013 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:10:39,410 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:10:39,570 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:10:47,227 - emg_pipeline - INFO - Found matching MVIC session: 17
+2025-05-05 10:10:47,308 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:10:47,308 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:10:47,309 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:10:47,310 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:10:47,310 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:10:47,311 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:11:21,419 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:11:21,425 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:11:21,426 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:11:21,427 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:11:21,433 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:11:21,456 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:11:21,457 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:11:21,457 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:11:21,457 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:11:21,457 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:11:21,457 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:11:21,458 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:11:21,458 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:11:21,814 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:11:22,806 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:11:22,807 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:11:22,807 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:11:22,807 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:11:22,809 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:11:22,811 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:11:22,811 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:11:22,812 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:11:22,812 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:11:22,812 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:11:22,812 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:11:22,817 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:11:22,894 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:11:22,896 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:11:22,896 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:11:22,900 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:11:22,902 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:11:22,909 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:11:22,909 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:11:22,910 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:11:22,911 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:11:22,979 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:11:22,981 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:11:22,981 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:11:22,981 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:11:23,015 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,016 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,016 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,016 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,017 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,017 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,017 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,017 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,017 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:11:23,418 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:11:23,577 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:11:36,682 - emg_pipeline - INFO - Found matching MVIC session: 18
+2025-05-05 10:11:36,762 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:11:36,763 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:11:36,763 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:11:36,763 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:11:36,763 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:11:36,763 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:12:50,362 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:12:50,374 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:12:50,380 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:12:50,381 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:12:50,381 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:12:50.381656
+2025-05-05 10:16:58,102 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:16:58.102257
+2025-05-05 10:16:58,105 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:16:58,105 - db_connector - INFO - Database connector initialized
+2025-05-05 10:16:58,105 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:16:58,106 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:16:58,106 - db_connector - INFO - Database connector initialized
+2025-05-05 10:16:58,507 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:16:58,668 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:16:58,669 - db_connector - INFO - Database connection closed
+2025-05-05 10:16:58,669 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:16:58,670 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:16:58.670127
+2025-05-05 10:16:59,790 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:16:59.790282
+2025-05-05 10:16:59,792 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:16:59,792 - db_connector - INFO - Database connector initialized
+2025-05-05 10:16:59,792 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:16:59,792 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:16:59,793 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:17:00,192 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:17:01,108 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:17:01,123 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:17:01,123 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:17:01,136 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:17:01,137 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:17:01,137 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:17:01,139 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:17:01,155 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:17:01,155 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:17:01,155 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:17:01,155 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:17:01,156 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:17:01,156 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:17:01,156 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:17:01,156 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:17:01,168 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:17:01,193 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:17:01,193 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:17:01,193 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:17:01,194 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:17:01,194 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:17:01,194 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:17:01,194 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:17:01,194 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:17:01,195 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:17:01,195 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:17:01,195 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:17:01,195 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:17:01,200 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:17:01,200 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:17:01,200 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:17:01,201 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:17:01,201 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:17:01,596 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:17:01,762 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:17:02,481 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:17:02,482 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:17:02,482 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:17:02,482 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:17:02,485 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:17:02,501 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:17:02,501 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:17:02,501 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:17:02,501 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:17:02,502 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:17:02,502 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:17:02,502 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:17:02,502 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:17:02,513 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:17:02,538 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:17:02,539 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:17:02,539 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:17:02,539 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:17:02,539 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:17:02,539 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:17:02,540 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:17:02,540 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:17:02,540 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:17:02,540 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:17:02,540 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:17:02,541 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:17:02,545 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:17:02,546 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:17:02,546 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:17:02,547 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:17:02,547 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:17:02,943 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:17:03,102 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:17:03,821 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:17:03,823 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:17:03,824 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:17:03,825 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:17:03,829 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:17:03,864 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:17:03,865 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:17:03,865 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:17:03,865 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:17:03,866 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:17:03,866 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:17:03,866 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:17:03,866 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:17:04,024 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:17:04,468 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:17:04,468 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:17:04,468 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:17:04,469 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:17:04,470 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:17:04,471 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:17:04,471 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:17:04,471 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:17:04,471 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:17:04,472 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:17:04,472 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:17:04,474 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:17:04,515 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:17:04,516 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:17:04,516 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:17:04,517 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:17:04,519 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:17:04,521 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:17:04,521 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:17:04,522 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:17:04,522 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:17:04,554 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:17:04,555 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:17:04,555 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:17:04,555 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:17:04,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,579 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,580 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,580 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,580 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:04,980 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:17:05,139 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:17:13,403 - emg_pipeline - INFO - Found matching MVIC session: 21
+2025-05-05 10:17:13,483 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:17:13,485 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:17:13,486 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:17:13,486 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:17:13,487 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:17:13,488 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:17:46,479 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:17:46,485 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:17:46,486 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:17:46,486 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:17:46,491 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:17:46,511 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:17:46,511 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:17:46,511 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:17:46,512 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:17:46,512 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:17:46,512 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:17:46,512 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:17:46,512 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:17:46,870 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:17:47,902 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:17:47,903 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:17:47,903 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:17:47,903 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:17:47,907 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:17:47,910 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:17:47,910 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:17:47,910 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:17:47,910 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:17:47,910 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:17:47,911 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:17:47,916 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:17:48,000 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:17:48,001 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:17:48,001 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:17:48,006 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:17:48,010 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:17:48,019 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:17:48,019 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:17:48,020 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:17:48,020 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:17:48,092 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:17:48,093 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:17:48,093 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:17:48,094 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:17:48,130 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,130 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,130 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,130 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,131 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,131 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,131 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,131 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,131 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:17:48,535 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:17:48,693 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:18:01,905 - emg_pipeline - INFO - Found matching MVIC session: 22
+2025-05-05 10:18:01,985 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:18:01,986 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:18:01,987 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:18:01,987 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:18:01,988 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:18:01,989 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:19:15,704 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:19:15,708 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:19:15,710 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:19:15,710 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:19:15,710 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:19:15.710061
+2025-05-05 10:22:47,994 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:22:47.994392
+2025-05-05 10:22:47,998 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:22:47,998 - db_connector - INFO - Database connector initialized
+2025-05-05 10:22:47,998 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:22:47,998 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:22:47,998 - db_connector - INFO - Database connector initialized
+2025-05-05 10:22:48,395 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:22:48,557 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:22:48,558 - db_connector - INFO - Database connection closed
+2025-05-05 10:22:48,559 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:22:48,559 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:22:48.559626
+2025-05-05 10:22:49,704 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:22:49.704290
+2025-05-05 10:22:49,705 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:22:49,705 - db_connector - INFO - Database connector initialized
+2025-05-05 10:22:49,705 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:22:49,705 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:22:49,706 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:22:50,104 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:22:50,424 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:22:50,428 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:22:50,428 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:22:50,434 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:22:50,435 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:22:50,435 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:22:50,438 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:22:50,454 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:22:50,454 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:22:50,466 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:22:50,490 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:22:50,490 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:22:50,490 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:22:50,490 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:22:50,491 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:22:50,491 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:22:50,492 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:22:50,492 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:22:50,492 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:22:50,492 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:22:50,492 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:22:50,493 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:22:50,497 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:22:50,498 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:22:50,498 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:22:50,498 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:22:50,499 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:22:50,894 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:22:51,054 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:22:51,771 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:22:51,773 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:22:51,773 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:22:51,775 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:22:51,782 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:22:51,798 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:22:51,798 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:22:51,799 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:22:51,799 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:22:51,799 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:22:51,799 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:22:51,799 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:22:51,799 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:22:51,811 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:22:51,835 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:22:51,835 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:22:51,835 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:22:51,835 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:22:51,836 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:22:51,837 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:22:51,837 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:22:51,837 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:22:51,837 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:22:51,837 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:22:51,837 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:22:51,838 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:22:51,842 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:22:51,842 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:22:51,843 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:22:51,843 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:22:51,843 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:22:52,242 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:22:52,401 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:22:53,423 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:22:53,425 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:22:53,426 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:22:53,427 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:22:53,433 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:22:53,471 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:22:53,472 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:22:53,472 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:22:53,472 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:22:53,473 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:22:53,473 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:22:53,473 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:22:53,474 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:22:53,637 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:22:54,069 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:22:54,070 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:22:54,070 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:22:54,070 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:22:54,071 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:22:54,072 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:22:54,073 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:22:54,073 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:22:54,073 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:22:54,073 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:22:54,073 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:22:54,076 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:22:54,115 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:22:54,116 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:22:54,116 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:22:54,117 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:22:54,119 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:22:54,122 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:22:54,122 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:22:54,123 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:22:54,123 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:22:54,152 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:22:54,153 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:22:54,153 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:22:54,154 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:22:54,176 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,176 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,177 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,177 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,177 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,177 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,178 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,178 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:22:54,575 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:22:54,735 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:23:02,977 - emg_pipeline - INFO - Found matching MVIC session: 25
+2025-05-05 10:23:03,057 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:23:03,058 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:23:03,058 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:23:03,059 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:23:03,059 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:23:03,059 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:23:35,595 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:23:35,601 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:23:35,602 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:23:35,602 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:23:35,608 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:23:35,633 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:23:35,635 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:23:35,635 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:23:35,635 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:23:35,635 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:23:35,635 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:23:35,636 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:23:35,636 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:23:36,020 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:23:37,010 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:23:37,011 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:23:37,011 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:23:37,011 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:23:37,013 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:23:37,016 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:23:37,016 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:23:37,017 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:23:37,017 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:23:37,017 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:23:37,017 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:23:37,022 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:23:37,100 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:23:37,101 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:23:37,101 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:23:37,104 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:23:37,108 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:23:37,114 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:23:37,114 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:23:37,116 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:23:37,118 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:23:37,184 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:23:37,185 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:23:37,185 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:23:37,186 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:23:37,238 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,238 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,239 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,239 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,240 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,240 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,240 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,240 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,240 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:23:37,641 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:23:37,800 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:23:51,676 - emg_pipeline - INFO - Found matching MVIC session: 26
+2025-05-05 10:23:51,756 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:23:51,757 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:23:51,758 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:23:51,758 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:23:51,760 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:23:51,760 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:25:03,890 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:25:03,901 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:25:03,904 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:25:03,904 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:25:03,904 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:25:03.904383
+2025-05-05 10:30:30,694 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:30:30.694900
+2025-05-05 10:30:30,697 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:30:30,697 - db_connector - INFO - Database connector initialized
+2025-05-05 10:30:30,697 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:30:30,697 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:30:30,697 - db_connector - INFO - Database connector initialized
+2025-05-05 10:30:31,094 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:30:31,253 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:30:31,253 - db_connector - INFO - Database connection closed
+2025-05-05 10:30:31,254 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:30:31,254 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:30:31.254400
+2025-05-05 10:30:32,730 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:30:32.730323
+2025-05-05 10:30:32,732 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:30:32,732 - db_connector - INFO - Database connector initialized
+2025-05-05 10:30:32,732 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:30:32,732 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:30:32,733 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:30:33,130 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:30:33,553 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:30:33,559 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:30:33,559 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:30:33,565 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:30:33,567 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:30:33,567 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:30:33,570 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:30:33,584 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:30:33,584 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:30:33,595 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:30:33,621 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:30:33,622 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:30:33,622 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:30:33,622 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:30:33,622 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:30:33,622 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:30:33,622 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:30:33,622 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:30:33,622 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:30:33,622 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:30:33,622 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:30:33,622 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:30:33,627 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:30:33,627 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:30:33,628 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:30:33,628 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:30:33,628 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:30:34,030 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:30:34,188 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:30:34,902 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:30:34,902 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:30:34,902 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:30:34,902 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:30:34,904 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:30:34,918 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:30:34,919 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:30:34,931 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:30:34,959 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:30:34,960 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:30:34,960 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:30:34,960 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:30:34,960 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:30:34,960 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:30:34,960 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:30:34,960 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:30:34,960 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:30:34,960 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:30:34,960 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:30:34,960 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:30:34,964 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:30:34,964 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:30:34,965 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:30:34,965 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:30:34,965 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:30:35,361 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:30:35,519 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:30:36,231 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:30:36,231 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:30:36,231 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:30:36,231 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:30:36,233 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:30:36,248 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:30:36,248 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:30:36,409 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:30:37,132 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:30:37,133 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:30:37,133 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:30:37,133 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:30:37,134 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:30:37,137 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:30:37,139 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:30:37,139 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:30:37,139 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:30:37,139 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:30:37,140 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:30:37,148 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:30:37,231 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:30:37,232 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:30:37,232 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:30:37,235 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:30:37,241 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:30:37,245 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:30:37,245 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:30:37,246 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:30:37,247 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:30:37,341 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:30:37,346 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:30:37,346 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:30:37,346 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:30:37,430 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,430 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,431 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,431 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,431 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,432 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,432 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,433 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:30:37,831 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:30:37,989 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:30:46,334 - emg_pipeline - INFO - Found matching MVIC session: 29
+2025-05-05 10:30:46,413 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:30:46,413 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:30:46,413 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:30:46,413 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:30:46,413 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:30:46,413 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:31:18,193 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:31:18,198 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:31:18,198 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:31:18,199 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:31:18,204 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:31:18,244 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:31:18,244 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:31:18,244 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:31:18,244 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:31:18,244 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:31:18,244 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:31:18,245 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:31:18,245 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:31:18,606 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:31:19,620 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:31:19,620 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:31:19,620 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:31:19,620 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:31:19,622 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:31:19,624 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:31:19,624 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:31:19,624 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:31:19,624 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:31:19,624 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:31:19,624 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:31:19,629 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:31:19,715 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:31:19,716 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:31:19,716 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:31:19,719 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:31:19,722 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:31:19,729 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:31:19,729 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:31:19,730 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:31:19,731 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:31:19,795 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:31:19,796 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:31:19,797 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:31:19,797 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:31:19,829 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,829 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,829 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,829 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,830 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,830 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,830 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,830 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:19,830 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:31:20,232 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:31:20,391 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:31:33,980 - emg_pipeline - INFO - Found matching MVIC session: 30
+2025-05-05 10:31:34,061 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:31:34,061 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:31:34,061 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:31:34,062 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:31:34,062 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:31:34,062 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:32:49,320 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:32:49,322 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:32:49,324 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:32:49,325 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:32:49,325 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:32:49.325676
+2025-05-05 10:36:22,712 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:36:22.712588
+2025-05-05 10:36:22,714 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:36:22,714 - db_connector - INFO - Database connector initialized
+2025-05-05 10:36:22,714 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:36:22,715 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:36:22,715 - db_connector - INFO - Database connector initialized
+2025-05-05 10:36:24,118 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:36:24,277 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:36:24,277 - db_connector - INFO - Database connection closed
+2025-05-05 10:36:24,277 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:36:24,277 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:36:24.277919
+2025-05-05 10:36:25,655 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:36:25.655792
+2025-05-05 10:36:25,656 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:36:25,656 - db_connector - INFO - Database connector initialized
+2025-05-05 10:36:25,657 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:36:25,657 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:36:25,658 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:36:27,067 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:36:27,384 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:36:27,388 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:36:27,388 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:36:27,395 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:36:27,396 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:36:27,396 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:36:27,398 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:36:27,414 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:36:27,414 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:36:27,425 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:36:27,450 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:36:27,450 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:36:27,450 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:36:27,450 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:36:27,450 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:36:27,451 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:36:27,451 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:36:27,451 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:36:27,451 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:36:27,451 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:36:27,451 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:36:27,451 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:36:27,456 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:36:27,456 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:36:27,457 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:36:27,457 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:36:27,457 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:36:27,852 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:36:28,010 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:36:28,724 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:36:28,724 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:36:28,724 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:36:28,724 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:36:28,726 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:36:28,741 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:36:28,741 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:36:28,741 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:36:28,742 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:36:28,742 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:36:28,742 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:36:28,742 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:36:28,742 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:36:28,753 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:36:28,779 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:36:28,779 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:36:28,779 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:36:28,779 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:36:28,779 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:36:28,779 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:36:28,779 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:36:28,780 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:36:28,780 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:36:28,780 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:36:28,780 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:36:28,780 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:36:28,784 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:36:28,784 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:36:28,784 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:36:28,785 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:36:28,785 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:36:29,179 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:36:29,337 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:36:30,347 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:36:30,348 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:36:30,348 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:36:30,348 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:36:30,350 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:36:30,365 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:36:30,365 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:36:30,526 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:36:30,997 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:36:30,997 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:36:30,997 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:36:30,997 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:36:30,998 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:36:30,999 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:36:30,999 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:36:30,999 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:36:30,999 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:36:30,999 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:36:31,000 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:36:31,002 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:36:31,042 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:36:31,042 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:36:31,043 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:36:31,044 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:36:31,045 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:36:31,049 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:36:31,049 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:36:31,050 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:36:31,050 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:36:31,080 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:36:31,081 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:36:31,081 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:36:31,081 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:36:31,103 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,103 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,103 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,104 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,104 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,104 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,104 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,104 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:36:31,502 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:36:31,661 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:36:40,662 - emg_pipeline - INFO - Found matching MVIC session: 33
+2025-05-05 10:36:40,743 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:36:40,743 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:36:40,743 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:36:40,743 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:36:40,743 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:36:40,743 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:37:13,101 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:37:13,105 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:37:13,106 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:37:13,106 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:37:13,113 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:37:13,141 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:37:13,142 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:37:13,497 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:37:14,470 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:37:14,470 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:37:14,470 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:37:14,471 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:37:14,472 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:37:14,474 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:37:14,474 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:37:14,474 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:37:14,474 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:37:14,474 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:37:14,474 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:37:14,478 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:37:14,559 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:37:14,559 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:37:14,559 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:37:14,562 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:37:14,565 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:37:14,572 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:37:14,572 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:37:14,573 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:37:14,573 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:37:14,637 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:37:14,639 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:37:14,639 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:37:14,640 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:37:14,692 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,692 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,692 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,693 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,693 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,693 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,693 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,693 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:14,693 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:37:15,095 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:37:15,254 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:37:29,047 - emg_pipeline - INFO - Found matching MVIC session: 34
+2025-05-05 10:37:29,127 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:37:29,128 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:37:29,128 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:37:29,128 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:37:29,128 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:37:29,129 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:38:45,633 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:38:45,635 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:38:45,638 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:38:45,638 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:38:45,638 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:38:45.638335
+2025-05-05 10:41:22,146 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:41:22.146691
+2025-05-05 10:41:22,149 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:41:22,149 - db_connector - INFO - Database connector initialized
+2025-05-05 10:41:22,149 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:41:22,149 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:41:22,149 - db_connector - INFO - Database connector initialized
+2025-05-05 10:41:22,546 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:41:22,704 - db_connector - INFO - Database connection test successful. Found 4 EMG tables.
+2025-05-05 10:41:22,705 - db_connector - INFO - Database connection closed
+2025-05-05 10:41:22,705 - __main__ - INFO - Database connection test successful!
+2025-05-05 10:41:22,705 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:41:22.705696
+2025-05-05 10:41:24,159 - __main__ - INFO - Starting pipeline run at 2025-05-05 10:41:24.159071
+2025-05-05 10:41:24,161 - emg_processor - INFO - EMG Processor initialized
+2025-05-05 10:41:24,161 - db_connector - INFO - Database connector initialized
+2025-05-05 10:41:24,161 - emg_pipeline - INFO - EMG Pipeline initialized with data directory: M:\EMG_DATA_new
+2025-05-05 10:41:24,161 - emg_pipeline - INFO - Using batch size of 1000 for DB operations
+2025-05-05 10:41:24,162 - emg_pipeline - INFO - Processing directory: M:\EMG_DATA_new (recursive=True)
+2025-05-05 10:41:24,558 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:41:24,982 - db_connector - INFO - Database tables created/verified successfully
+2025-05-05 10:41:24,987 - emg_pipeline - INFO - Found 4 files to process
+2025-05-05 10:41:24,987 - emg_pipeline - INFO - Files will be processed in this order: ['041725_109072_SamWilliams_mvic.csv', '042125_118635_ColbyWilkerson_mvic.csv', '041725_109072_SamWilliams_mocap.csv', '042125_118635_ColbyWilkerson_mocap.csv']
+2025-05-05 10:41:24,994 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:41:24,995 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:41:24,995 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mvic.csv
+2025-05-05 10:41:24,997 - emg_processor - INFO - File size: 855148 bytes
+2025-05-05 10:41:25,014 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:38:28 PM
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.291
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:41:25,014 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:41:25,028 - emg_processor - INFO - Total data lines: 13515
+2025-05-05 10:41:25,052 - emg_processor - INFO - Muscle1 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:41:25,052 - emg_processor - INFO - Muscle1 EMG - Length: 13514, First: 0.0, Last: 0.011245899137865261
+2025-05-05 10:41:25,052 - emg_processor - INFO - Muscle2 Time - Length: 13514, First: 0.0, Last: 10.7309114
+2025-05-05 10:41:25,052 - emg_processor - INFO - Muscle2 EMG - Length: 13514, First: 0.0, Last: -0.017120622568093383
+2025-05-05 10:41:25,052 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:41:25,052 - emg_processor - INFO - Data loaded: Session Type:: 13514 samples, MVIC: 13514 samples
+2025-05-05 10:41:25,052 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:41:25,052 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:41:25,052 - emg_pipeline - INFO - Signal lengths: 13514 and 13514 samples
+2025-05-05 10:41:25,053 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:41:25,053 - emg_pipeline - INFO - Common duration: 10.73 seconds
+2025-05-05 10:41:25,053 - emg_pipeline - INFO - Common time base: 13514 samples at 1259.3 Hz
+2025-05-05 10:41:25,059 - emg_pipeline - INFO - Preprocessed aligned signals: 13514 and 13514 samples
+2025-05-05 10:41:25,060 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.08, Muscle2: 0.03
+2025-05-05 10:41:25,060 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:41:25,061 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.18, RMS: 0.02
+2025-05-05 10:41:25,061 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 0.07, RMS: 0.01
+2025-05-05 10:41:25,454 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:41:25,613 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mvic already exists. Removing old data...
+2025-05-05 10:41:26,620 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mvic to database
+2025-05-05 10:41:26,621 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:41:26,621 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:41:26,621 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mvic.csv
+2025-05-05 10:41:26,623 - emg_processor - INFO - File size: 865102 bytes
+2025-05-05 10:41:26,639 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:59:13 PM
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 3: Collection Length (seconds):,6.642
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 4: Session Type:,MVIC (Maximum Voluntary Isometric Contraction)
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 5: FCU (5),,FCR (7)
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 6: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:41:26,639 - emg_processor - INFO - Line 7: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:41:26,652 - emg_processor - INFO - Total data lines: 14269
+2025-05-05 10:41:26,682 - emg_processor - INFO - Muscle1 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:41:26,682 - emg_processor - INFO - Muscle1 EMG - Length: 14268, First: 0.0, Last: 0.010574502174410621
+2025-05-05 10:41:26,682 - emg_processor - INFO - Muscle2 Time - Length: 14268, First: 0.0, Last: 11.3296761
+2025-05-05 10:41:26,682 - emg_processor - INFO - Muscle2 EMG - Length: 14268, First: 0.0, Last: -0.005706874189364461
+2025-05-05 10:41:26,683 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:41:26,683 - emg_processor - INFO - Data loaded: Session Type:: 14268 samples, MVIC: 14268 samples
+2025-05-05 10:41:26,683 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:41:26,683 - emg_pipeline - INFO - Loaded muscles: Session Type: and MVIC
+2025-05-05 10:41:26,683 - emg_pipeline - INFO - Signal lengths: 14268 and 14268 samples
+2025-05-05 10:41:26,683 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:41:26,683 - emg_pipeline - INFO - Common duration: 11.33 seconds
+2025-05-05 10:41:26,683 - emg_pipeline - INFO - Common time base: 14268 samples at 1259.3 Hz
+2025-05-05 10:41:26,689 - emg_pipeline - INFO - Preprocessed aligned signals: 14268 and 14268 samples
+2025-05-05 10:41:26,689 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.34, Muscle2: 1.00
+2025-05-05 10:41:26,689 - emg_pipeline - INFO - Processing as MVIC session
+2025-05-05 10:41:26,690 - emg_pipeline - INFO - MVIC Reference Values - Muscle1 Peak: 0.97, RMS: 0.07
+2025-05-05 10:41:26,690 - emg_pipeline - INFO - MVIC Reference Values - Muscle2 Peak: 2.67, RMS: 0.37
+2025-05-05 10:41:27,085 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:41:27,243 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mvic already exists. Removing old data...
+2025-05-05 10:41:27,954 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mvic to database
+2025-05-05 10:41:27,955 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:41:27,955 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-17
+2025-05-05 10:41:27,955 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-17\041725_109072_SamWilliams_mocap.csv
+2025-05-05 10:41:27,956 - emg_processor - INFO - File size: 15713640 bytes
+2025-05-05 10:41:27,972 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:41:27,972 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:41:27,973 - emg_processor - INFO - Line 2: Date/Time:,04/17/2025 02:30:45 PM
+2025-05-05 10:41:27,973 - emg_processor - INFO - Line 3: Collection Length (seconds):,112.158
+2025-05-05 10:41:27,973 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:41:27,973 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:41:27,973 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:41:27,973 - emg_processor - INFO - Line 7: ,2148.1481481481483 Hz,,2148.1481481481483 Hz
+2025-05-05 10:41:28,132 - emg_processor - INFO - Total data lines: 240932
+2025-05-05 10:41:28,606 - emg_processor - INFO - Muscle1 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:41:28,606 - emg_processor - INFO - Muscle1 EMG - Length: 240932, First: 0.0, Last: 0.012252994583047227
+2025-05-05 10:41:28,607 - emg_processor - INFO - Muscle2 Time - Length: 240932, First: 0.0, Last: 112.1575345
+2025-05-05 10:41:28,607 - emg_processor - INFO - Muscle2 EMG - Length: 240932, First: 0.0, Last: -0.006378271152819104
+2025-05-05 10:41:28,609 - emg_processor - INFO - Sampling Frequency: 2148.1 Hz
+2025-05-05 10:41:28,610 - emg_processor - INFO - Data loaded: FCU: 240932 samples, FCR: 240932 samples
+2025-05-05 10:41:28,610 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:41:28,610 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:41:28,610 - emg_pipeline - INFO - Signal lengths: 240932 and 240932 samples
+2025-05-05 10:41:28,610 - emg_pipeline - INFO - Sampling rates: 2148.1 and 2148.1 Hz
+2025-05-05 10:41:28,611 - emg_pipeline - INFO - Common duration: 112.16 seconds
+2025-05-05 10:41:28,613 - emg_pipeline - INFO - Common time base: 240932 samples at 2148.1 Hz
+2025-05-05 10:41:28,664 - emg_pipeline - INFO - Preprocessed aligned signals: 240932 and 240932 samples
+2025-05-05 10:41:28,665 - emg_pipeline - INFO - Signal maximums - Muscle1: 0.93, Muscle2: 0.79
+2025-05-05 10:41:28,665 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:41:28,668 - emg_processor - INFO - FCR RMS - Mean: 0.01638366293580617, Std: 0.043990209047863424
+2025-05-05 10:41:28,670 - emg_processor - INFO - FCU RMS - Mean: 0.01499949298405536, Std: 0.05135978120584873
+2025-05-05 10:41:28,674 - emg_processor - INFO - FCR Threshold: 0.12635918555546474
+2025-05-05 10:41:28,674 - emg_processor - INFO - FCU Threshold: 0.07663123043107382
+2025-05-05 10:41:28,675 - emg_processor - INFO - FCR samples above threshold: 3916 / 240932
+2025-05-05 10:41:28,675 - emg_processor - INFO - FCU samples above threshold: 7673 / 240932
+2025-05-05 10:41:28,714 - emg_pipeline - INFO - Detected 8 throws from aligned signals
+2025-05-05 10:41:28,715 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0150, Threshold: 0.0375
+2025-05-05 10:41:28,715 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0164, Threshold: 0.0197
+2025-05-05 10:41:28,715 - emg_pipeline - WARNING - Only 8 throws detected. This seems low for a typical session.
+2025-05-05 10:41:28,741 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,741 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,741 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,742 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,742 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,742 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,742 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:28,742 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:41:29,138 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:41:29,296 - emg_pipeline - INFO - Session 041725_109072_SamWilliams_mocap already exists. Removing old data...
+2025-05-05 10:41:38,433 - emg_pipeline - INFO - Found matching MVIC session: 37
+2025-05-05 10:41:38,514 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:41:38,514 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:41:38,515 - emg_pipeline - INFO - Muscle1 Peak: 1152.3093471255931%
+2025-05-05 10:41:38,515 - emg_pipeline - INFO - Muscle1 RMS: 1956.587279511896%
+2025-05-05 10:41:38,515 - emg_pipeline - INFO - Muscle2 Peak: 1739.3851840241432%
+2025-05-05 10:41:38,515 - emg_pipeline - INFO - Muscle2 RMS: 2637.955165743659%
+2025-05-05 10:42:12,593 - emg_pipeline - INFO - Successfully saved 041725_109072_SamWilliams_mocap to database
+2025-05-05 10:42:12,594 - emg_pipeline - INFO - Processing file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:42:12,595 - emg_processor - INFO - Successfully parsed date as %m%d%y: 2025-04-21
+2025-05-05 10:42:12,595 - emg_processor - INFO - Loading file: M:\EMG_DATA_new\2025-04-21\042125_118635_ColbyWilkerson_mocap.csv
+2025-05-05 10:42:12,598 - emg_processor - INFO - File size: 36068347 bytes
+2025-05-05 10:42:12,613 - emg_processor - INFO - First 7 header lines:
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 1: Application:,Trigno Discover (1.7.0)
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 2: Date/Time:,04/21/2025 01:46:56 PM
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 3: Collection Length (seconds):,251.019
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 4: FCU (5),,FCR (7)
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 5: sensor mode: 50,,sensor mode: 40
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 6: EMG 1 Time Series (s),EMG 1 (mV),EMG 1 Time Series (s),EMG 1 (mV)
+2025-05-05 10:42:12,613 - emg_processor - INFO - Line 7: ,1259.2593 Hz,,2148.1481 Hz
+2025-05-05 10:42:12,980 - emg_processor - INFO - Total data lines: 539226
+2025-05-05 10:42:13,972 - emg_processor - INFO - Muscle1 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:42:13,972 - emg_processor - INFO - Muscle1 EMG - Length: 539226, First: 0.0, Last: 0.011749446860456245
+2025-05-05 10:42:13,972 - emg_processor - INFO - Muscle2 Time - Length: 539226, First: 0.0, Last: 428.2080744
+2025-05-05 10:42:13,972 - emg_processor - INFO - Muscle2 EMG - Length: 539226, First: 0.0, Last: -0.009399557488364994
+2025-05-05 10:42:13,974 - emg_processor - INFO - Sampling Frequency: 1259.3 Hz
+2025-05-05 10:42:13,976 - emg_processor - INFO - Data loaded: FCU: 539226 samples, FCR: 539226 samples
+2025-05-05 10:42:13,976 - emg_processor - INFO - Found 2 muscles in file
+2025-05-05 10:42:13,976 - emg_pipeline - INFO - Loaded muscles: FCU and FCR
+2025-05-05 10:42:13,976 - emg_pipeline - INFO - Signal lengths: 539226 and 539226 samples
+2025-05-05 10:42:13,976 - emg_pipeline - INFO - Sampling rates: 1259.3 and 1259.3 Hz
+2025-05-05 10:42:13,976 - emg_pipeline - INFO - Common duration: 428.20 seconds
+2025-05-05 10:42:13,980 - emg_pipeline - INFO - Common time base: 539226 samples at 1259.3 Hz
+2025-05-05 10:42:14,062 - emg_pipeline - INFO - Preprocessed aligned signals: 539226 and 539226 samples
+2025-05-05 10:42:14,063 - emg_pipeline - INFO - Signal maximums - Muscle1: 1.64, Muscle2: 2.28
+2025-05-05 10:42:14,063 - emg_pipeline - INFO - Processing as pitching session
+2025-05-05 10:42:14,066 - emg_processor - INFO - FCR RMS - Mean: 0.01438702705313831, Std: 0.06775469740184015
+2025-05-05 10:42:14,070 - emg_processor - INFO - FCU RMS - Mean: 0.013955186645317088, Std: 0.05309504545785412
+2025-05-05 10:42:14,076 - emg_processor - INFO - FCR Threshold: 0.1837737705577387
+2025-05-05 10:42:14,076 - emg_processor - INFO - FCU Threshold: 0.07766924119474203
+2025-05-05 10:42:14,076 - emg_processor - INFO - FCR samples above threshold: 4027 / 539226
+2025-05-05 10:42:14,077 - emg_processor - INFO - FCU samples above threshold: 15580 / 539226
+2025-05-05 10:42:14,141 - emg_pipeline - INFO - Detected 9 throws from aligned signals
+2025-05-05 10:42:14,143 - emg_pipeline - INFO - Muscle1 (FCR) - Mean: 0.0140, Threshold: 0.0349
+2025-05-05 10:42:14,143 - emg_pipeline - INFO - Muscle2 (FCU) - Mean: 0.0144, Threshold: 0.0173
+2025-05-05 10:42:14,143 - emg_pipeline - WARNING - Only 9 throws detected. This seems low for a typical session.
+2025-05-05 10:42:14,177 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,179 - emg_pipeline - WARNING - Error calculating absolute timestamp: unsupported type for timedelta seconds component: NoneType
+2025-05-05 10:42:14,583 - db_connector - INFO - Connected to database theia_pitching_db
+2025-05-05 10:42:14,741 - emg_pipeline - INFO - Session 042125_118635_ColbyWilkerson_mocap already exists. Removing old data...
+2025-05-05 10:42:29,776 - emg_pipeline - INFO - Found matching MVIC session: 38
+2025-05-05 10:42:29,857 - emg_pipeline - INFO - Calculating %MVIC values for throws
+2025-05-05 10:42:29,857 - emg_pipeline - INFO - Sample %MVIC values for first throw:
+2025-05-05 10:42:29,857 - emg_pipeline - INFO - Muscle1 Peak: 365.45794818885724%
+2025-05-05 10:42:29,858 - emg_pipeline - INFO - Muscle1 RMS: 1025.6758619721904%
+2025-05-05 10:42:29,858 - emg_pipeline - INFO - Muscle2 Peak: 266.86239323377475%
+2025-05-05 10:42:29,858 - emg_pipeline - INFO - Muscle2 RMS: 244.78440372511918%
+2025-05-05 10:43:44,761 - emg_pipeline - INFO - Successfully saved 042125_118635_ColbyWilkerson_mocap to database
+2025-05-05 10:43:44,770 - emg_pipeline - INFO - Directory processing complete. Successfully processed 4 of 4 files.
+2025-05-05 10:43:44,778 - __main__ - INFO - Directory processing complete.
+2025-05-05 10:43:44,778 - __main__ - INFO - Successfully processed 4 of 4 files.
+2025-05-05 10:43:44,778 - __main__ - INFO - Pipeline run completed at 2025-05-05 10:43:44.778073
